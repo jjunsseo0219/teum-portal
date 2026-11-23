@@ -34,7 +34,7 @@
     forest: { query: '', year: 'all', month: 'all', dept: 'all', type: 'all' },
     inlineDetail: null,
     homeEditMode: false,
-    homeLayout: { order: [], hidden: [] },
+    homeLayout: { order: [], hidden: [], spans: {}, slots: {} },
     studyTimer: {
       subject: '수학',
       mode: 'stopwatch',
@@ -78,7 +78,9 @@
         if (parsed && typeof parsed === 'object') {
           state.homeLayout = {
             order: Array.isArray(parsed.order) ? parsed.order : [],
-            hidden: Array.isArray(parsed.hidden) ? parsed.hidden : []
+            hidden: Array.isArray(parsed.hidden) ? parsed.hidden : [],
+            spans: parsed.spans && typeof parsed.spans === 'object' ? parsed.spans : {},
+            slots: parsed.slots && typeof parsed.slots === 'object' ? parsed.slots : {}
           };
         }
       }
@@ -114,25 +116,136 @@
     return ordered.filter((w) => !hidden.has(w.id));
   }
 
-  function moveHomeWidgetOrder(fromId, toId) {
+  function getDefaultWidgetSpan(item) {
+    if (!item) return 1;
+    if (item.defaultSpan) return item.defaultSpan;
+    if (item.type === 'carousel' || item.type === 'ticker') return 3;
+    if (item.type === 'study_links') return 2;
+    return 1;
+  }
+
+  function getWidgetSpan(item, cols = 3) {
+    const saved = !isAdminPreview && state.homeLayout?.spans ? Number(state.homeLayout.spans[item.id]) : 0;
+    const raw = saved >= 1 && saved <= cols ? saved : getDefaultWidgetSpan(item);
+    return Math.min(cols, Math.max(1, raw));
+  }
+
+  function computeBentoPlacements(items, cols = 3) {
+    const occupied = new Set();
+    const placements = new Map();
+    const isFree = (col, row, span) => {
+      if (col < 1 || col + span - 1 > cols || row < 1) return false;
+      for (let c = col; c < col + span; c++) {
+        if (occupied.has(`${c},${row}`)) return false;
+      }
+      return true;
+    };
+    const occupy = (id, col, row, span) => {
+      for (let c = col; c < col + span; c++) occupied.add(`${c},${row}`);
+      placements.set(id, { col, row, span });
+    };
+    const findFirstFree = (span, startRow = 1) => {
+      for (let r = Math.max(1, startRow); r < 60; r++) {
+        for (let c = 1; c <= cols - span + 1; c++) {
+          if (isFree(c, r, span)) return { col: c, row: r };
+        }
+      }
+      return { col: 1, row: 1 };
+    };
+
+    const savedSlots = (!isAdminPreview && state.homeLayout?.slots && typeof state.homeLayout.slots === 'object')
+      ? state.homeLayout.slots
+      : {};
+
+    const pinned = [];
+    const unpinned = [];
+    for (const it of items) {
+      const s = savedSlots[it.id];
+      if (s && Number(s.col) >= 1 && Number(s.row) >= 1) pinned.push({ item: it, slot: s });
+      else unpinned.push(it);
+    }
+
+    for (const { item, slot } of pinned) {
+      const span = getWidgetSpan(item, cols);
+      const col = Math.min(Math.max(1, Number(slot.col)), cols - span + 1);
+      const row = Math.max(1, Number(slot.row));
+      if (isFree(col, row, span)) {
+        occupy(item.id, col, row, span);
+      } else {
+        const alt = findFirstFree(span, row);
+        occupy(item.id, alt.col, alt.row, span);
+      }
+    }
+
+    for (const item of unpinned) {
+      const span = getWidgetSpan(item, cols);
+      const pos = findFirstFree(span, 1);
+      occupy(item.id, pos.col, pos.row, span);
+    }
+
+    let maxRow = 1;
+    for (const p of placements.values()) {
+      if (p.row > maxRow) maxRow = p.row;
+    }
+    return { placements, occupied, maxRow };
+  }
+
+  function snapshotSlotsFromPlacements(placements) {
+    const nextSlots = {};
+    for (const [id, p] of placements.entries()) {
+      nextSlots[id] = { col: p.col, row: p.row };
+    }
+    state.homeLayout.slots = nextSlots;
+  }
+
+  function placeHomeWidgetAtSlot(widgetId, targetCol, targetRow, placements, items, cols = 3) {
+    if (!widgetId) return;
+    snapshotSlotsFromPlacements(placements);
+    const targetItem = items.find((it) => it.id === widgetId);
+    const span = getWidgetSpan(targetItem || { id: widgetId }, cols);
+    const col = Math.min(Math.max(1, targetCol), cols - span + 1);
+    const row = Math.max(1, targetRow);
+    state.homeLayout.slots[widgetId] = { col, row };
+    saveHomeLayout();
+    renderFeed();
+  }
+
+  function swapHomeWidgets(fromId, toId, placements, allIds) {
     if (!fromId || !toId || fromId === toId) return;
-    const cfg = state.data.config || {};
-    const ordered = getOrderedSchoolHomeWidgets((cfg.tabs && cfg.tabs.home) || []).map((w) => w.id);
-    const fromIdx = ordered.indexOf(fromId);
-    const toIdx = ordered.indexOf(toId);
-    if (fromIdx < 0 || toIdx < 0) return;
-    const [moved] = ordered.splice(fromIdx, 1);
-    ordered.splice(toIdx, 0, moved);
-    state.homeLayout.order = ordered;
+    if (placements && placements.has(fromId) && placements.has(toId)) {
+      snapshotSlotsFromPlacements(placements);
+      const a = state.homeLayout.slots[fromId];
+      const b = state.homeLayout.slots[toId];
+      state.homeLayout.slots[fromId] = { ...b };
+      state.homeLayout.slots[toId] = { ...a };
+    }
+    const order = Array.isArray(allIds) ? [...allIds] : [];
+    const fi = order.indexOf(fromId);
+    const ti = order.indexOf(toId);
+    if (fi >= 0 && ti >= 0) {
+      [order[fi], order[ti]] = [order[ti], order[fi]];
+      state.homeLayout.order = order;
+    }
+    saveHomeLayout();
+    renderFeed();
+  }
+
+  function setHomeWidgetSpan(widgetId, span, placements, cols = 3) {
+    if (!state.homeLayout.spans || typeof state.homeLayout.spans !== 'object') state.homeLayout.spans = {};
+    const clamped = Math.min(cols, Math.max(1, Number(span) || 1));
+    state.homeLayout.spans[widgetId] = clamped;
+    if (placements && placements.size > 0) {
+      snapshotSlotsFromPlacements(placements);
+      const cur = state.homeLayout.slots[widgetId];
+      if (cur && cur.col + clamped - 1 > cols) {
+        cur.col = Math.max(1, cols - clamped + 1);
+      }
+    }
     saveHomeLayout();
     renderFeed();
   }
 
   function setHomeWidgetHidden(widgetId, hidden) {
-    const cfg = state.data.config || {};
-    if (!state.homeLayout.order || state.homeLayout.order.length === 0) {
-      state.homeLayout.order = getOrderedSchoolHomeWidgets((cfg.tabs && cfg.tabs.home) || []).map((w) => w.id);
-    }
     const set = new Set(Array.isArray(state.homeLayout.hidden) ? state.homeLayout.hidden : []);
     if (hidden) set.add(widgetId);
     else set.delete(widgetId);
@@ -142,7 +255,7 @@
   }
 
   function resetHomeLayout() {
-    state.homeLayout = { order: [], hidden: [] };
+    state.homeLayout = { order: [], hidden: [], spans: {}, slots: {} };
     saveHomeLayout();
     renderFeed();
   }
@@ -1581,7 +1694,7 @@
     const startIdx = activeIdx >= 0 ? Math.min(activeIdx, Math.max(0, periods.length - 3)) : 0;
     const previewPeriods = periods.slice(startIdx, startIdx + 3);
 
-    return el('section', { className: 'tds-home-top home-dashboard', ariaLabel: '오늘 학교 요약' },
+    const stripNode = el('section', { className: 'tds-home-top home-dashboard', ariaLabel: '오늘 학교 요약' },
       el('div', { className: 'home-strip-row' },
         el('button', { type: 'button', className: 'tds-now-strip', onClick: openTimetableSheet },
           el('div', { className: 'tds-now-left' },
@@ -1597,7 +1710,7 @@
         }, state.homeEditMode ? '편집 완료' : '화면 편집') : null
       ),
       (!isAdminPreview && state.homeEditMode) ? el('div', { className: 'home-edit-banner' },
-        el('span', { className: 'home-edit-banner-text' }, '카드를 끌어서(드래그) 순서를 바꾸거나 숨길 수 있어요.'),
+        el('span', { className: 'home-edit-banner-text' }, '카드를 빈 칸이나 다른 카드 위로 끌어 원하는 위치에 배치하고, 1칸·2칸·3칸 크기도 바꿀 수 있어요.'),
         el('div', { style: { display: 'flex', gap: '6px', flexShrink: 0 } },
           el('button', {
             type: 'button',
@@ -1610,48 +1723,54 @@
             onClick: () => toggleHomeEditMode(false)
           }, '완료')
         )
-      ) : null,
-      el('div', { className: 'home-bento-grid' },
-        el('button', { type: 'button', className: 'home-bento-card', onClick: openMealSheet },
-          el('div', { className: 'bento-head' },
-            el('span', { className: 'bento-title' }, '오늘 급식'),
-            el('span', { className: 'bento-meta' }, meal.calories || meal.date || '중식')
-          ),
-          previewDishes.length > 0
-            ? el('ul', { className: 'bento-meal-list' },
-                previewDishes.map((dish, idx) => {
-                  const hits = (dish.allergens || []).filter((n) => userAllergens.has(Number(n)));
-                  return el('li', {
-                    className: `bento-meal-item ${idx === 0 ? 'is-lead' : ''} ${hits.length ? 'has-allergen' : ''}`.trim()
-                  }, dish.name);
-                })
-              )
-            : el('p', { className: 'bento-empty' }, '급식 정보가 없습니다.'),
-          el('div', { className: 'bento-foot' },
-            dishes.length > 4 ? `외 ${dishes.length - 4}개 더보기` : '전체 메뉴 · 알레르기'
-          )
+      ) : null
+    );
+
+    const mealCard = el('section', { className: 'widget-card bento-core-card', 'data-widget-id': 'bento-meal' },
+      el('button', { type: 'button', className: 'bento-card-trigger', onClick: openMealSheet },
+        el('div', { className: 'bento-head' },
+          el('span', { className: 'bento-title' }, '오늘 급식'),
+          el('span', { className: 'bento-meta' }, meal.calories || meal.date || '중식')
         ),
-        el('button', { type: 'button', className: 'home-bento-card', onClick: openTimetableSheet },
-          el('div', { className: 'bento-head' },
-            el('span', { className: 'bento-title' }, '시간표'),
-            el('span', { className: 'bento-meta' }, `${periods.length || 7}교시`)
-          ),
-          previewPeriods.length > 0
-            ? el('div', { className: 'bento-tt-list' },
-                previewPeriods.map((subject, offset) => {
-                  const pIdx = startIdx + offset;
-                  const isNow = pIdx === activeIdx;
-                  return el('div', { className: `bento-tt-row ${isNow ? 'is-now' : ''}`.trim() },
-                    el('span', { className: 'bento-tt-num' }, `${pIdx + 1}교시`),
-                    el('span', { className: 'bento-tt-subj' }, String(subject))
-                  );
-                })
-              )
-            : el('p', { className: 'bento-empty' }, '시간표가 없습니다.'),
-          el('div', { className: 'bento-foot' }, '주간 전체 시간표')
+        previewDishes.length > 0
+          ? el('ul', { className: 'bento-meal-list' },
+              previewDishes.map((dish, idx) => {
+                const hits = (dish.allergens || []).filter((n) => userAllergens.has(Number(n)));
+                return el('li', {
+                  className: `bento-meal-item ${idx === 0 ? 'is-lead' : ''} ${hits.length ? 'has-allergen' : ''}`.trim()
+                }, dish.name);
+              })
+            )
+          : el('p', { className: 'bento-empty' }, '급식 정보가 없습니다.'),
+        el('div', { className: 'bento-foot' },
+          dishes.length > 4 ? `외 ${dishes.length - 4}개 더보기` : '전체 메뉴 · 알레르기'
         )
       )
     );
+
+    const timetableCard = el('section', { className: 'widget-card bento-core-card', 'data-widget-id': 'bento-timetable' },
+      el('button', { type: 'button', className: 'bento-card-trigger', onClick: openTimetableSheet },
+        el('div', { className: 'bento-head' },
+          el('span', { className: 'bento-title' }, '시간표'),
+          el('span', { className: 'bento-meta' }, `${periods.length || 7}교시`)
+        ),
+        previewPeriods.length > 0
+          ? el('div', { className: 'bento-tt-list' },
+              previewPeriods.map((subject, offset) => {
+                const pIdx = startIdx + offset;
+                const isNow = pIdx === activeIdx;
+                return el('div', { className: `bento-tt-row ${isNow ? 'is-now' : ''}`.trim() },
+                  el('span', { className: 'bento-tt-num' }, `${pIdx + 1}교시`),
+                  el('span', { className: 'bento-tt-subj' }, String(subject))
+                );
+              })
+            )
+          : el('p', { className: 'bento-empty' }, '시간표가 없습니다.'),
+        el('div', { className: 'bento-foot' }, '주간 전체 시간표')
+      )
+    );
+
+    return { stripNode, mealCard, timetableCard };
   }
 
   function renderFeed() {
@@ -1685,8 +1804,208 @@
     const classKey = `${state.grade}-${state.classNum}`;
 
     if (state.tab === 'home') {
-      container.appendChild(buildHomeTopHero(cfg, sources, classKey));
-    } else if (state.tab === 'explore') {
+      const { stripNode, mealCard, timetableCard } = buildHomeTopHero(cfg, sources, classKey);
+      container.appendChild(stripNode);
+
+      const coreItems = [
+        { id: 'bento-meal', title: '오늘 급식', defaultSpan: 1, render: () => mealCard },
+        { id: 'bento-timetable', title: '시간표', defaultSpan: 1, render: () => timetableCard }
+      ];
+      const widgetItems = tabWidgets
+        .filter((w) => w && w.enabled !== false)
+        .map((w) => ({
+          id: w.id,
+          type: w.type,
+          title: w.title || w.type,
+          defaultSpan: getDefaultWidgetSpan(w),
+          render: () => {
+            const sourceKey = w.sourceKey || '';
+            const sourceData = sourceKey ? sources[sourceKey] : undefined;
+            return window.renderWidgetSafe(w, sourceData, {
+              classKey,
+              allergens: state.allergens,
+              personalTasks: state.personalTasks,
+              sourceMeta: sourceKey ? metaSources[sourceKey] : null,
+              openHalfSheet,
+              openFullArticle,
+              toggleTaskDone,
+              deleteTask,
+              openAddTaskSheet,
+              openAssessmentPicker,
+              openAllTasksSheet,
+              studyTimer: state.studyTimer,
+              getStudyElapsedMs,
+              toggleStudyTimer,
+              saveStudySession,
+              resetStudyTimer,
+              setStudySubject,
+              setStudyMode,
+              openStudyFocusSheet,
+              registerTimer: (id) => state.timers.push(id)
+            });
+          }
+        }));
+
+      const allPool = [...coreItems, ...widgetItems];
+      const orderedPool = getOrderedSchoolHomeWidgets(allPool);
+      const hiddenSet = isAdminPreview
+        ? new Set()
+        : new Set(Array.isArray(state.homeLayout?.hidden) ? state.homeLayout.hidden : []);
+      const visibleItems = orderedPool.filter((it) => !hiddenSet.has(it.id));
+
+      if (visibleItems.length === 0) {
+        container.appendChild(
+          el('div', { className: 'empty-state' },
+            !isAdminPreview
+              ? el('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' } },
+                  el('span', null, '홈 화면에 표시할 카드가 모두 숨겨져 있습니다.'),
+                  el('button', { type: 'button', className: 'planner-mini-btn is-primary', onClick: resetHomeLayout }, '기본 배치로 복원')
+                )
+              : '표시할 위젯이 없습니다. 관리자 스튜디오(admin.html)에서 위젯을 추가해 보세요.'
+          )
+        );
+        return;
+      }
+
+      const COLS = 3;
+      const { placements, occupied, maxRow } = computeBentoPlacements(visibleItems, COLS);
+      const board = el('div', { className: `bento-board ${state.homeEditMode && !isAdminPreview ? 'is-edit-board' : ''}`.trim() });
+      const allIds = orderedPool.map((it) => it.id);
+      let draggingWidgetId = null;
+
+      for (const item of visibleItems) {
+        const card = item.render();
+        const pos = placements.get(item.id);
+        if (pos) {
+          card.style.setProperty('--bento-col', String(pos.col));
+          card.style.setProperty('--bento-span', String(pos.span));
+          card.style.setProperty('--bento-row', String(pos.row));
+          card.classList.add('bento-placed-card');
+        }
+
+        if (!isAdminPreview && state.homeEditMode && item.id) {
+          const curSpan = pos ? pos.span : getWidgetSpan(item, COLS);
+          card.classList.add('is-edit-mode');
+          card.draggable = true;
+          card.prepend(
+            el('div', { className: 'widget-edit-bar' },
+              el('span', { className: 'widget-drag-handle' }, '⋮⋮ 이동'),
+              el('div', { className: 'widget-size-group', role: 'group', 'aria-label': '위젯 가로 크기' },
+                [1, 2, 3].map((s) =>
+                  el('button', {
+                    type: 'button',
+                    className: `widget-size-btn ${curSpan === s ? 'is-active' : ''}`.trim(),
+                    onClick: (e) => {
+                      e.stopPropagation();
+                      setHomeWidgetSpan(item.id, s, placements, COLS);
+                    }
+                  }, `${s}칸`)
+                )
+              ),
+              el('button', {
+                type: 'button',
+                className: 'planner-mini-btn',
+                onClick: (e) => {
+                  e.stopPropagation();
+                  setHomeWidgetHidden(item.id, true);
+                }
+              }, '숨기기')
+            )
+          );
+          card.addEventListener('dragstart', (e) => {
+            draggingWidgetId = item.id;
+            card.classList.add('is-dragging');
+            if (e.dataTransfer) {
+              e.dataTransfer.effectAllowed = 'move';
+              e.dataTransfer.setData('text/plain', item.id);
+            }
+          });
+          card.addEventListener('dragover', (e) => {
+            if (!draggingWidgetId || draggingWidgetId === item.id) return;
+            e.preventDefault();
+            card.classList.add('is-drop-target');
+          });
+          card.addEventListener('dragleave', () => {
+            card.classList.remove('is-drop-target');
+          });
+          card.addEventListener('drop', (e) => {
+            e.preventDefault();
+            card.classList.remove('is-drop-target');
+            const fromId = draggingWidgetId || (e.dataTransfer && e.dataTransfer.getData('text/plain'));
+            draggingWidgetId = null;
+            if (fromId && fromId !== item.id) {
+              swapHomeWidgets(fromId, item.id, placements, allIds);
+            }
+          });
+          card.addEventListener('dragend', () => {
+            draggingWidgetId = null;
+            card.classList.remove('is-dragging');
+            board.querySelectorAll('.is-drop-target').forEach((n) => n.classList.remove('is-drop-target'));
+          });
+        }
+        board.appendChild(card);
+      }
+
+      if (!isAdminPreview && state.homeEditMode && isDesktopLayout()) {
+        for (let r = 1; r <= maxRow + 1; r++) {
+          for (let c = 1; c <= COLS; c++) {
+            if (occupied.has(`${c},${r}`)) continue;
+            const slotEl = el('div', {
+              className: 'bento-empty-slot',
+              style: { '--bento-col': String(c), '--bento-row': String(r) }
+            }, `+ 빈 칸 (${r}행 ${c}열)`);
+            slotEl.addEventListener('dragover', (e) => {
+              if (!draggingWidgetId) return;
+              e.preventDefault();
+              slotEl.classList.add('is-drop-target');
+            });
+            slotEl.addEventListener('dragleave', () => {
+              slotEl.classList.remove('is-drop-target');
+            });
+            slotEl.addEventListener('drop', (e) => {
+              e.preventDefault();
+              slotEl.classList.remove('is-drop-target');
+              const fromId = draggingWidgetId || (e.dataTransfer && e.dataTransfer.getData('text/plain'));
+              draggingWidgetId = null;
+              if (fromId) {
+                placeHomeWidgetAtSlot(fromId, c, r, placements, visibleItems, COLS);
+              }
+            });
+            board.appendChild(slotEl);
+          }
+        }
+      }
+
+      container.appendChild(board);
+
+      if (!isAdminPreview && state.homeEditMode) {
+        const hiddenItems = orderedPool.filter((it) => hiddenSet.has(it.id));
+        if (hiddenItems.length > 0) {
+          container.appendChild(
+            el('section', { className: 'widget-card home-hidden-tray' },
+              el('div', { className: 'card-head' },
+                el('div', { className: 'card-head-title-group' },
+                  el('h2', { className: 'card-title' }, `숨긴 카드 (${hiddenItems.length})`),
+                  el('p', { className: 'card-subtitle' }, '다시 표시할 카드를 누르세요')
+                )
+              ),
+              el('div', { className: 'study-subj-row' },
+                hiddenItems.map((it) =>
+                  el('button', {
+                    type: 'button',
+                    className: 'planner-mini-btn',
+                    onClick: () => setHomeWidgetHidden(it.id, false)
+                  }, `+ ${it.title || it.id}`)
+                )
+              )
+            )
+          );
+        }
+      }
+      return;
+    }
+
+    if (state.tab === 'explore') {
       renderExploreArchive(container);
     } else if (state.tab === 'forest') {
       renderForestFunnel(container);
@@ -1695,24 +2014,7 @@
       container.appendChild(buildMySettingsCard());
     }
 
-    const enabledWidgets = state.tab === 'home'
-      ? resolveHomeWidgets(tabWidgets)
-      : tabWidgets.filter((w) => w && w.enabled !== false);
-    if (enabledWidgets.length === 0 && state.tab === 'home') {
-      container.appendChild(
-        el('div', { className: 'empty-state' },
-          !isAdminPreview
-            ? el('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' } },
-                el('span', null, '홈 화면에 표시할 카드가 모두 숨겨져 있습니다.'),
-                el('button', { type: 'button', className: 'planner-mini-btn is-primary', onClick: resetHomeLayout }, '기본 배치로 복원')
-              )
-            : '표시할 위젯이 없습니다. 관리자 스튜디오(admin.html)에서 위젯을 추가해 보세요.'
-        )
-      );
-      return;
-    }
-
-    let draggingWidgetId = null;
+    const enabledWidgets = tabWidgets.filter((w) => w && w.enabled !== false);
     for (const widget of enabledWidgets) {
       const sourceKey = widget.sourceKey || '';
       const sourceData = sourceKey ? sources[sourceKey] : undefined;
@@ -1738,81 +2040,7 @@
         openStudyFocusSheet,
         registerTimer: (id) => state.timers.push(id)
       };
-      const card = window.renderWidgetSafe(widget, sourceData, ctx);
-      if (state.tab === 'home' && !isAdminPreview && state.homeEditMode && widget.id) {
-        card.classList.add('is-edit-mode');
-        card.draggable = true;
-        card.prepend(
-          el('div', { className: 'widget-edit-bar' },
-            el('span', { className: 'widget-drag-handle' }, '⋮⋮ 끌어서 이동'),
-            el('button', {
-              type: 'button',
-              className: 'planner-mini-btn',
-              onClick: (e) => {
-                e.stopPropagation();
-                setHomeWidgetHidden(widget.id, true);
-              }
-            }, '숨기기')
-          )
-        );
-        card.addEventListener('dragstart', (e) => {
-          draggingWidgetId = widget.id;
-          card.classList.add('is-dragging');
-          if (e.dataTransfer) {
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', widget.id);
-          }
-        });
-        card.addEventListener('dragover', (e) => {
-          if (!draggingWidgetId || draggingWidgetId === widget.id) return;
-          e.preventDefault();
-          card.classList.add('is-drop-target');
-        });
-        card.addEventListener('dragleave', () => {
-          card.classList.remove('is-drop-target');
-        });
-        card.addEventListener('drop', (e) => {
-          e.preventDefault();
-          card.classList.remove('is-drop-target');
-          const fromId = draggingWidgetId || (e.dataTransfer && e.dataTransfer.getData('text/plain'));
-          draggingWidgetId = null;
-          if (fromId && fromId !== widget.id) {
-            moveHomeWidgetOrder(fromId, widget.id);
-          }
-        });
-        card.addEventListener('dragend', () => {
-          draggingWidgetId = null;
-          card.classList.remove('is-dragging');
-          container.querySelectorAll('.is-drop-target').forEach((n) => n.classList.remove('is-drop-target'));
-        });
-      }
-      container.appendChild(card);
-    }
-
-    if (state.tab === 'home' && !isAdminPreview && state.homeEditMode) {
-      const hiddenSet = new Set(Array.isArray(state.homeLayout?.hidden) ? state.homeLayout.hidden : []);
-      const hiddenWidgets = getOrderedSchoolHomeWidgets(tabWidgets).filter((w) => hiddenSet.has(w.id));
-      if (hiddenWidgets.length > 0) {
-        container.appendChild(
-          el('section', { className: 'widget-card home-hidden-tray' },
-            el('div', { className: 'card-head' },
-              el('div', { className: 'card-head-title-group' },
-                el('h2', { className: 'card-title' }, `숨긴 카드 (${hiddenWidgets.length})`),
-                el('p', { className: 'card-subtitle' }, '다시 표시할 카드를 누르세요')
-              )
-            ),
-            el('div', { className: 'study-subj-row' },
-              hiddenWidgets.map((w) =>
-                el('button', {
-                  type: 'button',
-                  className: 'planner-mini-btn',
-                  onClick: () => setHomeWidgetHidden(w.id, false)
-                }, `+ ${w.title || w.type}`)
-              )
-            )
-          )
-        );
-      }
+      container.appendChild(window.renderWidgetSafe(widget, sourceData, ctx));
     }
   }
 

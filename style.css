@@ -1904,6 +1904,8 @@ dialog.sheet[open]:where(:not([data-closing])) {
   }
 
   .tds-home-top.home-dashboard,
+  .bento-board,
+  .home-hidden-tray,
   .archive-controls,
   .funnel-box,
   .feed > div:not([class]),
@@ -2025,8 +2027,26 @@ dialog.sheet[open]:where(:not([data-closing])) {
   .home-strip-row,
   .home-edit-banner,
   .home-hidden-tray,
+  .bento-board,
   .tds-now-strip {
     grid-column: 1 / -1;
+  }
+
+  .bento-board {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    align-items: start;
+  }
+
+  .bento-board > .widget-card.bento-placed-card {
+    grid-column: var(--bento-col, auto) / span var(--bento-span, 1);
+    grid-row: var(--bento-row, auto);
+  }
+
+  .bento-empty-slot {
+    grid-column: var(--bento-col, auto);
+    grid-row: var(--bento-row, auto);
   }
 
   .widget-card:has(.planner-list) {
@@ -2530,6 +2550,90 @@ dialog.sheet[open]:where(:not([data-closing])) {
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
+}
+
+.bento-board {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  align-items: start;
+  width: 100%;
+}
+
+.bento-core-card {
+  padding: 16px;
+}
+
+.bento-card-trigger {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.widget-size-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.widget-size-btn {
+  border: 1px solid var(--border);
+  background-color: var(--chip-bg);
+  color: var(--text-sub);
+  border-radius: 6px;
+  padding: 3px 7px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.widget-size-btn.is-active {
+  background-color: var(--accent-weak);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.bento-empty-slot {
+  min-height: 112px;
+  border: 2px dashed color-mix(in srgb, var(--accent) 32%, var(--border));
+  border-radius: 12px;
+  background-color: color-mix(in srgb, var(--accent-weak) 35%, transparent);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  text-align: center;
+  transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease;
+}
+
+.bento-empty-slot.is-drop-target {
+  border-color: var(--accent);
+  background-color: var(--accent-weak);
+  color: var(--accent);
+}
+
+@media (min-width: 720px) and (max-width: 1023px) {
+  .bento-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bento-board > .ticker-card,
+  .bento-board > .widget-card:has(.snap-carousel),
+  .bento-board > .study-links-card {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (min-width: 1400px) {
