@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#257A54">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="틈 (Teum) · 서전고 오늘 급식 · 시간표 · 공지">
+  <meta property="og:description" content="광고 없이 빠르게 확인하는 서전고 디지털 포털">
+  <script>
+    try {
+      document.querySelector('meta[name="color-scheme"]').content = localStorage.getItem('color-scheme') ?? 'light dark';
+    } catch (e) {}
+  </script>
+  <title>틈 (Teum) · 서전고 디지털 포털</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./style.css?v=15">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="top-bar" id="topBar">
+      <div class="top-bar-row">
+        <div class="brand-group">
+          <h1 class="brand-mark" id="brandTitle">틈.</h1>
+        </div>
+        <div class="top-actions">
+          <button type="button" class="school-pill" id="schoolClassPill" aria-label="우리 반 설정으로 이동">서전고 1-1</button>
+          <span class="live-status-pill" id="liveClockPill">로딩 중</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="feed" id="feedContainer" aria-live="polite"></main>
+
+    <nav class="bottom-nav" aria-label="메인 탭 메뉴">
+      <button type="button" class="nav-btn" data-tab="home" aria-label="홈" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5.5v-6.5h-5V21H4a1 1 0 0 1-1-1z" />
+        </svg>
+        <span>홈</span>
+      </button>
+      <button type="button" class="nav-btn" data-tab="explore" aria-label="탐색">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2" />
+          <polygon points="15.8,8.2 13.7,13.7 8.2,15.8 10.3,10.3" />
+        </svg>
+        <span>탐색</span>
+      </button>
+      <button type="button" class="nav-btn" data-tab="forest" aria-label="숲">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3l-5.5 7.5h3.2L5.5 16h13l-4.2-5.5h3.2L12 3zM11 16v5h2v-5h-2z" />
+        </svg>
+        <span>숲</span>
+      </button>
+      <button type="button" class="nav-btn" data-tab="my" aria-label="마이">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="8.5" r="4" />
+          <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
+        </svg>
+        <span>마이</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- 반 시트 (~58dvh): 급식 / 시간표 / 짧은 카드 빠른 확인 -->
+  <dialog id="halfSheet" class="sheet is-half" closedby="any" aria-labelledby="halfTitle">
+    <div class="sheet-inner">
+      <header class="sheet-header">
+        <div class="sheet-heading-wrap">
+          <span class="sheet-kicker" id="halfKicker"></span>
+          <h2 class="sheet-title" id="halfTitle">빠른 확인</h2>
+        </div>
+        <button type="button" class="sheet-close" id="halfCloseBtn" aria-label="닫기">✕</button>
+      </header>
+      <div class="sheet-body" id="halfBody"></div>
+    </div>
+  </dialog>
+
+  <!-- 풀 아티클 시트 (~92dvh): 블로그 글 / 스와이프 공지 / 숲 문서 열람 -->
+  <dialog id="fullSheet" class="sheet is-full" closedby="any" aria-labelledby="fullTitle">
+    <div class="sheet-inner is-full-inner">
+      <header class="sheet-header">
+        <div class="sheet-heading-wrap">
+          <span class="sheet-kicker" id="fullKicker"></span>
+          <h2 class="sheet-title" id="fullTitle">상세 보기</h2>
+        </div>
+        <button type="button" class="sheet-close" id="fullCloseBtn" aria-label="닫기">✕</button>
+      </header>
+      <div class="sheet-body" id="fullBody"></div>
+    </div>
+  </dialog>
+
+  <script src="./data.js?v=10"></script>
+  <script src="./widgets.js?v=12"></script>
+  <script src="./app.js?v=14"></script></script>
+</body>
+</html>

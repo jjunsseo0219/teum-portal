@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>시안 2 — 스위스 그리드 포스터 스타일</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: #FFFFFF; color: #0A0A0A;
+      font-family: "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; line-height: 1.45;
+    }
+    .wrap { max-width: 460px; margin: 0 auto; border-left: 1.5px solid #0A0A0A; border-right: 1.5px solid #0A0A0A; min-height: 100vh; }
+    .topbar {
+      display: grid; grid-template-columns: 1fr auto; border-bottom: 1.5px solid #0A0A0A;
+      font-family: ui-monospace, Consolas, monospace; font-size: 0.75rem; font-weight: 700;
+    }
+    .topbar span { padding: 12px 16px; }
+    .topbar .code { border-left: 1.5px solid #0A0A0A; background: #0047FF; color: #FFFFFF; }
+    .hero { padding: 28px 16px 24px; border-bottom: 1.5px solid #0A0A0A; }
+    .tag { font-family: ui-monospace, Consolas, monospace; font-size: 0.74rem; font-weight: 700; color: #0047FF; margin-bottom: 10px; }
+    h1 { margin: 0; font-size: 2.05rem; font-weight: 900; letter-spacing: -0.04em; line-height: 1.15; word-break: keep-all; }
+    .sub { margin: 14px 0 0; font-size: 0.88rem; color: #404040; word-break: keep-all; }
+    .action-bar {
+      display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1.5px solid #0A0A0A;
+      font-size: 0.84rem; font-weight: 800; text-align: center;
+    }
+    .action-bar a { padding: 14px 10px; text-decoration: none; color: #0A0A0A; }
+    .action-bar a:first-child { background: #0A0A0A; color: #FFFFFF; }
+    .action-bar a:last-child { border-left: 1.5px solid #0A0A0A; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; }
+    .cell { padding: 18px 16px; border-bottom: 1.5px solid #0A0A0A; }
+    .cell:nth-child(odd) { border-right: 1.5px solid #0A0A0A; }
+    .cell-no { font-family: ui-monospace, Consolas, monospace; font-size: 0.75rem; font-weight: 700; color: #0047FF; }
+    .cell h2 { margin: 8px 0 6px; font-size: 1.12rem; font-weight: 900; letter-spacing: -0.03em; }
+    .cell p { margin: 0; font-size: 0.8rem; color: #404040; word-break: keep-all; }
+    .ticker-strip {
+      padding: 14px 16px; background: #F4F4F4; border-bottom: 1.5px solid #0A0A0A;
+      font-family: ui-monospace, Consolas, monospace; font-size: 0.76rem; display: flex; justify-content: space-between;
+    }
+    .foot-note { padding: 20px 16px; font-size: 0.78rem; color: #525252; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <span>SEOJEON HIGH / TEUM</span>
+      <span class="code">NO.10</span>
+    </div>
+
+    <section class="hero">
+      <div class="tag">[2026 STUDENT COUNCIL]</div>
+      <h1>틈을 열어<br>마당으로.<br>TEUM—2026</h1>
+      <p class="sub">남윤아 × 임준서. 포스터 속 약속이 아니라, 지금 작동하는 0.5초 포털과 4대 실행 그리드.</p>
+    </section>
+
+    <div class="action-bar">
+      <a href="#">포털 바로 열기 →</a>
+      <a href="#">공약 상세 보기 ↓</a>
+    </div>
+
+    <div class="ticker-strip">
+      <span>TODAY / 급식·시간표</span>
+      <span>0.5s ZERO-ADS</span>
+    </div>
+
+    <section class="grid-2">
+      <div class="cell">
+        <div class="cell-no">01 / ONLINE</div>
+        <h2>틈</h2>
+        <p>광고 없는 급식·반별 시간표·수행 D-Day 0.5초 생활 허브</p>
+      </div>
+      <div class="cell">
+        <div class="cell-no">02 / SPACE</div>
+        <h2>뜰</h2>
+        <p>10년 만에 개방되는 지산실 안뜰과 그늘집 피크닉존</p>
+      </div>
+      <div class="cell">
+        <div class="cell-no">03 / CYCLE</div>
+        <h2>터</h2>
+        <p>1.2m 빨간 러그 유랑 세바시 &amp; 무인 자원순환</p>
+      </div>
+      <div class="cell">
+        <div class="cell-no">04 / ARCHIVE</div>
+        <h2>숲</h2>
+        <p>1원 단위 회계 공개와 기수제 디지털운영위원회</p>
+      </div>
+    </section>
+
+    <footer class="foot-note">
+      * 둥근 카드와 장식을 걷어내고 정보와 구조만 남긴 스위스 타이포그래피 시안입니다.
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,3103 @@
+{
+  "config": {
+    "siteTitle": "틈.",
+    "schoolName": "서전고",
+    "accentColor": "#257A54",
+    "liveBarText": "점심시간까지 카운트다운 · 서전고 일상 허브",
+    "tabs": {
+      "home": [
+        {
+          "id": "home-planner",
+          "type": "planner",
+          "enabled": true,
+          "title": "내 일정 & 수행 D-Day",
+          "subtitle": "직접 추가 · 공지/수행 1초 담기",
+          "sourceKey": "assessments",
+          "accent": "",
+          "props": {
+            "maxVisible": 4
+          },
+          "sheet": {
+            "title": "내 일정 & 수행평가 연동 안내",
+            "body": "폰에 안전하게 저장되며, 탐색 공지의 [일정 담기]나 [수행] 버튼으로 손쉽게 일정을 채울 수 있습니다."
+          }
+        },
+        {
+          "id": "home-study-timer",
+          "type": "study_timer",
+          "enabled": true,
+          "title": "오늘의 공부 타이머",
+          "subtitle": "과목별 집중 측정 · 25분 뽀모도로",
+          "sourceKey": "",
+          "accent": "",
+          "props": {
+            "pomodoroMin": 25
+          },
+          "sheet": {
+            "title": "공부 타이머 안내",
+            "body": "과목을 선택해 스톱워치 또는 25분 뽀모도로로 측정하고 [기록 저장]을 누르면 오늘 누적 공부시간에 반영됩니다."
+          }
+        },
+        {
+          "id": "home-study-links",
+          "type": "study_links",
+          "enabled": true,
+          "title": "입시 · 학습 추천 사이트",
+          "subtitle": "수능 · 대입 · 인강 바로가기",
+          "sourceKey": "study_links",
+          "accent": "",
+          "props": {
+            "maxItems": 8
+          },
+          "sheet": {
+            "title": "입시 · 학습 추천 사이트",
+            "body": "관리자 스튜디오의 [고급 연결 (API)] → study_links에서 링크를 추가하거나 수정할 수 있습니다."
+          }
+        },
+        {
+          "id": "home-carousel",
+          "type": "carousel",
+          "enabled": true,
+          "title": "중요 공지",
+          "subtitle": "가로 스와이프 고정 공지",
+          "sourceKey": "archive_posts",
+          "accent": "",
+          "props": {
+            "pinnedOnly": true
+          },
+          "sheet": {
+            "title": "중요 공지 안내",
+            "body": "탐색(블로그) 글 중 중요공지로 고정된 항목이 자동으로 표시됩니다."
+          }
+        },
+        {
+          "id": "home-ticker",
+          "type": "ticker",
+          "enabled": true,
+          "title": "학사 D-Day & 알림",
+          "subtitle": "실시간 일정 티커",
+          "sourceKey": "neis_schedule",
+          "accent": "",
+          "props": {
+            "intervalMs": 3000
+          },
+          "sheet": {
+            "title": "서전고 주요 일정",
+            "body": "NEIS 학사일정과 자동 연동되며, 관리자 스튜디오에서 소스를 교체할 수 있습니다."
+          }
+        },
+        {
+          "id": "home-meal",
+          "type": "meal",
+          "enabled": false,
+          "title": "오늘의 점심",
+          "subtitle": "서전고 급식실",
+          "sourceKey": "neis_meal",
+          "accent": "",
+          "props": {
+            "showCalories": true
+          },
+          "sheet": {
+            "title": "오늘의 급식 상세",
+            "body": "마이 탭에서 알레르기 번호를 선택하면 해당 성분이 포함된 메뉴가 자동 강조됩니다."
+          }
+        },
+        {
+          "id": "home-timetable",
+          "type": "timetable",
+          "enabled": false,
+          "title": "우리 반 시간표",
+          "subtitle": "1~7교시 라이브 타임라인",
+          "sourceKey": "timetable",
+          "accent": "",
+          "props": {
+            "showPeriodTimes": true
+          },
+          "sheet": {
+            "title": "시간표 안내",
+            "body": "마이 탭에서 학년/반을 변경하면 홈 시간표가 즉시 바뀝니다."
+          }
+        }
+      ],
+      "explore": [],
+      "forest": [],
+      "my": [
+        {
+          "id": "my-guide",
+          "type": "text",
+          "enabled": true,
+          "title": "틈(Teum) v2 안내",
+          "subtitle": "노션 CMS · Zero-Toolchain 포털",
+          "sourceKey": "",
+          "accent": "",
+          "props": {
+            "body": "홈: 주요 요약 · 일정 · 공지\n탐색: 사진 썸네일 블로그 아카이브 (검색·날짜·태그)\n숲: 회계·회의록·공지·자료 통합 창고\n\n관리자 스튜디오(admin.html)에서 코딩 없이 위젯과 블로그 포스트, 사진 썸네일을 관리할 수 있습니다."
+          },
+          "sheet": {
+            "title": "틈(Teum) v2 아키텍처",
+            "body": "노션 통합 마스터 DB에서 글과 사진을 수집해 정적 JSON과 WebP 썸네일로 구워내는 Zero-Ops 포털입니다."
+          }
+        }
+      ]
+    }
+  },
+  "sources": {
+    "neis_meal": {
+      "date": "2026-11-23 (예정)",
+      "mealType": "중식",
+      "calories": "625.3 Kcal",
+      "dishes": [
+        {
+          "name": "비빔밥",
+          "allergens": [
+            5,
+            6,
+            10,
+            13
+          ]
+        },
+        {
+          "name": "두부미역미소된장국",
+          "allergens": [
+            5,
+            6,
+            9
+          ]
+        },
+        {
+          "name": "갈릭고르곤졸라피자",
+          "allergens": [
+            1,
+            2,
+            5,
+            6,
+            10,
+            12,
+            15,
+            16,
+            18
+          ]
+        },
+        {
+          "name": "나박김치",
+          "allergens": [
+            9
+          ]
+        },
+        {
+          "name": "하동매실주스100",
+          "allergens": []
+        },
+        {
+          "name": "모듬피클",
+          "allergens": []
+        }
+      ]
+    },
+    "neis_schedule": [
+      {
+        "title": "성탄절",
+        "date": "2026-12-25",
+        "tag": "공휴일"
+      }
+    ],
+    "timetable": {
+      "1-1": {
+        "월": [
+          "국어",
+          "수학",
+          "영어",
+          "통합사회",
+          "통합과학",
+          "체육",
+          "창체"
+        ],
+        "화": [
+          "영어",
+          "통합과학",
+          "국어",
+          "수학",
+          "한국사",
+          "음악",
+          "미술"
+        ],
+        "수": [
+          "수학",
+          "국어",
+          "통합사회",
+          "영어",
+          "정보",
+          "체육",
+          "동아리"
+        ],
+        "목": [
+          "통합과학",
+          "영어",
+          "수학",
+          "국어",
+          "진로",
+          "통합사회",
+          "자율"
+        ],
+        "금": [
+          "한국사",
+          "미술",
+          "통합과학",
+          "영어",
+          "국어",
+          "수학",
+          "창체"
+        ]
+      },
+      "1-2": {
+        "월": [
+          "수학",
+          "영어",
+          "국어",
+          "통합과학",
+          "한국사",
+          "미술",
+          "자율"
+        ],
+        "화": [
+          "국어",
+          "통합사회",
+          "수학",
+          "영어",
+          "체육",
+          "정보",
+          "음악"
+        ],
+        "수": [
+          "영어",
+          "통합과학",
+          "한국사",
+          "국어",
+          "수학",
+          "진로",
+          "동아리"
+        ],
+        "목": [
+          "통합사회",
+          "국어",
+          "영어",
+          "수학",
+          "통합과학",
+          "체육",
+          "창체"
+        ],
+        "금": [
+          "정보",
+          "수학",
+          "영어",
+          "통합사회",
+          "국어",
+          "미술",
+          "자율"
+        ]
+      },
+      "2-1": {
+        "월": [
+          "문학",
+          "수Ⅰ",
+          "영어Ⅰ",
+          "물리학Ⅰ",
+          "화학Ⅰ",
+          "체육",
+          "동아리"
+        ],
+        "화": [
+          "수Ⅰ",
+          "영어Ⅰ",
+          "문학",
+          "생명과학Ⅰ",
+          "한국사",
+          "음악",
+          "진로"
+        ],
+        "수": [
+          "물리학Ⅰ",
+          "문학",
+          "수Ⅰ",
+          "화학Ⅰ",
+          "영어Ⅰ",
+          "체육",
+          "자율"
+        ],
+        "목": [
+          "영어Ⅰ",
+          "화학Ⅰ",
+          "생명과학Ⅰ",
+          "문학",
+          "수Ⅰ",
+          "정보",
+          "창체"
+        ],
+        "금": [
+          "한국사",
+          "수Ⅰ",
+          "물리학Ⅰ",
+          "영어Ⅰ",
+          "문학",
+          "독서",
+          "자율"
+        ]
+      },
+      "3-1": {
+        "월": [
+          "독서",
+          "미적분",
+          "영어독해",
+          "생명과학Ⅱ",
+          "지구과학Ⅱ",
+          "진로",
+          "자습"
+        ],
+        "화": [
+          "미적분",
+          "영어독해",
+          "화법과작문",
+          "물리학Ⅱ",
+          "독서",
+          "체육",
+          "자습"
+        ],
+        "수": [
+          "영어독해",
+          "생명과학Ⅱ",
+          "미적분",
+          "지구과학Ⅱ",
+          "심화국어",
+          "논술",
+          "동아리"
+        ],
+        "목": [
+          "화법과작문",
+          "독서",
+          "물리학Ⅱ",
+          "미적분",
+          "영어독해",
+          "진로",
+          "자습"
+        ],
+        "금": [
+          "지구과학Ⅱ",
+          "미적분",
+          "독서",
+          "영어독해",
+          "생명과학Ⅱ",
+          "체육",
+          "자습"
+        ]
+      },
+      "default": {
+        "월": [
+          "국어",
+          "수학",
+          "영어",
+          "탐구A",
+          "탐구B",
+          "체육",
+          "창체"
+        ],
+        "화": [
+          "영어",
+          "탐구B",
+          "국어",
+          "수학",
+          "한국사",
+          "예술",
+          "자율"
+        ],
+        "수": [
+          "수학",
+          "국어",
+          "탐구A",
+          "영어",
+          "정보",
+          "체육",
+          "동아리"
+        ],
+        "목": [
+          "탐구B",
+          "영어",
+          "수학",
+          "국어",
+          "진로",
+          "탐구A",
+          "창체"
+        ],
+        "금": [
+          "한국사",
+          "예술",
+          "탐구B",
+          "영어",
+          "국어",
+          "수학",
+          "자율"
+        ]
+      }
+    },
+    "archive_posts": [
+      {
+        "id": "post-jisan",
+        "date": "2026-11-18",
+        "dept": "환경복지부",
+        "title": "1층 지산실 안뜰 전면 개방: 점심시간 50분의 작은 쉼터",
+        "excerpt": "10년 동안 닫혀 있던 1층 지산실 폴딩도어를 열고 통유리 앞 자율 휴식 공간을 마련했습니다.",
+        "pinned": true,
+        "thumbUrl": "./assets/thumbs/notice_jisan.webp",
+        "thumbTheme": "forest",
+        "thumbIcon": "공간",
+        "tags": [
+          "#공간",
+          "#공지"
+        ],
+        "article": {
+          "quote": "“교실을 잠시 벗어나 바람 쐬고 숨 고르는 서전고의 작은 틈.”",
+          "sections": [
+            {
+              "heading": "이렇게 이용해 주세요",
+              "body": "평일 점심시간(12:40~13:25) 누구나 자유롭게 들어와 책을 읽거나 조용히 쉴 수 있습니다. 잔잔한 45dB Lo-Fi 음악이 재생됩니다."
+            },
+            {
+              "heading": "안전 및 분실 예방 수칙",
+              "body": "개인 소지품은 직접 챙겨주시고, 음료·음식물 반입은 삼가해 쾌적한 환경을 유지해 주세요."
+            }
+          ],
+          "facts": [
+            {
+              "label": "운영 시간",
+              "value": "평일 점심 12:40 ~ 13:25"
+            },
+            {
+              "label": "위치",
+              "value": "본관 1층 지산세미나실"
+            },
+            {
+              "label": "담당",
+              "value": "환경복지부"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "post-dolsil",
+        "date": "2026-11-15",
+        "dueDate": "2026-11-27",
+        "dept": "기획홍보부",
+        "title": "12.29 돌실제 부스 신청 시작 & 이스터에그 퀘스트 예고",
+        "excerpt": "동아리 부스 참가 신청서 접수와 함께 포털 곳곳에 숨겨진 모스부호(TEUM) 이스터에그 이벤트를 미리 공개합니다.",
+        "pinned": true,
+        "thumbUrl": "./assets/thumbs/notice_dolsil.webp",
+        "thumbTheme": "sunset",
+        "thumbIcon": "행사",
+        "tags": [
+          "#행사",
+          "#동아리"
+        ],
+        "article": {
+          "quote": "“기다림만 길던 축제 대신, 빈 부스를 한눈에 찾고 바로 즐기는 돌실제.”",
+          "sections": [
+            {
+              "heading": "부스 신청 및 홍보물 규격",
+              "body": "동아리당 대표 1명이 신청 폼에 부스명과 포스터 이미지를 올리면, 320px/800px 초경량 WebP로 자동 변환되어 축제 당일 목록에 바로 노출됩니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "축제일",
+              "value": "2026-12-29"
+            },
+            {
+              "label": "모집 마감",
+              "value": "2026-11-27 (금)"
+            }
+          ],
+          "attachment": "2026_돌실제_부스신청_가이드.hwp"
+        }
+      },
+      {
+        "id": "post-mwrszjqe",
+        "date": "2026-11-22",
+        "dept": "학생자치회",
+        "title": "",
+        "excerpt": "",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "forest",
+        "thumbIcon": "공지",
+        "tags": [
+          "#공지"
+        ],
+        "article": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "heading": "",
+              "body": ""
+            }
+          ],
+          "attachment": "",
+          "sections": [
+            {
+              "heading": "본문",
+              "body": ""
+            }
+          ],
+          "html": "<p style=\"text-align: left;\">ㅁㅁㅁ</p><img src=\"./assets/thumbs/thumb_1795349981601_0e70701f.png\" alt=\"스크린샷 2026-11-04 180129.png\"><hr class=\"article-hr\"><div class=\"article-facts\"><div class=\"article-fact-row\"><b>일시</b></div><div class=\"article-fact-row\"><b>장소</b></div></div><p><br></p><p><br></p>"
+        }
+      },
+      {
+        "id": "post-election",
+        "date": "2026-11-20",
+        "dueDate": "2026-12-23",
+        "dept": "임준서",
+        "title": "제10대 학생자치회 공약 매거진: 틈·뜰·터·숲 마스터플랜",
+        "excerpt": "현실의 틈(온라인)을 열어 마당(뜰)으로. 말뿐인 공약 대신 지금 바로 쓰는 포털과 4대 핵심 공약을 매거진 홈페이지로 확인하세요.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "ocean",
+        "thumbIcon": "공약",
+        "tags": [
+          "#공약",
+          "#틈뜰터숲"
+        ],
+        "ctaUrl": "./pledge.html",
+        "ctaLabel": "제10대 공약 매거진 홈페이지 열기",
+        "article": {
+          "quote": "“투표 전 모든 공약의 배경, 실행 로드맵, 투명한 운영 원칙을 매거진 페이지에서 한눈에 확인해 보세요.”",
+          "sections": [
+            {
+              "heading": "왜 포털과 홈페이지를 먼저 만들었을까요?",
+              "body": ""
+            },
+            {
+              "heading": "주요 선거 타임라인",
+              "body": "12월 16일 후보자 등록 마감 후, 12월 18일부터 합동 유세 및 공약집 웹 공개가 진행됩니다. 본투표는 12월 23일 오전 중 각 학급에서 이루어집니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "선거일",
+              "value": "2026-12-23 (수)"
+            },
+            {
+              "label": "후보",
+              "value": "남윤아 × 임준서"
+            },
+            {
+              "label": "전용 사이트",
+              "value": "제10대 공약 매거진 (pledge.html)"
+            }
+          ],
+          "attachment": "제10대_학생자치회_선거공고.pdf"
+        }
+      },
+      {
+        "id": "school-M010503-5885679",
+        "date": "2026-11-17",
+        "dept": "서전고 가정통신문",
+        "title": "2026학년도 고등학교 학점 이수 지원 미이수 과정 수강 독려 및 이수 기준 안내",
+        "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "forest",
+        "thumbIcon": "가정",
+        "tags": [
+          "#가정통신문"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5885679",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 가정통신문"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-11-17"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010503-5884525",
+        "date": "2026-11-16",
+        "dept": "서전고 가정통신문",
+        "title": "2026. AI-ONE FESTIVAL 행사 안내 가정통신문",
+        "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "forest",
+        "thumbIcon": "가정",
+        "tags": [
+          "#가정통신문"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5884525",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 가정통신문"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-11-16"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010503-5883048",
+        "date": "2026-11-12",
+        "dept": "서전고 가정통신문",
+        "title": "2026. 가족과 함께하는 미니 해커톤 참가 신청 안내 가정통신문",
+        "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "forest",
+        "thumbIcon": "가정",
+        "tags": [
+          "#가정통신문"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5883048",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 가정통신문"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-11-12"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010503-5881229",
+        "date": "2026-11-11",
+        "dept": "서전고 가정통신문",
+        "title": "사교육비 현황 관련 설문조사 시행 안내 가정통신문",
+        "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "forest",
+        "thumbIcon": "가정",
+        "tags": [
+          "#가정통신문"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5881229",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 가정통신문"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-11-11"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "post-woodumji-32",
+        "date": "2026-11-10",
+        "dept": "우듬지 편집부",
+        "title": "[우듬지 32호] 2층 나무 계단 5분 세바시 첫 강연 현장 스케치",
+        "excerpt": "점심시간 10분, 계단에 둘러앉아 들었던 첫 번째 학생 연사의 솔직한 실패담과 현장 분위기를 담았습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "warm",
+        "thumbIcon": "🗞️",
+        "tags": [
+          "#우듬지",
+          "#동아리"
+        ],
+        "article": {
+          "quote": "“거창한 성공 사례보다, 어제 시험을 망치고도 오늘 다시 펜을 잡은 친구의 5분이 더 크게 울렸습니다.”",
+          "sections": [
+            {
+              "heading": "계단이 작은 강연장이 되기까지",
+              "body": "무선 마이크 두 개와 지나가던 학우들의 발걸음. 딱 5분의 제한 시간이 오히려 말의 밀도를 높여 주었습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "취재",
+              "value": "우듬지 학생기자단"
+            },
+            {
+              "label": "다음 강연",
+              "value": "격주 수요일 점심"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "post-budget-oct",
+        "date": "2026-10-28",
+        "dept": "문서관리부",
+        "title": "10월 학생자치회 결산 및 무료 인프라 전환 보고",
+        "excerpt": "외부 유료 서버를 없애고 정적 웹 구조로 전환해 절감한 비용과 10월 집행 내역을 정리했습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "midnight",
+        "thumbIcon": "🧾",
+        "tags": [
+          "#재정",
+          "#공지"
+        ],
+        "article": {
+          "quote": "고정 인프라 유지비 0원으로 아낀 예산을 연말 수능 응원 간식과 공모전 시상으로 돌립니다.",
+          "sections": [
+            {
+              "heading": "10월 주요 지출 요약",
+              "body": "10월 중 고정 서버 비용은 0원이었으며, 지산실 안내 팻말 및 북마켓 스탬프 부자재 등 소액 실비만 집행되었습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "서버 유지비",
+              "value": "0원"
+            },
+            {
+              "label": "상세 원장",
+              "value": "🌲 숲 탭 회계 필터에서 조회 가능"
+            }
+          ],
+          "attachment": "2026_10월_재정결산서.pdf"
+        }
+      },
+      {
+        "id": "post-suneung-box",
+        "date": "2026-10-14",
+        "dept": "학생자치회",
+        "title": "제1회 수능 응원 온기 공모전 & 3학년 8개 반 간식 박스 안내",
+        "excerpt": "후배들의 따뜻한 응원 문구 28편을 선정해 시상하고, 수능 D-3에 맞춰 3학년 전 학급에 응원 박스를 전달합니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "violet",
+        "thumbIcon": "🧣",
+        "tags": [
+          "#행사",
+          "#공지"
+        ],
+        "article": {
+          "quote": "“너의 응원이 선배의 핫팩이 되고, 너의 문장은 소소한 간식이 된다.”",
+          "sections": [
+            {
+              "heading": "선정 및 전달 과정",
+              "body": "응모작 중 진심이 담긴 28개 문구를 뽑아 엽서로 인쇄하고, 3학년 8개 반 모두에 간식 박스와 함께 전달했습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "시상 인원",
+              "value": "28명"
+            },
+            {
+              "label": "전달 대상",
+              "value": "3학년 8개 학급 전체"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "post-club-fair",
+        "date": "2026-09-22",
+        "dept": "학술문화부",
+        "title": "2학기 24개 동아리 연합 탐구 발표회 아카이브",
+        "excerpt": "학술·창체·자율 동아리들이 2학기 동안 진행한 탐구 주제와 오픈데이터 활용 사례를 한곳에 모았습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "ocean",
+        "thumbIcon": "🔬",
+        "tags": [
+          "#동아리",
+          "#우듬지"
+        ],
+        "article": {
+          "quote": "시간이 지나도 사라지지 않는 선배들의 탐구 기록, 검색과 태그로 언제든 꺼내볼 수 있습니다.",
+          "sections": [
+            {
+              "heading": "75학점 심화 탐구 연계 기록",
+              "body": "각 동아리별 발표 자료 요약과 후배들을 위한 참고 키워드를 정리해 영구 보관합니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "참여 동아리",
+              "value": "24개 팀"
+            },
+            {
+              "label": "기록 보존",
+              "value": "영구 아카이브"
+            }
+          ],
+          "attachment": "2026_동아리_발표요약집.pdf"
+        }
+      },
+      {
+        "id": "school-M010501-5822115",
+        "date": "2026-08-25",
+        "dept": "서전고 공지사항",
+        "title": "본교 외부인 방문 및 출입에 관한 안내",
+        "excerpt": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "ocean",
+        "thumbIcon": "공지",
+        "tags": [
+          "#학교공지"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010501/view/5822115",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [공지사항]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 공지사항"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-08-25"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010501-5816105",
+        "date": "2026-08-14",
+        "dept": "서전고 공지사항",
+        "title": "2027학년도 대학수학능력시험 수능 원서 접수 안내",
+        "excerpt": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "ocean",
+        "thumbIcon": "공지",
+        "tags": [
+          "#학교공지"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010501/view/5816105",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [공지사항]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 공지사항"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-08-14"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010501-5806846",
+        "date": "2026-07-16",
+        "dept": "서전고 공지사항",
+        "title": "2026학년도 학생생활규정 제·개정 확정 공포",
+        "excerpt": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "ocean",
+        "thumbIcon": "공지",
+        "tags": [
+          "#학교공지"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010501/view/5806846",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [공지사항]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 공지사항"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-07-16"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010501-5673743",
+        "date": "2026-02-12",
+        "dept": "서전고 공지사항",
+        "title": "결석신고서(양식)",
+        "excerpt": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "ocean",
+        "thumbIcon": "공지",
+        "tags": [
+          "#학교공지"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010501/view/5673743",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [공지사항]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 공지사항"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-02-12"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010501-5673742",
+        "date": "2026-02-12",
+        "dept": "서전고 공지사항",
+        "title": "교외체험학습 안내(양식)",
+        "excerpt": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "ocean",
+        "thumbIcon": "공지",
+        "tags": [
+          "#학교공지"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010501/view/5673742",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [공지사항]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 공지사항"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-02-12"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010503-5427489",
+        "date": "2025-03-07",
+        "dept": "서전고 가정통신문",
+        "title": "2025학년도 나이스 교외체험학습 신청 안내 가정통신문",
+        "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "forest",
+        "thumbIcon": "가정",
+        "tags": [
+          "#가정통신문"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5427489",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 가정통신문"
+            },
+            {
+              "label": "등록일",
+              "value": "2025-03-07"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      }
+    ],
+    "forest_records": [
+      {
+        "id": "f-acc-01",
+        "type": "accounting",
+        "date": "2026-11-12",
+        "term": "10대 (2026)",
+        "dept": "학생자치회",
+        "title": "3학년 8개 학급 수능 응원 간식 박스 구입",
+        "flow": "expense",
+        "amount": 80000,
+        "detail": "수능 D-3 응원 박스 8반 분량 일괄 구매 영수증 처리 완료 (반별 10,000원).",
+        "attachment": "수능간식_영수증_20261112.jpg"
+      },
+      {
+        "id": "f-acc-02",
+        "type": "accounting",
+        "date": "2026-11-08",
+        "term": "10대 (2026)",
+        "dept": "기획홍보부",
+        "title": "제1회 수능 응원 온기 공모전 28명 시상 경비",
+        "flow": "expense",
+        "amount": 49000,
+        "detail": "대상 및 우수작 등 총 28명 실속 간식 시상 집행 완료.",
+        "attachment": "온기공모전_지출결의.pdf"
+      },
+      {
+        "id": "f-acc-03",
+        "type": "accounting",
+        "date": "2026-10-19",
+        "term": "10대 (2026)",
+        "dept": "환경복지부",
+        "title": "1층 지산실 라운지 안내 팻말 제작",
+        "flow": "expense",
+        "amount": 10000,
+        "detail": "아크릴 안내 스탠드 및 이용 수칙 인쇄물 제작 실비.",
+        "attachment": "지산실_팻말_영수증.jpg"
+      },
+      {
+        "id": "f-acc-04",
+        "type": "accounting",
+        "date": "2026-09-01",
+        "term": "10대 (2026)",
+        "dept": "학생자치회",
+        "title": "2026학년도 학생자치회 연간 사업 예산 배정",
+        "flow": "income",
+        "amount": 300000,
+        "detail": "불필요한 고정 서버비·현수막 비용을 제거하고 학생 복지 중심으로 편성한 연간 총액입니다.",
+        "attachment": "2026_학생회_예산편성안.pdf"
+      },
+      {
+        "id": "f-min-01",
+        "type": "minutes",
+        "date": "2026-11-05",
+        "term": "10대 (2026)",
+        "dept": "전체회의",
+        "title": "2026년 11월 제2차 학생자치회 정기회의록 (틈 포털 · 돌실제 안건)",
+        "session": "제2차 정기회의",
+        "agendaCount": 4,
+        "detail": "1. 포털 '틈' v2 UI(메인/탐색/숲) 개편 의결\n2. 12.29 돌실제 부스 모집 일정 확정\n3. 수능 응원 간식 박스 포장 인력 배정\n4. 지산실 점심 개방 모니터링 보고",
+        "attachment": "20261105_정기회의록.pdf"
+      },
+      {
+        "id": "f-min-02",
+        "type": "minutes",
+        "date": "2026-10-05",
+        "term": "10대 (2026)",
+        "dept": "대의원회",
+        "title": "2026년 10월 제1차 대의원회 정기회의록 (지산실 개방·예산 심의)",
+        "session": "제1차 대의원회",
+        "agendaCount": 3,
+        "detail": "1. 지산세미나실 안뜰 점심시간 자율 라운지 개방 승인\n2. 포털 '틈' Zero-Ops 아키텍처 및 서버비 0원 운용안 통과\n3. 온기 공모전 예산 49,000원 심의 의결",
+        "attachment": "20261005_대의원회_회의록.pdf"
+      },
+      {
+        "id": "f-min-03",
+        "type": "minutes",
+        "date": "2026-04-16",
+        "term": "10대 (2026)",
+        "dept": "디운위 TF",
+        "title": "2026년 4월 디지털 포털 '틈' 초기 기획 착수 회의록",
+        "session": "TF 1차 회의",
+        "agendaCount": 2,
+        "detail": "1. NEIS 급식·학사일정 정적 베이킹 방식 채택\n2. 개인간 댓글/DM 배제 및 노션 CMS 백엔드 도입 논의",
+        "attachment": "20260416_틈_TF_회의록.pdf"
+      },
+      {
+        "id": "f-doc-01",
+        "type": "docs",
+        "date": "2026-11-01",
+        "term": "10대 (2026)",
+        "dept": "소담 오픈데이터팀",
+        "title": "[소담 데이터셋] 2026 서전고 급식 잔반량 및 인기 메뉴 통계 (CSV)",
+        "fileType": "CSV",
+        "fileName": "sodam_meal_waste_2026.csv",
+        "detail": "75학점 ESD 심화 탐구보고서 및 교내 급식 개선 탐구에 활용할 수 있는 익명화 공공데이터셋입니다."
+      },
+      {
+        "id": "f-doc-02",
+        "type": "docs",
+        "date": "2026-10-10",
+        "term": "10대 (2026)",
+        "dept": "문서관리부",
+        "title": "서전고등학교 학생자치회 및 디지털운영위원회(디운위) 회칙 전문",
+        "fileType": "PDF",
+        "fileName": "서전고_학생자치회_회칙_2026.pdf",
+        "detail": "제10대 학생자치회 및 정권이 바뀌어도 포털을 이어가는 디지털운영위원회(디운위) 독립 운영 회칙입니다."
+      }
+    ],
+    "assessments": [
+      {
+        "id": "ass-1-math",
+        "grade": 1,
+        "subject": "수학",
+        "title": "공통수학2 도형의 방정식 문제풀이 보고서",
+        "dueDate": "2026-11-24",
+        "note": "풀이 과정 자필 스캔본 업로드 또는 수업 시간 제출"
+      },
+      {
+        "id": "ass-1-kor",
+        "grade": 1,
+        "subject": "국어",
+        "title": "비판적 읽기 논설문 초고 마감",
+        "dueDate": "2026-11-26",
+        "note": "A4 1장 분량 개요서 지참"
+      },
+      {
+        "id": "ass-1-sci",
+        "grade": 1,
+        "subject": "통합과학",
+        "title": "지속가능발전(ESD) 에너지 전환 실험 보고서",
+        "dueDate": "2026-11-28",
+        "note": "조별 데이터 시트 첨부 필수"
+      },
+      {
+        "id": "ass-1-eng",
+        "grade": 1,
+        "subject": "영어",
+        "title": "영어 에세이 스피킹 대본 최종본",
+        "dueDate": "2026-12-02",
+        "note": "2분 발표 기준 원고 작성"
+      },
+      {
+        "id": "ass-2-phys",
+        "grade": 2,
+        "subject": "물리학Ⅰ",
+        "title": "역학적 에너지 보존 실험 분석지",
+        "dueDate": "2026-11-25",
+        "note": "오차 원인 2가지 이상 서술"
+      },
+      {
+        "id": "ass-2-lit",
+        "grade": 2,
+        "subject": "문학",
+        "title": "현대시 비평문 작성 제출",
+        "dueDate": "2026-11-27",
+        "note": "수업 시간 현장 작성"
+      },
+      {
+        "id": "ass-3-calc",
+        "grade": 3,
+        "subject": "미적분",
+        "title": "정적분 활용 실생활 탐구 발표",
+        "dueDate": "2026-11-25",
+        "note": "슬라이드 5매 이내 요약"
+      }
+    ],
+    "custom_api_demo": {
+      "headline": "원하는 외부 REST API를 연결해 보세요",
+      "body": "관리자 스튜디오의 [API 커넥터] 탭에서 URL과 추출 경로(extractPath)만 입력하면, 날씨·버스·도서관 등 어떤 JSON API든 코딩 없이 위젯에 꽂을 수 있습니다."
+    },
+    "school_notices": [
+      {
+        "id": "school-M010503-5885679",
+        "date": "2026-11-17",
+        "dept": "서전고 가정통신문",
+        "title": "2026학년도 고등학교 학점 이수 지원 미이수 과정 수강 독려 및 이수 기준 안내",
+        "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "forest",
+        "thumbIcon": "가정",
+        "tags": [
+          "#가정통신문"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5885679",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 가정통신문"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-11-17"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010503-5884525",
+        "date": "2026-11-16",
+        "dept": "서전고 가정통신문",
+        "title": "2026. AI-ONE FESTIVAL 행사 안내 가정통신문",
+        "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "forest",
+        "thumbIcon": "가정",
+        "tags": [
+          "#가정통신문"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5884525",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 가정통신문"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-11-16"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010503-5883048",
+        "date": "2026-11-12",
+        "dept": "서전고 가정통신문",
+        "title": "2026. 가족과 함께하는 미니 해커톤 참가 신청 안내 가정통신문",
+        "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "forest",
+        "thumbIcon": "가정",
+        "tags": [
+          "#가정통신문"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5883048",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 가정통신문"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-11-12"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010503-5881229",
+        "date": "2026-11-11",
+        "dept": "서전고 가정통신문",
+        "title": "사교육비 현황 관련 설문조사 시행 안내 가정통신문",
+        "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "forest",
+        "thumbIcon": "가정",
+        "tags": [
+          "#가정통신문"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5881229",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 가정통신문"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-11-11"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010501-5822115",
+        "date": "2026-08-25",
+        "dept": "서전고 공지사항",
+        "title": "본교 외부인 방문 및 출입에 관한 안내",
+        "excerpt": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "ocean",
+        "thumbIcon": "공지",
+        "tags": [
+          "#학교공지"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010501/view/5822115",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [공지사항]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 공지사항"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-08-25"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010501-5816105",
+        "date": "2026-08-14",
+        "dept": "서전고 공지사항",
+        "title": "2027학년도 대학수학능력시험 수능 원서 접수 안내",
+        "excerpt": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "ocean",
+        "thumbIcon": "공지",
+        "tags": [
+          "#학교공지"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010501/view/5816105",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [공지사항]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 공지사항"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-08-14"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010501-5806846",
+        "date": "2026-07-16",
+        "dept": "서전고 공지사항",
+        "title": "2026학년도 학생생활규정 제·개정 확정 공포",
+        "excerpt": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "ocean",
+        "thumbIcon": "공지",
+        "tags": [
+          "#학교공지"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010501/view/5806846",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [공지사항]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 공지사항"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-07-16"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010501-5673743",
+        "date": "2026-02-12",
+        "dept": "서전고 공지사항",
+        "title": "결석신고서(양식)",
+        "excerpt": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "ocean",
+        "thumbIcon": "공지",
+        "tags": [
+          "#학교공지"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010501/view/5673743",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [공지사항]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 공지사항"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-02-12"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010501-5673742",
+        "date": "2026-02-12",
+        "dept": "서전고 공지사항",
+        "title": "교외체험학습 안내(양식)",
+        "excerpt": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "ocean",
+        "thumbIcon": "공지",
+        "tags": [
+          "#학교공지"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010501/view/5673742",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [공지사항]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 공지사항"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-02-12"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
+        "id": "school-M010503-5427489",
+        "date": "2025-03-07",
+        "dept": "서전고 가정통신문",
+        "title": "2025학년도 나이스 교외체험학습 신청 안내 가정통신문",
+        "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "forest",
+        "thumbIcon": "가정",
+        "tags": [
+          "#가정통신문"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5427489",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 가정통신문"
+            },
+            {
+              "label": "등록일",
+              "value": "2025-03-07"
+            },
+            {
+              "label": "첨부파일",
+              "value": "있음 (원문에서 다운로드)"
+            }
+          ],
+          "attachment": ""
+        }
+      }
+    ],
+    "study_links": [
+      {
+        "category": "입시·진학",
+        "title": "대입정보포털 어디가",
+        "desc": "대학별 입시결과 · 전형 · 성적 분석",
+        "url": "https://www.adiga.kr"
+      },
+      {
+        "category": "입시·진학",
+        "title": "한국교육과정평가원",
+        "desc": "수능 · 모의평가 기출문제 및 정답",
+        "url": "https://www.kice.re.kr"
+      },
+      {
+        "category": "입시·진학",
+        "title": "커리어넷",
+        "desc": "진로 · 학과 정보 및 적성 검사",
+        "url": "https://www.career.go.kr"
+      },
+      {
+        "category": "입시·진학",
+        "title": "학교알리미",
+        "desc": "전국 학교 교육과정 · 진학 공시",
+        "url": "https://www.schoolinfo.go.kr"
+      },
+      {
+        "category": "학습·인강",
+        "title": "EBSi",
+        "desc": "무료 수능 · 내신 강의 및 기출 모음",
+        "url": "https://www.ebsi.co.kr"
+      },
+      {
+        "category": "학습·인강",
+        "title": "칸아카데미 한국어",
+        "desc": "수학 · 과학 핵심 개념 무료 강의",
+        "url": "https://ko.khanacademy.org"
+      },
+      {
+        "category": "학습·인강",
+        "title": "네이버 영어사전",
+        "desc": "어휘 · 예문 · 발음 빠른 검색",
+        "url": "https://en.dict.naver.com"
+      },
+      {
+        "category": "학습·인강",
+        "title": "서전고 홈페이지",
+        "desc": "공지사항 · 가정통신문 원문 확인",
+        "url": "https://school.cbe.go.kr/seojeon-h"
+      }
+    ],
+    "forest_all": [
+      {
+        "id": "notice-post-mwrszjqe",
+        "type": "notice",
+        "date": "2026-11-22",
+        "term": "10대 (2026)",
+        "dept": "학생자치회",
+        "title": "",
+        "tags": [
+          "#공지"
+        ],
+        "detail": "",
+        "linkedPostId": "post-mwrszjqe",
+        "attachment": ""
+      },
+      {
+        "id": "notice-post-election",
+        "type": "notice",
+        "date": "2026-11-20",
+        "term": "10대 (2026)",
+        "dept": "임준서",
+        "title": "제10대 학생자치회 공약 매거진: 틈·뜰·터·숲 마스터플랜",
+        "tags": [
+          "#공약",
+          "#틈뜰터숲"
+        ],
+        "detail": "현실의 틈(온라인)을 열어 마당(뜰)으로. 말뿐인 공약 대신 지금 바로 쓰는 포털과 4대 핵심 공약을 매거진 홈페이지로 확인하세요.",
+        "linkedPostId": "post-election",
+        "attachment": "제10대_학생자치회_선거공고.pdf"
+      },
+      {
+        "id": "notice-post-jisan",
+        "type": "notice",
+        "date": "2026-11-18",
+        "term": "10대 (2026)",
+        "dept": "환경복지부",
+        "title": "1층 지산실 안뜰 전면 개방: 점심시간 50분의 작은 쉼터",
+        "tags": [
+          "#공간",
+          "#공지"
+        ],
+        "detail": "10년 동안 닫혀 있던 1층 지산실 폴딩도어를 열고 통유리 앞 자율 휴식 공간을 마련했습니다.",
+        "linkedPostId": "post-jisan",
+        "attachment": ""
+      },
+      {
+        "id": "notice-school-M010503-5885679",
+        "type": "notice",
+        "date": "2026-11-17",
+        "term": "10대 (2026)",
+        "dept": "서전고 가정통신문",
+        "title": "2026학년도 고등학교 학점 이수 지원 미이수 과정 수강 독려 및 이수 기준 안내",
+        "tags": [
+          "#가정통신문"
+        ],
+        "detail": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "linkedPostId": "school-M010503-5885679",
+        "attachment": ""
+      },
+      {
+        "id": "notice-school-M010503-5884525",
+        "type": "notice",
+        "date": "2026-11-16",
+        "term": "10대 (2026)",
+        "dept": "서전고 가정통신문",
+        "title": "2026. AI-ONE FESTIVAL 행사 안내 가정통신문",
+        "tags": [
+          "#가정통신문"
+        ],
+        "detail": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "linkedPostId": "school-M010503-5884525",
+        "attachment": ""
+      },
+      {
+        "id": "notice-post-dolsil",
+        "type": "notice",
+        "date": "2026-11-15",
+        "term": "10대 (2026)",
+        "dept": "기획홍보부",
+        "title": "12.29 돌실제 부스 신청 시작 & 이스터에그 퀘스트 예고",
+        "tags": [
+          "#행사",
+          "#동아리"
+        ],
+        "detail": "동아리 부스 참가 신청서 접수와 함께 포털 곳곳에 숨겨진 모스부호(TEUM) 이스터에그 이벤트를 미리 공개합니다.",
+        "linkedPostId": "post-dolsil",
+        "attachment": "2026_돌실제_부스신청_가이드.hwp"
+      },
+      {
+        "id": "f-acc-01",
+        "type": "accounting",
+        "date": "2026-11-12",
+        "term": "10대 (2026)",
+        "dept": "학생자치회",
+        "title": "3학년 8개 학급 수능 응원 간식 박스 구입",
+        "flow": "expense",
+        "amount": 80000,
+        "detail": "수능 D-3 응원 박스 8반 분량 일괄 구매 영수증 처리 완료 (반별 10,000원).",
+        "attachment": "수능간식_영수증_20261112.jpg"
+      },
+      {
+        "id": "notice-school-M010503-5883048",
+        "type": "notice",
+        "date": "2026-11-12",
+        "term": "10대 (2026)",
+        "dept": "서전고 가정통신문",
+        "title": "2026. 가족과 함께하는 미니 해커톤 참가 신청 안내 가정통신문",
+        "tags": [
+          "#가정통신문"
+        ],
+        "detail": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "linkedPostId": "school-M010503-5883048",
+        "attachment": ""
+      },
+      {
+        "id": "notice-school-M010503-5881229",
+        "type": "notice",
+        "date": "2026-11-11",
+        "term": "10대 (2026)",
+        "dept": "서전고 가정통신문",
+        "title": "사교육비 현황 관련 설문조사 시행 안내 가정통신문",
+        "tags": [
+          "#가정통신문"
+        ],
+        "detail": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "linkedPostId": "school-M010503-5881229",
+        "attachment": ""
+      },
+      {
+        "id": "notice-post-woodumji-32",
+        "type": "notice",
+        "date": "2026-11-10",
+        "term": "10대 (2026)",
+        "dept": "우듬지 편집부",
+        "title": "[우듬지 32호] 2층 나무 계단 5분 세바시 첫 강연 현장 스케치",
+        "tags": [
+          "#우듬지",
+          "#동아리"
+        ],
+        "detail": "점심시간 10분, 계단에 둘러앉아 들었던 첫 번째 학생 연사의 솔직한 실패담과 현장 분위기를 담았습니다.",
+        "linkedPostId": "post-woodumji-32",
+        "attachment": ""
+      },
+      {
+        "id": "f-acc-02",
+        "type": "accounting",
+        "date": "2026-11-08",
+        "term": "10대 (2026)",
+        "dept": "기획홍보부",
+        "title": "제1회 수능 응원 온기 공모전 28명 시상 경비",
+        "flow": "expense",
+        "amount": 49000,
+        "detail": "대상 및 우수작 등 총 28명 실속 간식 시상 집행 완료.",
+        "attachment": "온기공모전_지출결의.pdf"
+      },
+      {
+        "id": "f-min-01",
+        "type": "minutes",
+        "date": "2026-11-05",
+        "term": "10대 (2026)",
+        "dept": "전체회의",
+        "title": "2026년 11월 제2차 학생자치회 정기회의록 (틈 포털 · 돌실제 안건)",
+        "session": "제2차 정기회의",
+        "agendaCount": 4,
+        "detail": "1. 포털 '틈' v2 UI(메인/탐색/숲) 개편 의결\n2. 12.29 돌실제 부스 모집 일정 확정\n3. 수능 응원 간식 박스 포장 인력 배정\n4. 지산실 점심 개방 모니터링 보고",
+        "attachment": "20261105_정기회의록.pdf"
+      },
+      {
+        "id": "f-doc-01",
+        "type": "docs",
+        "date": "2026-11-01",
+        "term": "10대 (2026)",
+        "dept": "소담 오픈데이터팀",
+        "title": "[소담 데이터셋] 2026 서전고 급식 잔반량 및 인기 메뉴 통계 (CSV)",
+        "fileType": "CSV",
+        "fileName": "sodam_meal_waste_2026.csv",
+        "detail": "75학점 ESD 심화 탐구보고서 및 교내 급식 개선 탐구에 활용할 수 있는 익명화 공공데이터셋입니다."
+      },
+      {
+        "id": "notice-post-budget-oct",
+        "type": "notice",
+        "date": "2026-10-28",
+        "term": "10대 (2026)",
+        "dept": "문서관리부",
+        "title": "10월 학생자치회 결산 및 무료 인프라 전환 보고",
+        "tags": [
+          "#재정",
+          "#공지"
+        ],
+        "detail": "외부 유료 서버를 없애고 정적 웹 구조로 전환해 절감한 비용과 10월 집행 내역을 정리했습니다.",
+        "linkedPostId": "post-budget-oct",
+        "attachment": "2026_10월_재정결산서.pdf"
+      },
+      {
+        "id": "f-acc-03",
+        "type": "accounting",
+        "date": "2026-10-19",
+        "term": "10대 (2026)",
+        "dept": "환경복지부",
+        "title": "1층 지산실 라운지 안내 팻말 제작",
+        "flow": "expense",
+        "amount": 10000,
+        "detail": "아크릴 안내 스탠드 및 이용 수칙 인쇄물 제작 실비.",
+        "attachment": "지산실_팻말_영수증.jpg"
+      },
+      {
+        "id": "notice-post-suneung-box",
+        "type": "notice",
+        "date": "2026-10-14",
+        "term": "10대 (2026)",
+        "dept": "학생자치회",
+        "title": "제1회 수능 응원 온기 공모전 & 3학년 8개 반 간식 박스 안내",
+        "tags": [
+          "#행사",
+          "#공지"
+        ],
+        "detail": "후배들의 따뜻한 응원 문구 28편을 선정해 시상하고, 수능 D-3에 맞춰 3학년 전 학급에 응원 박스를 전달합니다.",
+        "linkedPostId": "post-suneung-box",
+        "attachment": ""
+      },
+      {
+        "id": "f-doc-02",
+        "type": "docs",
+        "date": "2026-10-10",
+        "term": "10대 (2026)",
+        "dept": "문서관리부",
+        "title": "서전고등학교 학생자치회 및 디지털운영위원회(디운위) 회칙 전문",
+        "fileType": "PDF",
+        "fileName": "서전고_학생자치회_회칙_2026.pdf",
+        "detail": "제10대 학생자치회 및 정권이 바뀌어도 포털을 이어가는 디지털운영위원회(디운위) 독립 운영 회칙입니다."
+      },
+      {
+        "id": "f-min-02",
+        "type": "minutes",
+        "date": "2026-10-05",
+        "term": "10대 (2026)",
+        "dept": "대의원회",
+        "title": "2026년 10월 제1차 대의원회 정기회의록 (지산실 개방·예산 심의)",
+        "session": "제1차 대의원회",
+        "agendaCount": 3,
+        "detail": "1. 지산세미나실 안뜰 점심시간 자율 라운지 개방 승인\n2. 포털 '틈' Zero-Ops 아키텍처 및 서버비 0원 운용안 통과\n3. 온기 공모전 예산 49,000원 심의 의결",
+        "attachment": "20261005_대의원회_회의록.pdf"
+      },
+      {
+        "id": "notice-post-club-fair",
+        "type": "notice",
+        "date": "2026-09-22",
+        "term": "10대 (2026)",
+        "dept": "학술문화부",
+        "title": "2학기 24개 동아리 연합 탐구 발표회 아카이브",
+        "tags": [
+          "#동아리",
+          "#우듬지"
+        ],
+        "detail": "학술·창체·자율 동아리들이 2학기 동안 진행한 탐구 주제와 오픈데이터 활용 사례를 한곳에 모았습니다.",
+        "linkedPostId": "post-club-fair",
+        "attachment": "2026_동아리_발표요약집.pdf"
+      },
+      {
+        "id": "f-acc-04",
+        "type": "accounting",
+        "date": "2026-09-01",
+        "term": "10대 (2026)",
+        "dept": "학생자치회",
+        "title": "2026학년도 학생자치회 연간 사업 예산 배정",
+        "flow": "income",
+        "amount": 300000,
+        "detail": "불필요한 고정 서버비·현수막 비용을 제거하고 학생 복지 중심으로 편성한 연간 총액입니다.",
+        "attachment": "2026_학생회_예산편성안.pdf"
+      },
+      {
+        "id": "notice-school-M010501-5822115",
+        "type": "notice",
+        "date": "2026-08-25",
+        "term": "10대 (2026)",
+        "dept": "서전고 공지사항",
+        "title": "본교 외부인 방문 및 출입에 관한 안내",
+        "tags": [
+          "#학교공지"
+        ],
+        "detail": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "linkedPostId": "school-M010501-5822115",
+        "attachment": ""
+      },
+      {
+        "id": "notice-school-M010501-5816105",
+        "type": "notice",
+        "date": "2026-08-14",
+        "term": "10대 (2026)",
+        "dept": "서전고 공지사항",
+        "title": "2027학년도 대학수학능력시험 수능 원서 접수 안내",
+        "tags": [
+          "#학교공지"
+        ],
+        "detail": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "linkedPostId": "school-M010501-5816105",
+        "attachment": ""
+      },
+      {
+        "id": "notice-school-M010501-5806846",
+        "type": "notice",
+        "date": "2026-07-16",
+        "term": "10대 (2026)",
+        "dept": "서전고 공지사항",
+        "title": "2026학년도 학생생활규정 제·개정 확정 공포",
+        "tags": [
+          "#학교공지"
+        ],
+        "detail": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "linkedPostId": "school-M010501-5806846",
+        "attachment": ""
+      },
+      {
+        "id": "f-min-03",
+        "type": "minutes",
+        "date": "2026-04-16",
+        "term": "10대 (2026)",
+        "dept": "디운위 TF",
+        "title": "2026년 4월 디지털 포털 '틈' 초기 기획 착수 회의록",
+        "session": "TF 1차 회의",
+        "agendaCount": 2,
+        "detail": "1. NEIS 급식·학사일정 정적 베이킹 방식 채택\n2. 개인간 댓글/DM 배제 및 노션 CMS 백엔드 도입 논의",
+        "attachment": "20260416_틈_TF_회의록.pdf"
+      },
+      {
+        "id": "notice-school-M010501-5673743",
+        "type": "notice",
+        "date": "2026-02-12",
+        "term": "10대 (2026)",
+        "dept": "서전고 공지사항",
+        "title": "결석신고서(양식)",
+        "tags": [
+          "#학교공지"
+        ],
+        "detail": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "linkedPostId": "school-M010501-5673743",
+        "attachment": ""
+      },
+      {
+        "id": "notice-school-M010501-5673742",
+        "type": "notice",
+        "date": "2026-02-12",
+        "term": "10대 (2026)",
+        "dept": "서전고 공지사항",
+        "title": "교외체험학습 안내(양식)",
+        "tags": [
+          "#학교공지"
+        ],
+        "detail": "서전고 공식 홈페이지 공지사항에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "linkedPostId": "school-M010501-5673742",
+        "attachment": ""
+      },
+      {
+        "id": "notice-school-M010503-5427489",
+        "type": "notice",
+        "date": "2025-03-07",
+        "term": "10대 (2025)",
+        "dept": "서전고 가정통신문",
+        "title": "2025학년도 나이스 교외체험학습 신청 안내 가정통신문",
+        "tags": [
+          "#가정통신문"
+        ],
+        "detail": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "linkedPostId": "school-M010503-5427489",
+        "attachment": ""
+      }
+    ]
+  },
+  "_sourcesConfig": {
+    "neis_meal": {
+      "type": "neis_meal",
+      "label": "NEIS 서전고 급식",
+      "officeCode": "M10",
+      "schoolName": "서전고등학교",
+      "schoolCode": "",
+      "fallback": {
+        "date": "2026-11-20",
+        "mealType": "중식",
+        "calories": "812.4 Kcal",
+        "dishes": [
+          {
+            "name": "차조밥",
+            "allergens": []
+          },
+          {
+            "name": "돈코츠라멘",
+            "allergens": [
+              1,
+              2,
+              5,
+              6,
+              10
+            ]
+          },
+          {
+            "name": "치킨가라아게",
+            "allergens": [
+              1,
+              5,
+              6,
+              15
+            ]
+          },
+          {
+            "name": "오이부추무침",
+            "allergens": [
+              13
+            ]
+          },
+          {
+            "name": "배추김치",
+            "allergens": [
+              9
+            ]
+          },
+          {
+            "name": "요구르트",
+            "allergens": [
+              2
+            ]
+          }
+        ]
+      }
+    },
+    "neis_schedule": {
+      "type": "neis_schedule",
+      "label": "NEIS 학사일정",
+      "officeCode": "M10",
+      "schoolName": "서전고등학교",
+      "schoolCode": "",
+      "fallback": [
+        {
+          "title": "2학기 2차 지필평가",
+          "date": "2026-12-09",
+          "tag": "학사"
+        },
+        {
+          "title": "제10대 학생자치회 선거",
+          "date": "2026-12-23",
+          "tag": "자치"
+        },
+        {
+          "title": "돌실제 (학교 축제)",
+          "date": "2026-12-29",
+          "tag": "축제"
+        }
+      ]
+    },
+    "timetable": {
+      "type": "static",
+      "label": "반별 주간 시간표 (월~금)",
+      "data": {
+        "1-1": {
+          "월": [
+            "국어",
+            "수학",
+            "영어",
+            "통합사회",
+            "통합과학",
+            "체육",
+            "창체"
+          ],
+          "화": [
+            "영어",
+            "통합과학",
+            "국어",
+            "수학",
+            "한국사",
+            "음악",
+            "미술"
+          ],
+          "수": [
+            "수학",
+            "국어",
+            "통합사회",
+            "영어",
+            "정보",
+            "체육",
+            "동아리"
+          ],
+          "목": [
+            "통합과학",
+            "영어",
+            "수학",
+            "국어",
+            "진로",
+            "통합사회",
+            "자율"
+          ],
+          "금": [
+            "한국사",
+            "미술",
+            "통합과학",
+            "영어",
+            "국어",
+            "수학",
+            "창체"
+          ]
+        },
+        "1-2": {
+          "월": [
+            "수학",
+            "영어",
+            "국어",
+            "통합과학",
+            "한국사",
+            "미술",
+            "자율"
+          ],
+          "화": [
+            "국어",
+            "통합사회",
+            "수학",
+            "영어",
+            "체육",
+            "정보",
+            "음악"
+          ],
+          "수": [
+            "영어",
+            "통합과학",
+            "한국사",
+            "국어",
+            "수학",
+            "진로",
+            "동아리"
+          ],
+          "목": [
+            "통합사회",
+            "국어",
+            "영어",
+            "수학",
+            "통합과학",
+            "체육",
+            "창체"
+          ],
+          "금": [
+            "정보",
+            "수학",
+            "영어",
+            "통합사회",
+            "국어",
+            "미술",
+            "자율"
+          ]
+        },
+        "2-1": {
+          "월": [
+            "문학",
+            "수Ⅰ",
+            "영어Ⅰ",
+            "물리학Ⅰ",
+            "화학Ⅰ",
+            "체육",
+            "동아리"
+          ],
+          "화": [
+            "수Ⅰ",
+            "영어Ⅰ",
+            "문학",
+            "생명과학Ⅰ",
+            "한국사",
+            "음악",
+            "진로"
+          ],
+          "수": [
+            "물리학Ⅰ",
+            "문학",
+            "수Ⅰ",
+            "화학Ⅰ",
+            "영어Ⅰ",
+            "체육",
+            "자율"
+          ],
+          "목": [
+            "영어Ⅰ",
+            "화학Ⅰ",
+            "생명과학Ⅰ",
+            "문학",
+            "수Ⅰ",
+            "정보",
+            "창체"
+          ],
+          "금": [
+            "한국사",
+            "수Ⅰ",
+            "물리학Ⅰ",
+            "영어Ⅰ",
+            "문학",
+            "독서",
+            "자율"
+          ]
+        },
+        "3-1": {
+          "월": [
+            "독서",
+            "미적분",
+            "영어독해",
+            "생명과학Ⅱ",
+            "지구과학Ⅱ",
+            "진로",
+            "자습"
+          ],
+          "화": [
+            "미적분",
+            "영어독해",
+            "화법과작문",
+            "물리학Ⅱ",
+            "독서",
+            "체육",
+            "자습"
+          ],
+          "수": [
+            "영어독해",
+            "생명과학Ⅱ",
+            "미적분",
+            "지구과학Ⅱ",
+            "심화국어",
+            "논술",
+            "동아리"
+          ],
+          "목": [
+            "화법과작문",
+            "독서",
+            "물리학Ⅱ",
+            "미적분",
+            "영어독해",
+            "진로",
+            "자습"
+          ],
+          "금": [
+            "지구과학Ⅱ",
+            "미적분",
+            "독서",
+            "영어독해",
+            "생명과학Ⅱ",
+            "체육",
+            "자습"
+          ]
+        },
+        "default": {
+          "월": [
+            "국어",
+            "수학",
+            "영어",
+            "탐구A",
+            "탐구B",
+            "체육",
+            "창체"
+          ],
+          "화": [
+            "영어",
+            "탐구B",
+            "국어",
+            "수학",
+            "한국사",
+            "예술",
+            "자율"
+          ],
+          "수": [
+            "수학",
+            "국어",
+            "탐구A",
+            "영어",
+            "정보",
+            "체육",
+            "동아리"
+          ],
+          "목": [
+            "탐구B",
+            "영어",
+            "수학",
+            "국어",
+            "진로",
+            "탐구A",
+            "창체"
+          ],
+          "금": [
+            "한국사",
+            "예술",
+            "탐구B",
+            "영어",
+            "국어",
+            "수학",
+            "자율"
+          ]
+        }
+      }
+    },
+    "archive_posts": {
+      "type": "notion_db",
+      "label": "블로그·공지 마스터 DB (노션)",
+      "envToken": "NOTION_TOKEN",
+      "databaseId": "",
+      "mode": "posts",
+      "fetchBlocks": true,
+      "cacheThumbs": true,
+      "fallback": [
+        {
+          "id": "post-mwrszjqe",
+          "date": "2026-11-22",
+          "dept": "학생자치회",
+          "title": "",
+          "excerpt": "",
+          "pinned": false,
+          "thumbUrl": "",
+          "thumbTheme": "forest",
+          "thumbIcon": "공지",
+          "tags": [
+            "#공지"
+          ],
+          "article": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "heading": "",
+                "body": ""
+              }
+            ],
+            "attachment": "",
+            "sections": [
+              {
+                "heading": "본문",
+                "body": ""
+              }
+            ],
+            "html": "<p style=\"text-align: left;\">ㅁㅁㅁ</p><img src=\"./assets/thumbs/thumb_1795349981601_0e70701f.png\" alt=\"스크린샷 2026-11-04 180129.png\"><hr class=\"article-hr\"><div class=\"article-facts\"><div class=\"article-fact-row\"><b>일시</b></div><div class=\"article-fact-row\"><b>장소</b></div></div><p><br></p><p><br></p>"
+          }
+        },
+        {
+          "id": "post-election",
+          "date": "2026-11-20",
+          "dueDate": "2026-12-23",
+          "dept": "임준서",
+          "title": "제10대 학생자치회 공약 매거진: 틈·뜰·터·숲 마스터플랜",
+          "excerpt": "현실의 틈(온라인)을 열어 마당(뜰)으로. 말뿐인 공약 대신 지금 바로 쓰는 포털과 4대 핵심 공약을 매거진 홈페이지로 확인하세요.",
+          "pinned": false,
+          "thumbUrl": "",
+          "thumbTheme": "ocean",
+          "thumbIcon": "공약",
+          "tags": [
+            "#공약",
+            "#틈뜰터숲"
+          ],
+          "ctaUrl": "./pledge.html",
+          "ctaLabel": "제10대 공약 매거진 홈페이지 열기",
+          "article": {
+            "quote": "“투표 전 모든 공약의 배경, 실행 로드맵, 투명한 운영 원칙을 매거진 페이지에서 한눈에 확인해 보세요.”",
+            "sections": [
+              {
+                "heading": "왜 포털과 홈페이지를 먼저 만들었을까요?",
+                "body": ""
+              },
+              {
+                "heading": "주요 선거 타임라인",
+                "body": "12월 16일 후보자 등록 마감 후, 12월 18일부터 합동 유세 및 공약집 웹 공개가 진행됩니다. 본투표는 12월 23일 오전 중 각 학급에서 이루어집니다."
+              }
+            ],
+            "facts": [
+              {
+                "label": "선거일",
+                "value": "2026-12-23 (수)"
+              },
+              {
+                "label": "후보",
+                "value": "남윤아 × 임준서"
+              },
+              {
+                "label": "전용 사이트",
+                "value": "제10대 공약 매거진 (pledge.html)"
+              }
+            ],
+            "attachment": "제10대_학생자치회_선거공고.pdf"
+          }
+        },
+        {
+          "id": "post-jisan",
+          "date": "2026-11-18",
+          "dept": "환경복지부",
+          "title": "1층 지산실 안뜰 전면 개방: 점심시간 50분의 작은 쉼터",
+          "excerpt": "10년 동안 닫혀 있던 1층 지산실 폴딩도어를 열고 통유리 앞 자율 휴식 공간을 마련했습니다.",
+          "pinned": true,
+          "thumbUrl": "./assets/thumbs/notice_jisan.webp",
+          "thumbTheme": "forest",
+          "thumbIcon": "공간",
+          "tags": [
+            "#공간",
+            "#공지"
+          ],
+          "article": {
+            "quote": "“교실을 잠시 벗어나 바람 쐬고 숨 고르는 서전고의 작은 틈.”",
+            "sections": [
+              {
+                "heading": "이렇게 이용해 주세요",
+                "body": "평일 점심시간(12:40~13:25) 누구나 자유롭게 들어와 책을 읽거나 조용히 쉴 수 있습니다. 잔잔한 45dB Lo-Fi 음악이 재생됩니다."
+              },
+              {
+                "heading": "안전 및 분실 예방 수칙",
+                "body": "개인 소지품은 직접 챙겨주시고, 음료·음식물 반입은 삼가해 쾌적한 환경을 유지해 주세요."
+              }
+            ],
+            "facts": [
+              {
+                "label": "운영 시간",
+                "value": "평일 점심 12:40 ~ 13:25"
+              },
+              {
+                "label": "위치",
+                "value": "본관 1층 지산세미나실"
+              },
+              {
+                "label": "담당",
+                "value": "환경복지부"
+              }
+            ],
+            "attachment": ""
+          }
+        },
+        {
+          "id": "post-dolsil",
+          "date": "2026-11-15",
+          "dueDate": "2026-11-27",
+          "dept": "기획홍보부",
+          "title": "12.29 돌실제 부스 신청 시작 & 이스터에그 퀘스트 예고",
+          "excerpt": "동아리 부스 참가 신청서 접수와 함께 포털 곳곳에 숨겨진 모스부호(TEUM) 이스터에그 이벤트를 미리 공개합니다.",
+          "pinned": true,
+          "thumbUrl": "./assets/thumbs/notice_dolsil.webp",
+          "thumbTheme": "sunset",
+          "thumbIcon": "행사",
+          "tags": [
+            "#행사",
+            "#동아리"
+          ],
+          "article": {
+            "quote": "“기다림만 길던 축제 대신, 빈 부스를 한눈에 찾고 바로 즐기는 돌실제.”",
+            "sections": [
+              {
+                "heading": "부스 신청 및 홍보물 규격",
+                "body": "동아리당 대표 1명이 신청 폼에 부스명과 포스터 이미지를 올리면, 320px/800px 초경량 WebP로 자동 변환되어 축제 당일 목록에 바로 노출됩니다."
+              }
+            ],
+            "facts": [
+              {
+                "label": "축제일",
+                "value": "2026-12-29"
+              },
+              {
+                "label": "모집 마감",
+                "value": "2026-11-27 (금)"
+              }
+            ],
+            "attachment": "2026_돌실제_부스신청_가이드.hwp"
+          }
+        },
+        {
+          "id": "post-woodumji-32",
+          "date": "2026-11-10",
+          "dept": "우듬지 편집부",
+          "title": "[우듬지 32호] 2층 나무 계단 5분 세바시 첫 강연 현장 스케치",
+          "excerpt": "점심시간 10분, 계단에 둘러앉아 들었던 첫 번째 학생 연사의 솔직한 실패담과 현장 분위기를 담았습니다.",
+          "pinned": false,
+          "thumbUrl": "",
+          "thumbTheme": "warm",
+          "thumbIcon": "🗞️",
+          "tags": [
+            "#우듬지",
+            "#동아리"
+          ],
+          "article": {
+            "quote": "“거창한 성공 사례보다, 어제 시험을 망치고도 오늘 다시 펜을 잡은 친구의 5분이 더 크게 울렸습니다.”",
+            "sections": [
+              {
+                "heading": "계단이 작은 강연장이 되기까지",
+                "body": "무선 마이크 두 개와 지나가던 학우들의 발걸음. 딱 5분의 제한 시간이 오히려 말의 밀도를 높여 주었습니다."
+              }
+            ],
+            "facts": [
+              {
+                "label": "취재",
+                "value": "우듬지 학생기자단"
+              },
+              {
+                "label": "다음 강연",
+                "value": "격주 수요일 점심"
+              }
+            ],
+            "attachment": ""
+          }
+        },
+        {
+          "id": "post-budget-oct",
+          "date": "2026-10-28",
+          "dept": "문서관리부",
+          "title": "10월 학생자치회 결산 및 무료 인프라 전환 보고",
+          "excerpt": "외부 유료 서버를 없애고 정적 웹 구조로 전환해 절감한 비용과 10월 집행 내역을 정리했습니다.",
+          "pinned": false,
+          "thumbUrl": "",
+          "thumbTheme": "midnight",
+          "thumbIcon": "🧾",
+          "tags": [
+            "#재정",
+            "#공지"
+          ],
+          "article": {
+            "quote": "고정 인프라 유지비 0원으로 아낀 예산을 연말 수능 응원 간식과 공모전 시상으로 돌립니다.",
+            "sections": [
+              {
+                "heading": "10월 주요 지출 요약",
+                "body": "10월 중 고정 서버 비용은 0원이었으며, 지산실 안내 팻말 및 북마켓 스탬프 부자재 등 소액 실비만 집행되었습니다."
+              }
+            ],
+            "facts": [
+              {
+                "label": "서버 유지비",
+                "value": "0원"
+              },
+              {
+                "label": "상세 원장",
+                "value": "🌲 숲 탭 회계 필터에서 조회 가능"
+              }
+            ],
+            "attachment": "2026_10월_재정결산서.pdf"
+          }
+        },
+        {
+          "id": "post-suneung-box",
+          "date": "2026-10-14",
+          "dept": "학생자치회",
+          "title": "제1회 수능 응원 온기 공모전 & 3학년 8개 반 간식 박스 안내",
+          "excerpt": "후배들의 따뜻한 응원 문구 28편을 선정해 시상하고, 수능 D-3에 맞춰 3학년 전 학급에 응원 박스를 전달합니다.",
+          "pinned": false,
+          "thumbUrl": "",
+          "thumbTheme": "violet",
+          "thumbIcon": "🧣",
+          "tags": [
+            "#행사",
+            "#공지"
+          ],
+          "article": {
+            "quote": "“너의 응원이 선배의 핫팩이 되고, 너의 문장은 소소한 간식이 된다.”",
+            "sections": [
+              {
+                "heading": "선정 및 전달 과정",
+                "body": "응모작 중 진심이 담긴 28개 문구를 뽑아 엽서로 인쇄하고, 3학년 8개 반 모두에 간식 박스와 함께 전달했습니다."
+              }
+            ],
+            "facts": [
+              {
+                "label": "시상 인원",
+                "value": "28명"
+              },
+              {
+                "label": "전달 대상",
+                "value": "3학년 8개 학급 전체"
+              }
+            ],
+            "attachment": ""
+          }
+        },
+        {
+          "id": "post-club-fair",
+          "date": "2026-09-22",
+          "dept": "학술문화부",
+          "title": "2학기 24개 동아리 연합 탐구 발표회 아카이브",
+          "excerpt": "학술·창체·자율 동아리들이 2학기 동안 진행한 탐구 주제와 오픈데이터 활용 사례를 한곳에 모았습니다.",
+          "pinned": false,
+          "thumbUrl": "",
+          "thumbTheme": "ocean",
+          "thumbIcon": "🔬",
+          "tags": [
+            "#동아리",
+            "#우듬지"
+          ],
+          "article": {
+            "quote": "시간이 지나도 사라지지 않는 선배들의 탐구 기록, 검색과 태그로 언제든 꺼내볼 수 있습니다.",
+            "sections": [
+              {
+                "heading": "75학점 심화 탐구 연계 기록",
+                "body": "각 동아리별 발표 자료 요약과 후배들을 위한 참고 키워드를 정리해 영구 보관합니다."
+              }
+            ],
+            "facts": [
+              {
+                "label": "참여 동아리",
+                "value": "24개 팀"
+              },
+              {
+                "label": "기록 보존",
+                "value": "영구 아카이브"
+              }
+            ],
+            "attachment": "2026_동아리_발표요약집.pdf"
+          }
+        }
+      ]
+    },
+    "forest_records": {
+      "type": "notion_db",
+      "label": "숲 회계·회의록·자료 DB (노션)",
+      "envToken": "NOTION_TOKEN",
+      "databaseId": "",
+      "mode": "forest",
+      "fallback": [
+        {
+          "id": "f-acc-01",
+          "type": "accounting",
+          "date": "2026-11-12",
+          "term": "10대 (2026)",
+          "dept": "학생자치회",
+          "title": "3학년 8개 학급 수능 응원 간식 박스 구입",
+          "flow": "expense",
+          "amount": 80000,
+          "detail": "수능 D-3 응원 박스 8반 분량 일괄 구매 영수증 처리 완료 (반별 10,000원).",
+          "attachment": "수능간식_영수증_20261112.jpg"
+        },
+        {
+          "id": "f-acc-02",
+          "type": "accounting",
+          "date": "2026-11-08",
+          "term": "10대 (2026)",
+          "dept": "기획홍보부",
+          "title": "제1회 수능 응원 온기 공모전 28명 시상 경비",
+          "flow": "expense",
+          "amount": 49000,
+          "detail": "대상 및 우수작 등 총 28명 실속 간식 시상 집행 완료.",
+          "attachment": "온기공모전_지출결의.pdf"
+        },
+        {
+          "id": "f-acc-03",
+          "type": "accounting",
+          "date": "2026-10-19",
+          "term": "10대 (2026)",
+          "dept": "환경복지부",
+          "title": "1층 지산실 라운지 안내 팻말 제작",
+          "flow": "expense",
+          "amount": 10000,
+          "detail": "아크릴 안내 스탠드 및 이용 수칙 인쇄물 제작 실비.",
+          "attachment": "지산실_팻말_영수증.jpg"
+        },
+        {
+          "id": "f-acc-04",
+          "type": "accounting",
+          "date": "2026-09-01",
+          "term": "10대 (2026)",
+          "dept": "학생자치회",
+          "title": "2026학년도 학생자치회 연간 사업 예산 배정",
+          "flow": "income",
+          "amount": 300000,
+          "detail": "불필요한 고정 서버비·현수막 비용을 제거하고 학생 복지 중심으로 편성한 연간 총액입니다.",
+          "attachment": "2026_학생회_예산편성안.pdf"
+        },
+        {
+          "id": "f-min-01",
+          "type": "minutes",
+          "date": "2026-11-05",
+          "term": "10대 (2026)",
+          "dept": "전체회의",
+          "title": "2026년 11월 제2차 학생자치회 정기회의록 (틈 포털 · 돌실제 안건)",
+          "session": "제2차 정기회의",
+          "agendaCount": 4,
+          "detail": "1. 포털 '틈' v2 UI(메인/탐색/숲) 개편 의결\n2. 12.29 돌실제 부스 모집 일정 확정\n3. 수능 응원 간식 박스 포장 인력 배정\n4. 지산실 점심 개방 모니터링 보고",
+          "attachment": "20261105_정기회의록.pdf"
+        },
+        {
+          "id": "f-min-02",
+          "type": "minutes",
+          "date": "2026-10-05",
+          "term": "10대 (2026)",
+          "dept": "대의원회",
+          "title": "2026년 10월 제1차 대의원회 정기회의록 (지산실 개방·예산 심의)",
+          "session": "제1차 대의원회",
+          "agendaCount": 3,
+          "detail": "1. 지산세미나실 안뜰 점심시간 자율 라운지 개방 승인\n2. 포털 '틈' Zero-Ops 아키텍처 및 서버비 0원 운용안 통과\n3. 온기 공모전 예산 49,000원 심의 의결",
+          "attachment": "20261005_대의원회_회의록.pdf"
+        },
+        {
+          "id": "f-min-03",
+          "type": "minutes",
+          "date": "2026-04-16",
+          "term": "10대 (2026)",
+          "dept": "디운위 TF",
+          "title": "2026년 4월 디지털 포털 '틈' 초기 기획 착수 회의록",
+          "session": "TF 1차 회의",
+          "agendaCount": 2,
+          "detail": "1. NEIS 급식·학사일정 정적 베이킹 방식 채택\n2. 개인간 댓글/DM 배제 및 노션 CMS 백엔드 도입 논의",
+          "attachment": "20260416_틈_TF_회의록.pdf"
+        },
+        {
+          "id": "f-doc-01",
+          "type": "docs",
+          "date": "2026-11-01",
+          "term": "10대 (2026)",
+          "dept": "소담 오픈데이터팀",
+          "title": "[소담 데이터셋] 2026 서전고 급식 잔반량 및 인기 메뉴 통계 (CSV)",
+          "fileType": "CSV",
+          "fileName": "sodam_meal_waste_2026.csv",
+          "detail": "75학점 ESD 심화 탐구보고서 및 교내 급식 개선 탐구에 활용할 수 있는 익명화 공공데이터셋입니다."
+        },
+        {
+          "id": "f-doc-02",
+          "type": "docs",
+          "date": "2026-10-10",
+          "term": "10대 (2026)",
+          "dept": "문서관리부",
+          "title": "서전고등학교 학생자치회 및 디지털운영위원회(디운위) 회칙 전문",
+          "fileType": "PDF",
+          "fileName": "서전고_학생자치회_회칙_2026.pdf",
+          "detail": "제10대 학생자치회 및 정권이 바뀌어도 포털을 이어가는 디지털운영위원회(디운위) 독립 운영 회칙입니다."
+        }
+      ]
+    },
+    "assessments": {
+      "type": "notion_db",
+      "label": "수행평가 · 학급 공통 일정 DB (노션)",
+      "envToken": "NOTION_TOKEN",
+      "databaseId": "",
+      "mode": "assessments",
+      "fallback": [
+        {
+          "id": "ass-1-math",
+          "grade": 1,
+          "subject": "수학",
+          "title": "공통수학2 도형의 방정식 문제풀이 보고서",
+          "dueDate": "2026-11-24",
+          "note": "풀이 과정 자필 스캔본 업로드 또는 수업 시간 제출"
+        },
+        {
+          "id": "ass-1-kor",
+          "grade": 1,
+          "subject": "국어",
+          "title": "비판적 읽기 논설문 초고 마감",
+          "dueDate": "2026-11-26",
+          "note": "A4 1장 분량 개요서 지참"
+        },
+        {
+          "id": "ass-1-sci",
+          "grade": 1,
+          "subject": "통합과학",
+          "title": "지속가능발전(ESD) 에너지 전환 실험 보고서",
+          "dueDate": "2026-11-28",
+          "note": "조별 데이터 시트 첨부 필수"
+        },
+        {
+          "id": "ass-1-eng",
+          "grade": 1,
+          "subject": "영어",
+          "title": "영어 에세이 스피킹 대본 최종본",
+          "dueDate": "2026-12-02",
+          "note": "2분 발표 기준 원고 작성"
+        },
+        {
+          "id": "ass-2-phys",
+          "grade": 2,
+          "subject": "물리학Ⅰ",
+          "title": "역학적 에너지 보존 실험 분석지",
+          "dueDate": "2026-11-25",
+          "note": "오차 원인 2가지 이상 서술"
+        },
+        {
+          "id": "ass-2-lit",
+          "grade": 2,
+          "subject": "문학",
+          "title": "현대시 비평문 작성 제출",
+          "dueDate": "2026-11-27",
+          "note": "수업 시간 현장 작성"
+        },
+        {
+          "id": "ass-3-calc",
+          "grade": 3,
+          "subject": "미적분",
+          "title": "정적분 활용 실생활 탐구 발표",
+          "dueDate": "2026-11-25",
+          "note": "슬라이드 5매 이내 요약"
+        }
+      ]
+    },
+    "custom_api_demo": {
+      "type": "generic_json",
+      "label": "범용 JSON API 데모",
+      "url": "",
+      "method": "GET",
+      "headers": {},
+      "extractPath": "",
+      "fieldMap": {},
+      "fallback": {
+        "headline": "원하는 외부 REST API를 연결해 보세요",
+        "body": "관리자 스튜디오의 [API 커넥터] 탭에서 URL과 추출 경로(extractPath)만 입력하면, 날씨·버스·도서관 등 어떤 JSON API든 코딩 없이 위젯에 꽂을 수 있습니다."
+      }
+    },
+    "school_notices": {
+      "type": "school_board",
+      "label": "서전고 홈페이지 공지·가정통신문",
+      "baseUrl": "https://school.cbe.go.kr/seojeon-h",
+      "limitPerBoard": 5,
+      "boards": [
+        {
+          "code": "M010501",
+          "tag": "#학교공지",
+          "label": "공지사항"
+        },
+        {
+          "code": "M010503",
+          "tag": "#가정통신문",
+          "label": "가정통신문"
+        }
+      ],
+      "fallback": []
+    },
+    "study_links": {
+      "type": "static",
+      "label": "입시 · 학습 추천 사이트",
+      "data": [
+        {
+          "category": "입시·진학",
+          "title": "대입정보포털 어디가",
+          "desc": "대학별 입시결과 · 전형 · 성적 분석",
+          "url": "https://www.adiga.kr"
+        },
+        {
+          "category": "입시·진학",
+          "title": "한국교육과정평가원",
+          "desc": "수능 · 모의평가 기출문제 및 정답",
+          "url": "https://www.kice.re.kr"
+        },
+        {
+          "category": "입시·진학",
+          "title": "커리어넷",
+          "desc": "진로 · 학과 정보 및 적성 검사",
+          "url": "https://www.career.go.kr"
+        },
+        {
+          "category": "입시·진학",
+          "title": "학교알리미",
+          "desc": "전국 학교 교육과정 · 진학 공시",
+          "url": "https://www.schoolinfo.go.kr"
+        },
+        {
+          "category": "학습·인강",
+          "title": "EBSi",
+          "desc": "무료 수능 · 내신 강의 및 기출 모음",
+          "url": "https://www.ebsi.co.kr"
+        },
+        {
+          "category": "학습·인강",
+          "title": "칸아카데미 한국어",
+          "desc": "수학 · 과학 핵심 개념 무료 강의",
+          "url": "https://ko.khanacademy.org"
+        },
+        {
+          "category": "학습·인강",
+          "title": "네이버 영어사전",
+          "desc": "어휘 · 예문 · 발음 빠른 검색",
+          "url": "https://en.dict.naver.com"
+        },
+        {
+          "category": "학습·인강",
+          "title": "서전고 홈페이지",
+          "desc": "공지사항 · 가정통신문 원문 확인",
+          "url": "https://school.cbe.go.kr/seojeon-h"
+        }
+      ]
+    }
+  },
+  "_meta": {
+    "bakedAt": "2026-11-22 23:31:06 KST",
+    "archiveFiles": [
+      "data/archive_2025.json",
+      "data/archive_2026.json"
+    ],
+    "sources": {
+      "neis_meal": {
+        "type": "neis_meal",
+        "label": "NEIS 서전고 급식",
+        "status": "live",
+        "reason": "2026-11-23 NEIS 급식 연동",
+        "durationMs": 326.5
+      },
+      "neis_schedule": {
+        "type": "neis_schedule",
+        "label": "NEIS 학사일정",
+        "status": "live",
+        "reason": "202611~202612 학사일정 1건 연동",
+        "durationMs": 180.3
+      },
+      "timetable": {
+        "type": "static",
+        "label": "반별 주간 시간표 (월~금)",
+        "status": "static",
+        "reason": "로컬 정적 데이터",
+        "durationMs": 0.0
+      },
+      "archive_posts": {
+        "type": "notion_db",
+        "label": "블로그·공지 마스터 DB (노션)",
+        "status": "fallback",
+        "reason": "NOTION_TOKEN 또는 databaseId 미설정",
+        "durationMs": 0.0
+      },
+      "forest_records": {
+        "type": "notion_db",
+        "label": "숲 회계·회의록·자료 DB (노션)",
+        "status": "fallback",
+        "reason": "NOTION_TOKEN 또는 databaseId 미설정",
+        "durationMs": 0.0
+      },
+      "assessments": {
+        "type": "notion_db",
+        "label": "수행평가 · 학급 공통 일정 DB (노션)",
+        "status": "fallback",
+        "reason": "NOTION_TOKEN 또는 databaseId 미설정",
+        "durationMs": 0.0
+      },
+      "custom_api_demo": {
+        "type": "generic_json",
+        "label": "범용 JSON API 데모",
+        "status": "fallback",
+        "reason": "URL 미설정 (커스텀 API 대기 중)",
+        "durationMs": 0.0
+      },
+      "school_notices": {
+        "type": "school_board",
+        "label": "서전고 홈페이지 공지·가정통신문",
+        "status": "live",
+        "reason": "서전고 홈페이지 10건 자동 수집",
+        "durationMs": 756.4
+      },
+      "study_links": {
+        "type": "static",
+        "label": "입시 · 학습 추천 사이트",
+        "status": "static",
+        "reason": "로컬 정적 데이터",
+        "durationMs": 0.0
+      },
+      "forest_all": {
+        "type": "synthesized",
+        "label": "숲 통합 아카이브 (회계·회의록·공지·자료)",
+        "status": "static",
+        "reason": "총 27건 자동 병합",
+        "durationMs": 0.0
+      }
+    }
+  }
+}

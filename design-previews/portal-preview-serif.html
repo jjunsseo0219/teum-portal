@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>포털 시안 A — 명조 블로그 제목 × 에디토리얼</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: light-dark(#FAF8F4, #121211);
+      --surface: light-dark(#FFFFFF, #1B1B19);
+      --subtle: light-dark(#F2EFE9, #242421);
+      --text: light-dark(#141413, #F4F2ED);
+      --muted: light-dark(#64615B, #9E9B93);
+      --line: light-dark(rgba(20, 20, 19, 0.12), rgba(244, 242, 237, 0.13));
+      --ink: light-dark(#1B4332, #6EE7B7);
+      --warn: light-dark(#B45309, #FBBF24);
+      --serif: "Nanum Myeongjo", "Batang", Georgia, serif;
+      &:has(> head > meta[name="color-scheme"][content="dark"]) { color-scheme: dark; }
+      &:has(> head > meta[name="color-scheme"][content="light"]) { color-scheme: light; }
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text); line-height: 1.55;
+      font-family: "Pretendard Variable", "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .shell { max-width: 480px; margin: 0 auto; min-height: 100dvh; padding-bottom: 78px; }
+
+    /* Top Bar */
+    .topbar {
+      position: sticky; top: 0; z-index: 20; padding: 14px 20px 12px;
+      background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+    }
+    .top-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .brand { font-size: 1.28rem; font-weight: 900; letter-spacing: -0.04em; }
+    .class-tag { font-size: 0.78rem; font-weight: 700; color: var(--muted); margin-left: 8px; }
+    .live-text { font-size: 0.76rem; font-weight: 700; color: var(--ink); }
+    .sub-line { margin: 4px 0 0; font-size: 0.76rem; color: var(--muted); }
+
+    /* Feed & Editorial Sections */
+    .feed { padding: 8px 20px 24px; display: flex; flex-direction: column; }
+    .sec-block { padding: 22px 0; border-bottom: 1px solid var(--line); }
+    .sec-block:last-child { border-bottom: 0; }
+    .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+    .sec-kicker { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; color: var(--ink); }
+    .sec-title { margin: 2px 0 0; font-size: 1.05rem; font-weight: 800; letter-spacing: -0.025em; }
+    .sec-meta { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+
+    /* Featured Notice (Serif Title) */
+    .notice-box {
+      width: 100%; text-align: left; border: 1px solid var(--line); background: var(--surface);
+      padding: 18px 18px 16px; border-radius: 10px; cursor: pointer; font-family: inherit; color: var(--text);
+      transition: transform 140ms ease, opacity 140ms ease;
+    }
+    .notice-box:active { transform: scale(0.985); opacity: 0.8; }
+    .notice-kicker { font-size: 0.72rem; font-weight: 700; color: var(--ink); letter-spacing: 0.04em; }
+    .notice-title {
+      margin: 6px 0 6px; font-family: var(--serif); font-size: 1.18rem; font-weight: 700;
+      line-height: 1.38; letter-spacing: -0.02em; word-break: keep-all;
+    }
+    .notice-foot { display: flex; justify-content: space-between; font-size: 0.76rem; color: var(--muted); }
+    .slide-dots { display: flex; gap: 6px; align-items: center; }
+    .slide-dot { width: 16px; height: 2px; border: 0; padding: 0; background: var(--line); cursor: pointer; }
+    .slide-dot.is-on { background: var(--ink); width: 24px; }
+
+    /* Meal */
+    .meal-main { font-size: 1.24rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 8px; }
+    .dish-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .dish-tag {
+      font-size: 0.8rem; padding: 4px 10px; border: 1px solid var(--line); border-radius: 4px;
+      color: var(--text); background: var(--surface);
+    }
+    .dish-tag.is-warn { border-color: var(--warn); color: var(--warn); font-weight: 700; }
+
+    /* Timetable */
+    .tt-list { display: flex; flex-direction: column; }
+    .tt-row {
+      display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 10px;
+      padding: 8px 4px; border-bottom: 1px solid var(--line); font-size: 0.88rem;
+    }
+    .tt-row:last-child { border-bottom: 0; }
+    .tt-row.is-now { border-left: 2.5px solid var(--ink); padding-left: 10px; font-weight: 800; color: var(--ink); }
+    .tt-num { font-size: 0.76rem; color: var(--muted); font-weight: 700; }
+    .tt-time { font-size: 0.75rem; color: var(--muted); }
+
+    /* Planner */
+    .task-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 0.88rem;
+    }
+    .task-row:last-child { border-bottom: 0; }
+    .task-dday { font-size: 0.76rem; font-weight: 800; color: var(--ink); }
+
+    /* Explore Blog (명조 제목!) */
+    .search-in {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px;
+      background: var(--surface); color: var(--text); font-family: inherit; font-size: 0.86rem; margin-bottom: 10px;
+    }
+    .tab-strip { display: flex; gap: 16px; border-bottom: 1px solid var(--line); margin-bottom: 4px; overflow-x: auto; }
+    .tab-chip {
+      border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted);
+      padding: 8px 2px; font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+    }
+    .tab-chip.is-active { color: var(--text); border-bottom-color: var(--text); font-weight: 800; }
+    .blog-item {
+      width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line);
+      background: transparent; color: var(--text); padding: 18px 0; cursor: pointer; font-family: inherit;
+      display: grid; grid-template-columns: 72px 1fr; gap: 14px; align-items: start;
+    }
+    .blog-item:active { opacity: 0.7; }
+    .blog-thumb {
+      width: 72px; height: 72px; border-radius: 6px; border: 1px solid var(--line);
+      background: var(--subtle); display: flex; align-items: center; justify-content: center;
+      font-family: var(--serif); font-size: 0.78rem; font-weight: 700; color: var(--ink); letter-spacing: 0.04em;
+    }
+    .blog-title {
+      margin: 0; font-family: var(--serif); font-size: 1.04rem; font-weight: 700;
+      line-height: 1.4; letter-spacing: -0.02em; word-break: keep-all;
+    }
+    .blog-meta { margin-top: 6px; font-size: 0.75rem; color: var(--muted); }
+
+    /* Forest Ledger */
+    .ledger-summary {
+      display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line);
+      background: var(--surface); border-radius: 8px; margin: 12px 0 16px;
+    }
+    .ledger-cell { padding: 12px 8px; text-align: center; border-right: 1px solid var(--line); }
+    .ledger-cell:last-child { border-right: 0; }
+    .ledger-label { display: block; font-size: 0.72rem; color: var(--muted); }
+    .ledger-val { display: block; font-size: 0.9rem; font-weight: 800; margin-top: 2px; }
+    .forest-item {
+      width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line);
+      background: transparent; color: var(--text); padding: 14px 0; cursor: pointer; font-family: inherit;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    }
+    .forest-title { margin: 2px 0 0; font-size: 0.92rem; font-weight: 700; }
+    .forest-amt { font-size: 0.86rem; font-weight: 800; white-space: nowrap; }
+
+    /* My Settings */
+    .setting-row {
+      display: flex; justify-content: space-between; align-items: center; padding: 14px 0;
+      border-bottom: 1px solid var(--line); font-size: 0.88rem;
+    }
+    .mini-btn {
+      border: 1px solid var(--line); background: var(--surface); color: var(--text);
+      padding: 6px 12px; border-radius: 6px; font-family: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+    }
+
+    /* Bottom Nav (Text + Subtle Line, Zero Emojis) */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px; height: 60px; padding-bottom: env(safe-area-inset-bottom, 0);
+      background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(16px);
+      border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(4, 1fr); z-index: 20;
+    }
+    .nav-btn {
+      border: 0; background: transparent; color: var(--muted); font-family: inherit;
+      font-size: 0.84rem; font-weight: 600; cursor: pointer; position: relative;
+    }
+    .nav-btn[aria-current="page"] { color: var(--text); font-weight: 800; }
+    .nav-btn[aria-current="page"]::after {
+      content: ""; position: absolute; top: 0; left: 28%; right: 28%; height: 2px; background: var(--ink);
+    }
+
+    /* Sheet */
+    dialog.sheet {
+      margin: auto auto 0; width: 100%; max-width: 480px; max-height: 88dvh;
+      border: 0; padding: 0; border-radius: 18px 18px 0 0; background: var(--surface); color: var(--text);
+      box-shadow: 0 -10px 32px rgba(0,0,0,0.2);
+    }
+    dialog.sheet::backdrop { background: rgba(0, 0, 0, 0.45); }
+    .sheet-in { padding: 22px 20px 32px; overflow-y: auto; max-height: 88dvh; }
+    .sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+    .sheet-title { margin: 4px 0 0; font-family: var(--serif); font-size: 1.18rem; line-height: 1.38; }
+    .close-btn { border: 1px solid var(--line); background: transparent; color: var(--text); width: 30px; height: 30px; border-radius: 999px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="top-row">
+        <div><span class="brand">틈.</span><span class="class-tag" id="classTag">서전고 1-1</span></div>
+        <span class="live-text">중식 625 Kcal</span>
+      </div>
+      <p class="sub-line">시안 A · 명조 블로그 제목 × 에디토리얼 룩북 포털</p>
+    </header>
+
+    <main class="feed" id="feed"></main>
+
+    <nav class="bottom-nav" aria-label="포털 메뉴">
+      <button type="button" class="nav-btn" data-tab="home" aria-current="page">홈</button>
+      <button type="button" class="nav-btn" data-tab="forest">숲</button>
+      <button type="button" class="nav-btn" data-tab="explore">탐색</button>
+      <button type="button" class="nav-btn" data-tab="my">마이</button>
+    </nav>
+  </div>
+
+  <dialog id="sheet" class="sheet">
+    <div class="sheet-in">
+      <div class="sheet-head">
+        <div>
+          <span class="sec-kicker" id="sKicker"></span>
+          <h2 class="sheet-title" id="sTitle"></h2>
+        </div>
+        <button type="button" class="close-btn" id="sClose" aria-label="닫기">✕</button>
+      </div>
+      <div id="sBody" style="font-size:0.9rem;color:var(--muted);line-height:1.75;white-space:pre-wrap"></div>
+    </div>
+  </dialog>
+
+  <script>
+    (function () {
+      const POSTS = [
+        { id: 'p1', tag: '공약', date: '2026.11.20', dept: '남윤아 × 임준서', title: '제10대 학생자치회 공약 매거진 — 틈·뜰·터·숲', body: '말뿐인 종이 공약 대신, 지금 바로 쓰는 0.5초 디지털 포털과 4대 순환 마스터플랜을 매거진 페이지로 정리했습니다.', cta: './5-hybrid-editorial.html' },
+        { id: 'p2', tag: '공간', date: '2026.11.18', dept: '환경복지부', title: '10년 만에 열리는 1층 지산실 안뜰 — 점심시간 50분의 쉼터', body: '평일 점심시간(12:40~13:25) 누구나 자유롭게 들어와 책을 읽거나 조용히 쉴 수 있습니다. 음료·음식물 반입만 삼가해 주세요.' },
+        { id: 'p3', tag: '행사', date: '2026.11.15', dept: '기획홍보부', title: '12.29 돌실제 동아리 부스 신청 및 안내', body: '동아리 부스 참가 신청서 접수 일정을 안내합니다. 행사 당일 타임테이블은 틈 포털에서 가장 먼저 공개됩니다.' }
+      ];
+      const FOREST = [
+        { type: '회계', title: '학생회 간식사업 쌀빵·음료 구입', date: '2026.11.19', amt: -184000, body: '집행 부서: 환경복지부\n영수증 번호 #2026-11-04 확인 완료' },
+        { type: '회의록', title: '제4차 학생자치회 정기 대의원회 회의록', date: '2026.11.14', amt: 0, body: '주요 안건: 1) 지산실 개방 에티켓 2) 돌실제 부스 배정 기준 확정' },
+        { type: '회계', title: '2학기 학생자치회 운영비 교부', date: '2026.11.01', amt: 450000, body: '수입 항목: 2학기 기본 운영 예산 배정' }
+      ];
+      const TIMETABLE = {
+        '1-1': ['국어', '수학', '영어', '통합사회', '통합과학', '체육', '창체'],
+        '1-2': ['수학', '영어', '국어', '통합과학', '한국사', '미술', '자율']
+      };
+      let tab = 'home', slideIdx = 0, expTag = '전체', cls = '1-1', query = '';
+      const $ = (id) => document.getElementById(id);
+
+      function openSheet(kicker, title, body, ctaHref) {
+        $('sKicker').textContent = kicker;
+        $('sTitle').textContent = title;
+        $('sBody').textContent = body;
+        if (ctaHref) {
+          const a = document.createElement('a');
+          a.href = ctaHref;
+          a.textContent = '공약 매거진 시안 열기 →';
+          a.style.cssText = 'display:block;margin-top:16px;padding:12px;text-align:center;border-radius:8px;background:var(--text);color:var(--bg);font-weight:700;text-decoration:none';
+          $('sBody').appendChild(a);
+        }
+        $('sheet').showModal();
+      }
+      $('sClose').onclick = () => $('sheet').close();
+      $('sheet').onclick = (e) => { if (e.target === $('sheet')) $('sheet').close(); };
+
+      function render() {
+        const f = $('feed');
+        f.innerHTML = '';
+        if (tab === 'home') {
+          const p = POSTS[slideIdx];
+          f.innerHTML = `
+            <section class="sec-block">
+              <div class="sec-head">
+                <div><div class="sec-kicker">FEATURED</div><h2 class="sec-title">중요 공지</h2></div>
+                <div class="slide-dots">${POSTS.map((_, i) => `<button type="button" class="slide-dot ${i === slideIdx ? 'is-on' : ''}" data-slide="${i}"></button>`).join('')}</div>
+              </div>
+              <button type="button" class="notice-box" id="featuredBtn">
+                <div class="notice-kicker">${p.tag} · ${p.date}</div>
+                <h3 class="notice-title">${p.title}</h3>
+                <div class="notice-foot"><span>${p.dept}</span><span>읽기 →</span></div>
+              </button>
+            </section>
+            <section class="sec-block">
+              <div class="sec-head"><div><div class="sec-kicker">TODAY'S MEAL</div><h2 class="sec-title">오늘의 점심</h2></div><span class="sec-meta">11.23 · 625 Kcal</span></div>
+              <div class="meal-main">비빔밥</div>
+              <div class="dish-list">
+                <span class="dish-tag">비빔밥</span><span class="dish-tag">두부미역된장국</span>
+                <span class="dish-tag is-warn">갈릭고르곤졸라피자</span><span class="dish-tag">나박김치</span><span class="dish-tag">매실주스</span>
+              </div>
+            </section>
+            <section class="sec-block">
+              <div class="sec-head"><div><div class="sec-kicker">TIMETABLE</div><h2 class="sec-title">우리 반 시간표</h2></div><span class="sec-meta">${cls}반</span></div>
+              <div class="tt-list">
+                ${TIMETABLE[cls].map((subj, i) => `<div class="tt-row ${i === 2 ? 'is-now' : ''}"><span class="tt-num">${i + 1}교시</span><span>${subj}</span><span class="tt-time">${['08:40','09:40','10:40','11:40','13:30','14:30','15:30'][i]}</span></div>`).join('')}
+              </div>
+            </section>
+            <section class="sec-block">
+              <div class="sec-head"><div><div class="sec-kicker">PLANNER</div><h2 class="sec-title">내 일정 · 수행</h2></div><span class="sec-meta">D-Day</span></div>
+              <div class="task-row"><span>공통수학2 도형의 방정식 보고서</span><span class="task-dday">D-3</span></div>
+              <div class="task-row"><span>제10대 학생자치회 본투표</span><span class="task-dday">D-31</span></div>
+            </section>`;
+          f.querySelectorAll('[data-slide]').forEach((b) => { b.onclick = () => { slideIdx = Number(b.dataset.slide); render(); }; });
+          $('featuredBtn').onclick = () => openSheet(`${p.tag} · ${p.date}`, p.title, p.body, p.cta);
+        } else if (tab === 'explore') {
+          const tags = ['전체', '공약', '공간', '행사'];
+          const list = POSTS.filter((p) => (expTag === '전체' || p.tag === expTag) && (!query || p.title.includes(query)));
+          f.innerHTML = `
+            <section class="sec-block">
+              <div class="sec-head"><div><div class="sec-kicker">ARCHIVE BLOG</div><h2 class="sec-title">탐색 · 학교 소식</h2></div><span class="sec-meta">${list.length}편</span></div>
+              <input class="search-in" id="expSearch" type="search" placeholder="제목 검색" value="${query}">
+              <div class="tab-strip">${tags.map((t) => `<button type="button" class="tab-chip ${t === expTag ? 'is-active' : ''}" data-tag="${t}">${t}</button>`).join('')}</div>
+              ${list.map((p) => `
+                <button type="button" class="blog-item" data-post="${p.id}">
+                  <div class="blog-thumb">${p.tag}</div>
+                  <div>
+                    <h3 class="blog-title">${p.title}</h3>
+                    <div class="blog-meta">${p.date} · ${p.dept}</div>
+                  </div>
+                </button>`).join('')}
+            </section>`;
+          $('expSearch').oninput = (e) => { query = e.target.value.trim(); render(); };
+          f.querySelectorAll('[data-tag]').forEach((b) => { b.onclick = () => { expTag = b.dataset.tag; render(); }; });
+          f.querySelectorAll('[data-post]').forEach((b) => {
+            b.onclick = () => { const p = POSTS.find((x) => x.id === b.dataset.post); openSheet(`${p.tag} · ${p.date}`, p.title, p.body, p.cta); };
+          });
+        } else if (tab === 'forest') {
+          f.innerHTML = `
+            <section class="sec-block">
+              <div class="sec-head"><div><div class="sec-kicker">OPEN LEDGER</div><h2 class="sec-title">숲 · 투명 기록실</h2></div><span class="sec-meta">10대 학생회</span></div>
+              <div class="ledger-summary">
+                <div class="ledger-cell"><span class="ledger-label">수입</span><span class="ledger-val">450,000원</span></div>
+                <div class="ledger-cell"><span class="ledger-label">지출</span><span class="ledger-val">184,000원</span></div>
+                <div class="ledger-cell"><span class="ledger-label">잔액</span><span class="ledger-val" style="color:var(--ink)">266,000원</span></div>
+              </div>
+              ${FOREST.map((it, idx) => `
+                <button type="button" class="forest-item" data-f="${idx}">
+                  <div><div class="sec-kicker">${it.type} · ${it.date}</div><div class="forest-title">${it.title}</div></div>
+                  <span class="forest-amt">${it.amt ? (it.amt > 0 ? '+' : '') + it.amt.toLocaleString() + '원' : '문서'}</span>
+                </button>`).join('')}
+            </section>`;
+          f.querySelectorAll('[data-f]').forEach((b) => {
+            b.onclick = () => { const it = FOREST[Number(b.dataset.f)]; openSheet(`${it.type} · ${it.date}`, it.title, it.body); };
+          });
+        } else {
+          f.innerHTML = `
+            <section class="sec-block">
+              <div class="sec-head"><div><div class="sec-kicker">PREFERENCES</div><h2 class="sec-title">마이 설정</h2></div></div>
+              <div class="setting-row"><span>우리 반 전환</span><button type="button" class="mini-btn" id="clsBtn">${cls}반 (누르면 전환)</button></div>
+              <div class="setting-row"><span>화면 테마</span><button type="button" class="mini-btn" id="thmBtn">라이트 / 다크 전환</button></div>
+              <div class="setting-row"><span>공약 매거진 시안</span><a class="mini-btn" href="./5-hybrid-editorial.html" style="text-decoration:none">열어보기 →</a></div>
+            </section>`;
+          $('clsBtn').onclick = () => { cls = cls === '1-1' ? '1-2' : '1-1'; $('classTag').textContent = `서전고 ${cls}`; render(); };
+          $('thmBtn').onclick = () => {
+            const m = document.querySelector('meta[name="color-scheme"]');
+            const isDark = m.content === 'dark' || (m.content === 'light dark' && matchMedia('(prefers-color-scheme: dark)').matches);
+            m.content = isDark ? 'light' : 'dark';
+          };
+        }
+      }
+
+      document.querySelectorAll('.nav-btn').forEach((btn) => {
+        btn.onclick = () => {
+          tab = btn.dataset.tab;
+          document.querySelectorAll('.nav-btn').forEach((b) => b.setAttribute('aria-current', b === btn ? 'page' : 'false'));
+          render();
+        };
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>

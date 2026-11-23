@@ -1,0 +1,10 @@
+{
+  "name": "틈 (Teum) — 서전고 디지털 포털",
+  "short_name": "틈",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F4F5F7",
+  "theme_color": "#257A54",
+  "lang": "ko",
+  "description": "서전고 초경량 디지털 자치 포털 MVP"
+}

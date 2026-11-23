@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#257A54">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="틈·뜰·터·숲 — 서전고 제10대 학생자치회 공약">
+  <meta property="og:description" content="현실의 틈을 열어 마당으로. 광고 없는 0.5초 학교 포털과 4대 순환 공약 이야기.">
+  <script>
+    try {
+      const s = localStorage.getItem('color-scheme');
+      if (s) document.querySelector('meta[name="color-scheme"]').content = s;
+    } catch (e) {}
+  </script>
+  <title>틈·뜰·터·숲 — 제10대 학생자치회 공약집</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: light-dark(#F4F5F7, #111315);
+      --surface: light-dark(#FFFFFF, #191C20);
+      --subtle: light-dark(#EEF0F3, #21252B);
+      --text: light-dark(#191F28, #ECEFF4);
+      --muted: light-dark(#5E646C, #9AA2AE);
+      --line: light-dark(rgba(25, 31, 40, 0.1), rgba(236, 239, 244, 0.12));
+      --ink: light-dark(#257A54, #5BB98C);
+      --btn-bg: light-dark(#191F28, #ECEFF4);
+      --btn-fg: light-dark(#FFFFFF, #111315);
+      --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+      &:has(> head > meta[name="color-scheme"][content="dark"]) { color-scheme: dark; }
+      &:has(> head > meta[name="color-scheme"][content="light"]) { color-scheme: light; }
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text); line-height: 1.65; overflow-x: hidden;
+      font-variant-numeric: tabular-nums;
+      font-family: "Pretendard Variable", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", -apple-system, sans-serif;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .btn-solid, .btn-text, .theme-btn, .index-row, .tab-btn, .article-row, .like-btn, .next-btn, .close-btn {
+      transition: transform 140ms var(--ease), opacity 140ms ease, color 140ms ease, border-color 140ms ease;
+    }
+    .btn-solid:active, .index-row:active, .article-row:active, .like-btn:active, .next-btn:active {
+      transform: scale(0.985); opacity: 0.78;
+    }
+
+    .header {
+      position: sticky; top: 0; z-index: 20;
+      background: color-mix(in srgb, var(--bg) 90%, transparent);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+    }
+    .header-in {
+      max-width: 580px; margin: 0 auto; padding: 13px 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .brand { font-size: 1.16rem; font-weight: 900; letter-spacing: -0.04em; display: inline-flex; align-items: baseline; }
+    .brand span { font-weight: 600; color: var(--muted); font-size: 0.8rem; margin-left: 8px; }
+    .nav-right { display: flex; align-items: center; gap: 12px; font-size: 0.82rem; font-weight: 700; }
+    .theme-btn {
+      border: 1px solid var(--line); background: transparent; color: var(--text);
+      padding: 5px 10px; border-radius: 6px; font-family: inherit; font-size: 0.76rem; font-weight: 600; cursor: pointer;
+    }
+    .portal-link { color: var(--ink); border-bottom: 1.5px solid var(--ink); padding-bottom: 1px; white-space: nowrap; }
+
+    .wrap { max-width: 580px; margin: 0 auto; padding: 32px 20px 72px; }
+
+    .hero { padding-bottom: 36px; border-bottom: 1px solid var(--line); }
+    .issue-line { font-size: 0.76rem; font-weight: 800; letter-spacing: 0.05em; color: var(--ink); margin-bottom: 12px; }
+    h1 {
+      margin: 0; font-size: clamp(1.75rem, 5.5vw, 2.25rem); font-weight: 800;
+      line-height: 1.26; letter-spacing: -0.04em; word-break: keep-all;
+    }
+    .hero-sub { margin: 14px 0 0; font-size: 0.94rem; color: var(--muted); word-break: keep-all; max-width: 44ch; }
+    .cta-row { margin-top: 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+    .btn-solid {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 12px 20px; border-radius: 8px; background: var(--btn-bg); color: var(--btn-fg);
+      font-size: 0.86rem; font-weight: 700; cursor: pointer; border: 0; font-family: inherit;
+    }
+    .btn-text { font-size: 0.85rem; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 2px; }
+    .hero-media {
+      margin-top: 26px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line);
+      aspect-ratio: 16 / 9; background: var(--subtle);
+    }
+    .hero-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .hero-caption { margin: 8px 0 0; font-size: 0.74rem; color: var(--muted); }
+
+    .sec { padding-top: 40px; }
+    .sec-label {
+      font-size: 0.74rem; font-weight: 700; letter-spacing: 0.07em; color: var(--muted);
+      margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .index-list { border-top: 1px solid var(--line); }
+    .index-row {
+      width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line);
+      background: transparent; color: var(--text); padding: 20px 2px; cursor: pointer;
+      font-family: inherit; display: grid; grid-template-columns: 32px 1fr 18px; gap: 10px; align-items: start;
+    }
+    .idx-num { font-size: 0.84rem; font-weight: 800; color: var(--ink); padding-top: 3px; }
+    .idx-title { margin: 0; font-size: 1.04rem; font-weight: 800; letter-spacing: -0.025em; word-break: keep-all; }
+    .idx-desc { margin: 5px 0 0; font-size: 0.85rem; color: var(--muted); word-break: keep-all; }
+    .idx-meta { margin-top: 8px; font-size: 0.74rem; color: var(--muted); font-weight: 600; }
+    .idx-arrow { color: var(--muted); font-size: 0.9rem; padding-top: 2px; }
+
+    .tabs { display: flex; gap: 18px; overflow-x: auto; border-bottom: 1px solid var(--line); margin-bottom: 4px; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted);
+      padding: 10px 2px; font-family: inherit; font-size: 0.86rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+    }
+    .tab-btn.is-active { color: var(--text); border-bottom-color: var(--text); font-weight: 800; }
+
+    .article-row {
+      width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line);
+      background: transparent; color: var(--text); padding: 22px 2px; cursor: pointer;
+      font-family: inherit; display: flex; gap: 14px; align-items: flex-start; justify-content: space-between;
+    }
+    .art-main { flex: 1; min-width: 0; }
+    .art-kicker { font-size: 0.75rem; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+    .art-title { margin: 0; font-size: 1.12rem; font-weight: 800; line-height: 1.38; letter-spacing: -0.025em; word-break: keep-all; }
+    .art-excerpt { margin: 7px 0 0; font-size: 0.85rem; color: var(--muted); word-break: keep-all; }
+    .art-foot { margin-top: 10px; font-size: 0.76rem; color: var(--muted); display: flex; gap: 12px; }
+    .art-thumb {
+      width: 76px; height: 76px; border-radius: 8px; overflow: hidden; flex-shrink: 0;
+      border: 1px solid var(--line); margin-top: 4px;
+    }
+    .art-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .tl-list { border-top: 1px solid var(--line); }
+    .tl-row {
+      padding: 18px 2px; border-bottom: 1px solid var(--line);
+      display: grid; grid-template-columns: 78px 1fr; gap: 12px; align-items: baseline;
+    }
+    .tl-when { font-size: 0.78rem; font-weight: 800; color: var(--ink); }
+    .tl-title { margin: 0; font-size: 0.96rem; font-weight: 700; letter-spacing: -0.02em; word-break: keep-all; }
+    .tl-desc { margin: 4px 0 0; font-size: 0.84rem; color: var(--muted); word-break: keep-all; }
+
+    .qna-list { border-top: 1px solid var(--line); }
+    .qna-item { border-bottom: 1px solid var(--line); }
+    .qna-item summary {
+      list-style: none; padding: 17px 2px; font-size: 0.94rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; word-break: keep-all;
+    }
+    .qna-item summary::-webkit-details-marker { display: none; }
+    .qna-chev { font-size: 0.84rem; color: var(--muted); transition: transform 180ms ease; flex-shrink: 0; }
+    .qna-item[open] .qna-chev { transform: rotate(180deg); }
+    .qna-ans { margin: 0; padding: 0 2px 18px; font-size: 0.86rem; color: var(--muted); line-height: 1.7; word-break: keep-all; }
+
+    .closing {
+      margin-top: 44px; padding: 28px 22px; border-radius: 12px;
+      background: var(--subtle); border: 1px solid var(--line);
+    }
+    .closing h2 { margin: 0; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.4; word-break: keep-all; }
+    .closing p { margin: 8px 0 18px; font-size: 0.86rem; color: var(--muted); }
+    .closing-btns { display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn-outline {
+      display: inline-flex; align-items: center; justify-content: center; padding: 12px 18px;
+      border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--text);
+      font-family: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+    }
+    .page-footer { margin-top: 32px; font-size: 0.76rem; color: var(--muted); text-align: center; }
+
+    dialog.sheet {
+      margin: auto auto 0; width: 100%; max-width: 580px; height: 90dvh; max-height: 90dvh;
+      border: 0; padding: 0; border-radius: 20px 20px 0 0; background: var(--surface); color: var(--text);
+      box-shadow: 0 -10px 36px rgba(0, 0, 0, 0.2); opacity: 0;
+      transition-property: opacity, transform, display, overlay; transition-duration: 0.24s;
+      transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1); transition-behavior: allow-discrete;
+    }
+    @media (prefers-reduced-motion: no-preference) { dialog.sheet { transform: translateY(100%); } }
+    dialog.sheet::backdrop { background: transparent; transition-property: background-color, display, overlay; transition-duration: 0.24s; transition-behavior: allow-discrete; }
+    dialog.sheet[open] {
+      opacity: 1;
+      @starting-style { opacity: 0; }
+      @media (prefers-reduced-motion: no-preference) { transform: translateY(0); @starting-style { transform: translateY(100%); } }
+      &::backdrop { background: rgb(0 0 0 / 0.45); @starting-style { background: transparent; } }
+    }
+    .sheet-in { height: 100%; overflow-y: auto; padding: 22px 22px calc(34px + env(safe-area-inset-bottom, 0)); display: flex; flex-direction: column; gap: 16px; }
+    .sheet-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+    .sheet-kicker { font-size: 0.76rem; font-weight: 700; color: var(--ink); display: block; margin-bottom: 5px; }
+    .sheet-title { margin: 0; font-size: 1.22rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.35; word-break: keep-all; }
+    .close-btn { border: 1px solid var(--line); background: transparent; color: var(--text); width: 32px; height: 32px; border-radius: 999px; cursor: pointer; flex-shrink: 0; }
+    .sheet-cover { width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; object-fit: cover; display: block; border: 1px solid var(--line); }
+    .sheet-quote { margin: 0; padding: 12px 14px; border-left: 3px solid var(--ink); background: var(--subtle); font-size: 0.9rem; font-weight: 700; word-break: keep-all; }
+    .sheet-sec h4 { margin: 0 0 5px; font-size: 0.98rem; font-weight: 800; }
+    .sheet-sec p { margin: 0; font-size: 0.9rem; color: var(--muted); line-height: 1.75; word-break: keep-all; }
+    .sheet-facts { padding: 12px 14px; border-radius: 10px; background: var(--subtle); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 7px; }
+    .fact-row { display: flex; justify-content: space-between; gap: 10px; font-size: 0.82rem; }
+    .fact-row span:first-child { color: var(--muted); font-weight: 600; }
+    .fact-row span:last-child { font-weight: 700; text-align: right; }
+    .sheet-foot { padding-top: 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .like-btn { border: 1px solid var(--line); background: transparent; color: var(--text); padding: 9px 15px; border-radius: 8px; font-family: inherit; font-size: 0.84rem; font-weight: 700; cursor: pointer; }
+    .like-btn.is-liked { border-color: var(--ink); color: var(--ink); }
+    .next-btn { border: 0; background: var(--btn-bg); color: var(--btn-fg); padding: 9px 15px; border-radius: 8px; font-family: inherit; font-size: 0.84rem; font-weight: 700; cursor: pointer; }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal { opacity: 0; transform: translateY(12px); transition: opacity 400ms ease, transform 400ms cubic-bezier(0.22, 1, 0.36, 1); }
+      .reveal.is-visible { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(16px);
+      background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 999px;
+      font-size: 0.82rem; font-weight: 700; opacity: 0; pointer-events: none; transition: opacity 180ms ease, transform 180ms ease; z-index: 60;
+    }
+    .toast.is-shown { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-in">
+      <a class="brand" href="./index.html">틈.<span>제10대 공약집</span></a>
+      <div class="nav-right">
+        <button type="button" class="theme-btn" id="themeBtn">테마</button>
+        <a class="portal-link" href="./index.html">포털 열기</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero reveal is-visible">
+      <div class="issue-line">서전고 제10대 학생자치회 후보 · 남윤아 × 임준서</div>
+      <h1>현실의 틈을 열어 마당으로,<br>사람과 생각의 마주침을 잇다.</h1>
+      <p class="hero-sub">
+        덜어낸 화면 위에 필요한 것만 남겼습니다. 지금 바로 쓸 수 있는 0.5초 생활 포털 ‘틈’과
+        학교 공간을 바꾸는 4단계 순환 이야기를 읽고 판단해 보세요.
+      </p>
+      <div class="cta-row">
+        <a class="btn-solid" href="./index.html">오늘 급식·시간표 열어보기 →</a>
+        <a class="btn-text" href="#pillars">4대 공약 목차 보기</a>
+      </div>
+      <div class="hero-media">
+        <img src="./assets/thumbs/notice_pledge.webp" alt="아침 햇살이 드는 학교 중정" loading="eager">
+      </div>
+      <p class="hero-caption">틈(온라인)에서 뜰(공간), 터(만남), 숲(기록)으로 이어지는 서전고 학생자치 마스터플랜</p>
+    </section>
+
+    <section id="pillars" class="sec reveal">
+      <div class="sec-label"><span>INDEX · 4대 공약</span><span>눌러서 읽기</span></div>
+      <div class="index-list" id="pillarsGrid"></div>
+    </section>
+
+    <section id="magazine" class="sec reveal">
+      <div class="sec-label"><span>ESSAYS · 왜, 어떻게</span></div>
+      <div class="tabs" id="filterBar" role="tablist" aria-label="공약 카테고리 필터"></div>
+      <div id="magazineList"></div>
+    </section>
+
+    <section id="timeline" class="sec reveal">
+      <div class="sec-label"><span>ROADMAP · 1년 흐름</span></div>
+      <div class="tl-list">
+        <div class="tl-row">
+          <span class="tl-when">3월 1주</span>
+          <div><h3 class="tl-title">틈 — 광고 없는 급식·시간표·공지 포털 가동</h3><p class="tl-desc">새 학기 첫날 바로 쓰는 생활 허브를 열고, 지산실 오픈 D-Day를 띄웁니다.</p></div>
+        </div>
+        <div class="tl-row">
+          <span class="tl-when">3월 말</span>
+          <div><h3 class="tl-title">뜰 — 지산실 폴딩도어 개방 &amp; 그늘집 피크닉존</h3><p class="tl-desc">10년간 닫혀 있던 1층 지산실 안뜰과 김효영 그늘집을 학생 쉼터로 엽니다.</p></div>
+        </div>
+        <div class="tl-row">
+          <span class="tl-when">4–5월</span>
+          <div><h3 class="tl-title">터 — 유랑 세바시 &amp; 3대 무인 자원순환 나눔터</h3><p class="tl-desc">1.2m 빨간 러그 팝업 무대와 패스-잇 서가, A5 이면지 패드, 밸럿 빈을 운영합니다.</p></div>
+        </div>
+        <div class="tl-row">
+          <span class="tl-when">6월~영구</span>
+          <div><h3 class="tl-title">숲 — 1원 영수증 공개 &amp; 디지털운영위원회</h3><p class="tl-desc">회의록과 회계를 투명하게 남기고, 기수가 바뀌어도 끊기지 않는 운영 기구를 세웁니다.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="qna" class="sec reveal">
+      <div class="sec-label"><span>Q&amp;A · 솔직한 답변</span></div>
+      <div class="qna-list">
+        <details class="qna-item">
+          <summary><span>선배가 졸업하면 사이트가 방치되지 않나요?</span><span class="qna-chev" aria-hidden="true">▾</span></summary>
+          <p class="qna-ans">가장 많이 실패하는 지점이라 처음부터 다르게 만들었습니다. 급식·학사일정·학교 공지는 매일 자동으로 모이고, 코드를 몰라도 글과 회계를 올릴 수 있는 관리 화면과 기수제 기술 기구(디지털운영위원회)를 통해 후배들에게 그대로 넘깁니다.</p>
+        </details>
+        <details class="qna-item">
+          <summary><span>왜 댓글이나 익명 게시판이 없나요?</span><span class="qna-chev" aria-hidden="true">▾</span></summary>
+          <p class="qna-ans">악플이나 사적 갈등 때문에 학교 커뮤니티가 문을 닫는 경우가 많습니다. ‘틈’은 정확한 학교 정보와 투명한 기록에 집중하고, 공감과 보관만 남겨 누구나 안전하게 쓰도록 했습니다.</p>
+        </details>
+        <details class="qna-item">
+          <summary><span>유지비나 서버비 부담이 크지 않나요?</span><span class="qna-chev" aria-hidden="true">▾</span></summary>
+          <p class="qna-ans">별도의 유료 서버가 없는 가벼운 정적 웹 방식이라 유지비가 사실상 0원입니다. 점심시간 직전 전교생이 동시에 켜도 멈추지 않으며, 아낀 예산은 오프라인 쉼터와 순환 사업에 씁니다.</p>
+        </details>
+        <details class="qna-item">
+          <summary><span>선생님들이 공지를 따로 올려주셔야 하나요?</span><span class="qna-chev" aria-hidden="true">▾</span></summary>
+          <p class="qna-ans">아니요. 서전고 공식 홈페이지에 올라오는 공지사항과 가정통신문을 자동으로 가져오도록 연결해 두어, 선생님께 새로운 업무 부담을 드리지 않습니다.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="closing reveal">
+      <h2>약속이 아니라,<br>이미 움직이는 구조로 남깁니다.</h2>
+      <p>오늘 점심 메뉴와 우리 반 시간표부터 가볍게 먼저 써보세요.</p>
+      <div class="closing-btns">
+        <a class="btn-solid" href="./index.html">오늘 급식·시간표 보러 가기 →</a>
+        <button type="button" class="btn-outline" id="copyShareBtn">링크 복사해 공유하기</button>
+      </div>
+    </section>
+
+    <footer class="page-footer">서전고등학교 제10대 학생자치회 후보 남윤아 × 임준서</footer>
+  </main>
+
+  <dialog id="magazineSheet" class="sheet" closedby="any" aria-labelledby="readerTitle">
+    <div class="sheet-in">
+      <header class="sheet-top">
+        <div>
+          <span class="sheet-kicker" id="readerKicker"></span>
+          <h2 class="sheet-title" id="readerTitle"></h2>
+        </div>
+        <button type="button" class="close-btn" id="readerCloseBtn" aria-label="닫기">✕</button>
+      </header>
+      <img id="readerImg" class="sheet-cover" alt="" style="display:none">
+      <blockquote class="sheet-quote" id="readerQuote"></blockquote>
+      <div id="readerSections"></div>
+      <div class="sheet-facts" id="readerFacts"></div>
+      <div class="sheet-foot">
+        <button type="button" class="like-btn" id="readerLikeBtn">공감 0</button>
+        <button type="button" class="next-btn" id="readerNextBtn">다음 글 →</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      const PILLARS = [
+        { articleId: 'art-teum', no: '01', cat: '틈', when: '3월 1주 · 온라인', title: '광고 없는 0.5초 생활 포털 ‘틈’', summary: '등굣길과 쉬는 시간, 오늘 급식과 우리 반 시간표·수행 D-Day가 바로 열립니다.' },
+        { articleId: 'art-tteul', no: '02', cat: '뜰', when: '3월 말 · 공간', title: '10년 만에 열리는 지산실 안뜰 ‘뜰’', summary: '닫혀 있던 1층 지산실 폴딩도어를 열고 김효영 그늘집을 캠퍼스 거실로 바꿉니다.' },
+        { articleId: 'art-teo', no: '03', cat: '터', when: '4–5월 · 만남·순환', title: '빨간 러그 유랑 세바시 & 순환 ‘터’', summary: '교내 다섯 곳을 도는 팝업 무대와 패스-잇 서가·A5 이면지 패드를 운영합니다.' },
+        { articleId: 'art-sup', no: '04', cat: '숲', when: '6월~영구 · 기록·제도', title: '1원 단위 투명 장부 & 디운위 ‘숲’', summary: '선배가 졸업해도 멈추지 않는 기수제 운영 기구와 10년 회의록 아카이브를 세웁니다.' }
+      ];
+
+      const ARTICLES = [
+        {
+          id: 'art-teum', no: '01', cat: '틈', readTime: '2분 읽기',
+          image: './assets/thumbs/notice_pledge.webp',
+          title: '왜 선거 전부터 포털을 먼저 만들었을까요?',
+          quote: '“당선되면 만들겠다는 말 대신, 지금 손끝으로 눌러볼 수 있는 결과를 먼저 열었습니다.”',
+          excerpt: '매일 찾는 급식과 시간표, 그런데 왜 늘 광고 많은 외부 앱과 흩어진 단톡방에 의존해야 할까요?',
+          likes: 86,
+          sections: [
+            { heading: '0.5초 안에 끝나는 학교생활 확인', body: '등굣길이나 쉬는 시간에 필요한 건 화려한 배너가 아니라 오늘 점심 메뉴와 다음 교시 시간표입니다. 틈은 로그인 없이 내 학년·반만 한 번 고르면 광고 없이 즉시 열립니다.' },
+            { heading: '학교 공지와 수행평가까지 한 번에 연결', body: '학교 공식 홈페이지 공지사항과 가정통신문을 자동으로 모아오고, 학년별 수행평가 마감일을 내 시간표 과목 옆에 바로 표시해 놓치는 일이 없도록 합니다.' },
+            { heading: '한 기능이 흔들려도 멈추지 않는 안전 설계', body: '특정 기능에 일시 오류가 나도 급식과 시간표는 그대로 동작하도록 격리되어 있습니다. 홈 화면에 추가해 두면 네트워크가 불안한 교실에서도 빠르게 열립니다.' }
+          ],
+          facts: [
+            { label: '핵심 기능', value: '급식 · 반별 시간표 · 수행 D-Day · 공식 공지' },
+            { label: '유지 비용', value: '서버비 0원 (초경량 정적 웹)' },
+            { label: '체험하기', value: '상단 [포털 열기]에서 지금 바로 사용' }
+          ]
+        },
+        {
+          id: 'art-tteul', no: '02', cat: '뜰', readTime: '2분 읽기',
+          image: './assets/thumbs/notice_jisan.webp',
+          title: '10년간 닫혀 있던 지산실 폴딩도어를 열면 생기는 일',
+          quote: '“온라인 틈을 연 학생들이, 밖으로 나와 햇살과 바람이 닿는 실제 캠퍼스 거실을 만납니다.”',
+          excerpt: '교실과 복도 사이, 점심시간 50분 동안 편하게 숨 고를 수 있는 우리 학교만의 열린 마당을 만듭니다.',
+          likes: 74,
+          sections: [
+            { heading: '거점 1 · 지산실-중정 캠퍼스 거실', body: '10년 동안 닫혀 있던 1층 지산실 폴딩도어를 개방해 안뜰과 실내를 잇습니다. 방수 빈백과 잔잔한 배경음으로 점심시간 누구나 쉴 수 있는 공간을 엽니다.' },
+            { heading: '거점 2 · 김효영 그늘집 피크닉존', body: '원목 벤치 테이블을 정비해 날씨 좋은 날 점심 피크닉과 야외 대화가 자연스럽게 일어나는 휴식 거점으로 가꿉니다.' }
+          ],
+          facts: [
+            { label: '오픈 목표', value: '3월 말 (포털 내 D-Day 카운트다운)' },
+            { label: '공간 거점', value: '1층 지산실 안뜰 · 김효영 그늘집' },
+            { label: '운영 원칙', value: '자율 휴식 · 청결 에티켓 캠페인' }
+          ]
+        },
+        {
+          id: 'art-teo', no: '03', cat: '터', readTime: '2분 읽기',
+          image: './assets/thumbs/notice_dolsil.webp',
+          title: '빨간 원형 러그 하나면 학교 어디든 무대가 된다',
+          quote: '“거창한 강당 행사 대신, 친구들의 이야기와 쓰임 다한 물건이 일상 길목에서 오가는 터를 엽니다.”',
+          excerpt: '유랑 세바시 버스킹과 관리 인력 없이도 깨끗하게 굴러가는 3대 무인 자원순환 나눔터 이야기입니다.',
+          likes: 69,
+          sections: [
+            { heading: '1.2m 빨간 러그 위 ‘유랑 세바시’', body: '도서관 앞, 메이커스실 앞, 그늘집 잔디, 2층 나무 계단, 지산실을 순회하는 소규모 게릴라 강연·버스킹을 엽니다. 작은 앰프와 러그 한 장이면 점심시간 15분이 반짝이는 무대가 됩니다.' },
+            { heading: '지저분해지지 않는 3대 무인 자원순환', body: '관리가 어려워 방치되기 쉬운 품목은 빼고 꼭 필요한 3가지만 둡니다. ① 다 본 수특·기출을 나누는 ‘서전 패스-잇’ 서가(2층 도서관 앞), ② 교무실 파지를 재단한 ‘A5 이면지 패드’(4층), ③ 밸런스 투표와 페트병 뚜껑을 결합한 ‘밸럿 빈’.' }
+          ],
+          facts: [
+            { label: '유랑 스팟', value: '교내 5대 거점 순회' },
+            { label: '자원순환', value: '패스-잇 서가 · A5 이면지 · 밸럿 빈' },
+            { label: '신청 창구', value: '틈 포털 간편 신청 연동' }
+          ]
+        },
+        {
+          id: 'art-sup', no: '04', cat: '숲', readTime: '2분 읽기',
+          image: '',
+          title: '선배가 졸업해도 안 망가지는 학생자치의 조건',
+          quote: '“한 사람이 열심히 해서 버티는 구조가 아니라, 누구나 이어받아 투명하게 남기는 시스템의 숲.”',
+          excerpt: '1원 단위 학생회비 영수증 공개와 10년 치 회의록 보관, 그리고 독립 기구 ‘디운위’ 구상입니다.',
+          likes: 92,
+          sections: [
+            { heading: '누구나 1초 만에 검증하는 ‘숲’ 장부', body: '학생회비를 어디에 얼마 썼는지 궁금할 때, 숲 탭에서 연도와 유형(회계·회의록·공지)을 누르면 총 수입·지출·잔액이 바로 계산되어 보입니다. 시간이 지나도 연도별로 깔끔하게 누적됩니다.' },
+            { heading: '디지털운영위원회(디운위) 제도화', body: '학생회장이 바뀌면 포털이 멈추는 문제를 막기 위해, 선관위처럼 독립된 기술 기구인 ‘디운위’를 1학년 크루–2학년 리드–3학년 고문 기수제로 운영해 다음 세대에 온전히 물려줍니다.' }
+          ],
+          facts: [
+            { label: '투명 공개', value: '1원 단위 영수증 + 대의원회 회의록' },
+            { label: '지속 기구', value: '기수제 디지털운영위원회(디운위)' },
+            { label: '기록 보존', value: '연도별 분리 저장으로 10년 누적 가능' }
+          ]
+        },
+        {
+          id: 'art-principle', no: '05', cat: '원칙', readTime: '2분 읽기',
+          image: '',
+          title: '남윤아 × 임준서가 약속하는 3가지 운영 원칙',
+          quote: '“거창해서 2주 만에 멈추는 계획보다, 학생회도 선생님도 힘들이지 않고 매일 돌아가는 구조가 진짜 실력입니다.”',
+          excerpt: '자동 수집 중심 운영, 갈등 없는 안전한 공간, 10분 후배 인수인계라는 기준을 세운 이유입니다.',
+          likes: 81,
+          sections: [
+            { heading: '1. 시험기간에도 멈추지 않는 자동 운영', body: '급식·학사일정·학교 공지는 자동으로 모아오고, 학생회는 행사 포스터와 회계 영수증처럼 꼭 필요한 내용만 편하게 올리도록 설계했습니다.' },
+            { heading: '2. 사적 갈등 없는 안전한 정보 공간', body: '댓글창이나 익명 쪽지 기능은 넣지 않았습니다. 학생 누구나 기분 상할 걱정 없이 필요한 학교 정보만 챙기고, 공감과 보관으로 가볍게 반응할 수 있습니다.' },
+            { heading: '3. 10분이면 배우는 후배 인수인계', body: '복잡한 개발 프로그램을 깔지 않아도 굴러가는 단순한 구조로 만들어, 내년에 이어받는 후배들이 부담 없이 계속 가꿔갈 수 있습니다.' }
+          ],
+          facts: [
+            { label: '후보 팀', value: '회장 후보 남윤아 × 부회장 후보 임준서' },
+            { label: '슬로건', value: '현실의 틈을 열어 마당으로' },
+            { label: '운영 원칙', value: '자동 수집 · 무댓글 안전 · 10분 인수인계' }
+          ]
+        }
+      ];
+
+      const CATS = ['전체', '틈', '뜰', '터', '숲', '원칙'];
+      let currentCat = '전체';
+      let likedMap = {};
+      const $ = (id) => document.getElementById(id);
+
+      try {
+        const stored = JSON.parse(localStorage.getItem('teum_pledge_likes') || '{}');
+        if (stored && typeof stored === 'object') likedMap = stored;
+      } catch (e) {}
+      const saveLikes = () => { try { localStorage.setItem('teum_pledge_likes', JSON.stringify(likedMap)); } catch (e) {} };
+
+      function el(tag, attrs, ...children) {
+        const node = document.createElement(tag);
+        if (attrs) {
+          for (const [k, v] of Object.entries(attrs)) {
+            if (v === null || v === undefined || v === false) continue;
+            if (k === 'className') node.className = v;
+            else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2).toLowerCase(), v);
+            else node.setAttribute(k, String(v));
+          }
+        }
+        for (const ch of children.flat()) {
+          if (ch !== null && ch !== undefined && ch !== false) {
+            node.appendChild(typeof ch === 'string' ? document.createTextNode(ch) : ch);
+          }
+        }
+        return node;
+      }
+
+      const renderPillars = () => {
+        $('pillarsGrid').replaceChildren(...PILLARS.map((p) =>
+          el('button', { type: 'button', className: 'index-row', onClick: () => openArticleById(p.articleId) },
+            el('span', { className: 'idx-num' }, p.no),
+            el('div', null,
+              el('h3', { className: 'idx-title' }, p.title),
+              el('p', { className: 'idx-desc' }, p.summary),
+              el('div', { className: 'idx-meta' }, `${p.cat} · ${p.when}`)
+            ),
+            el('span', { className: 'idx-arrow' }, '→')
+          )
+        ));
+      };
+
+      const renderFilters = () => {
+        $('filterBar').replaceChildren(...CATS.map((cat) =>
+          el('button', {
+            type: 'button', role: 'tab', 'aria-selected': cat === currentCat ? 'true' : 'false',
+            className: `tab-btn ${cat === currentCat ? 'is-active' : ''}`.trim(),
+            onClick: () => { currentCat = cat; renderFilters(); renderMagazine(); }
+          }, cat)
+        ));
+      };
+
+      const renderMagazine = () => {
+        const items = ARTICLES.filter((a) => currentCat === '전체' || a.cat === currentCat);
+        $('magazineList').replaceChildren(...items.map((a) => {
+          const liked = Boolean(likedMap[a.id]);
+          return el('button', { type: 'button', className: 'article-row', onClick: () => openArticleById(a.id) },
+            el('div', { className: 'art-main' },
+              el('div', { className: 'art-kicker' }, `${a.no} · ${a.cat}`),
+              el('h3', { className: 'art-title' }, a.title),
+              el('p', { className: 'art-excerpt' }, a.excerpt),
+              el('div', { className: 'art-foot' },
+                el('span', null, a.readTime),
+                el('span', null, `공감 ${a.likes + (liked ? 1 : 0)} · 읽기 →`)
+              )
+            ),
+            a.image ? el('div', { className: 'art-thumb' }, el('img', { src: a.image, alt: '', loading: 'lazy', decoding: 'async' })) : null
+          );
+        }));
+      };
+
+      const sheet = $('magazineSheet');
+      const updateLikeBtn = (a) => {
+        const liked = Boolean(likedMap[a.id]);
+        const btn = $('readerLikeBtn');
+        btn.className = `like-btn ${liked ? 'is-liked' : ''}`.trim();
+        btn.textContent = `${liked ? '공감됨 · ' : '공감 · '}${a.likes + (liked ? 1 : 0)}`;
+      };
+
+      function openArticleById(id) {
+        const idx = ARTICLES.findIndex((a) => a.id === id);
+        if (idx < 0) return;
+        const a = ARTICLES[idx];
+        $('readerKicker').textContent = `${a.no} · ${a.cat} · ${a.readTime}`;
+        $('readerTitle').textContent = a.title;
+        const imgEl = $('readerImg');
+        if (a.image) { imgEl.src = a.image; imgEl.alt = a.title; imgEl.style.display = 'block'; }
+        else { imgEl.style.display = 'none'; imgEl.removeAttribute('src'); }
+        $('readerQuote').textContent = a.quote;
+        $('readerSections').replaceChildren(...a.sections.map((s) =>
+          el('div', { className: 'sheet-sec', style: 'margin-bottom:14px' }, el('h4', null, s.heading), el('p', null, s.body))
+        ));
+        $('readerFacts').replaceChildren(...a.facts.map((f) =>
+          el('div', { className: 'fact-row' }, el('span', null, f.label), el('span', null, f.value))
+        ));
+        updateLikeBtn(a);
+        const nextA = ARTICLES[(idx + 1) % ARTICLES.length];
+        const nextBtn = $('readerNextBtn');
+        nextBtn.textContent = `다음 글: ${nextA.cat} →`;
+        nextBtn.onclick = () => openArticleById(nextA.id);
+        $('readerLikeBtn').onclick = () => {
+          likedMap[a.id] = !likedMap[a.id];
+          saveLikes();
+          updateLikeBtn(a);
+          renderMagazine();
+        };
+        if (!sheet.open) sheet.showModal();
+        sheet.querySelector('.sheet-in').scrollTop = 0;
+      }
+
+      $('readerCloseBtn').addEventListener('click', () => sheet.close());
+      sheet.addEventListener('click', (e) => { if (e.target === sheet) sheet.close(); });
+
+      const meta = document.querySelector('meta[name="color-scheme"]');
+      const themeBtn = $('themeBtn');
+      const syncThemeText = () => {
+        themeBtn.textContent = meta.content === 'dark' ? '다크' : meta.content === 'light' ? '라이트' : '테마';
+      };
+      let toastTimer = null;
+      const showToast = (msg) => {
+        const t = $('toast');
+        t.textContent = msg;
+        t.classList.add('is-shown');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('is-shown'), 2200);
+      };
+
+      syncThemeText();
+      themeBtn.addEventListener('click', () => {
+        const cur = meta.content || 'light dark';
+        const darkNow = cur === 'dark' || (cur === 'light dark' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        const next = darkNow ? 'light' : 'dark';
+        meta.content = next;
+        try { localStorage.setItem('color-scheme', next); } catch (e) {}
+        syncThemeText();
+        showToast(next === 'dark' ? '다크 모드로 전환했어요' : '라이트 모드로 전환했어요');
+      });
+
+      $('copyShareBtn').addEventListener('click', () => {
+        const url = window.location.href;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(() => showToast('공약집 링크를 복사했어요')).catch(() => showToast('주소창 링크를 복사해 공유해 주세요'));
+        } else {
+          showToast('주소창 링크를 복사해 공유해 주세요');
+        }
+      });
+
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('is-visible'); io.unobserve(en.target); } });
+        }, { threshold: 0.08 });
+        document.querySelectorAll('.reveal:not(.is-visible)').forEach((n) => io.observe(n));
+      } else {
+        document.querySelectorAll('.reveal').forEach((n) => n.classList.add('is-visible'));
+      }
+
+      renderPillars();
+      renderFilters();
+      renderMagazine();
+    })();
+  </script>
+</body>
+</html>

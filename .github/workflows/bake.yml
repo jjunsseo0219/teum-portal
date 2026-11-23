@@ -1,0 +1,44 @@
+name: Bake Teum Portal Data
+
+on:
+  schedule:
+    - cron: '0 21 * * *' # 매일 오전 06:00 KST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install optional image compressor (Pillow)
+        run: pip install pillow
+
+      - name: Bake data.js, archives, and WebP thumbnails
+        env:
+          NEIS_API_KEY: ${{ secrets.NEIS_API_KEY }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: python scripts/bake_data.py
+
+      - name: Commit updated data if changed
+        run: |
+          git config user.name "teum-bot"
+          git config user.email "teum-bot@users.noreply.github.com"
+          git add data.js data.json
+          if [ -d "data" ]; then git add data/; fi
+          if [ -d "assets/thumbs" ]; then git add assets/thumbs/; fi
+          if git diff --cached --quiet; then
+            echo "변경된 데이터가 없습니다."
+          else
+            git commit -m "chore(bake): update portal data [skip ci]"
+            git push
+          fi

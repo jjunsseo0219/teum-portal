@@ -1,0 +1,142 @@
+{
+  "siteTitle": "틈.",
+  "schoolName": "서전고",
+  "accentColor": "#257A54",
+  "liveBarText": "점심시간까지 카운트다운 · 서전고 일상 허브",
+  "tabs": {
+    "home": [
+      {
+        "id": "home-planner",
+        "type": "planner",
+        "enabled": true,
+        "title": "내 일정 & 수행 D-Day",
+        "subtitle": "직접 추가 · 공지/수행 1초 담기",
+        "sourceKey": "assessments",
+        "accent": "",
+        "props": {
+          "maxVisible": 4
+        },
+        "sheet": {
+          "title": "내 일정 & 수행평가 연동 안내",
+          "body": "폰에 안전하게 저장되며, 탐색 공지의 [일정 담기]나 [수행] 버튼으로 손쉽게 일정을 채울 수 있습니다."
+        }
+      },
+      {
+        "id": "home-study-timer",
+        "type": "study_timer",
+        "enabled": true,
+        "title": "오늘의 공부 타이머",
+        "subtitle": "과목별 집중 측정 · 25분 뽀모도로",
+        "sourceKey": "",
+        "accent": "",
+        "props": {
+          "pomodoroMin": 25
+        },
+        "sheet": {
+          "title": "공부 타이머 안내",
+          "body": "과목을 선택해 스톱워치 또는 25분 뽀모도로로 측정하고 [기록 저장]을 누르면 오늘 누적 공부시간에 반영됩니다."
+        }
+      },
+      {
+        "id": "home-study-links",
+        "type": "study_links",
+        "enabled": true,
+        "title": "입시 · 학습 추천 사이트",
+        "subtitle": "수능 · 대입 · 인강 바로가기",
+        "sourceKey": "study_links",
+        "accent": "",
+        "props": {
+          "maxItems": 8
+        },
+        "sheet": {
+          "title": "입시 · 학습 추천 사이트",
+          "body": "관리자 스튜디오의 [고급 연결 (API)] → study_links에서 링크를 추가하거나 수정할 수 있습니다."
+        }
+      },
+      {
+        "id": "home-carousel",
+        "type": "carousel",
+        "enabled": true,
+        "title": "중요 공지",
+        "subtitle": "가로 스와이프 고정 공지",
+        "sourceKey": "archive_posts",
+        "accent": "",
+        "props": {
+          "pinnedOnly": true
+        },
+        "sheet": {
+          "title": "중요 공지 안내",
+          "body": "탐색(블로그) 글 중 중요공지로 고정된 항목이 자동으로 표시됩니다."
+        }
+      },
+      {
+        "id": "home-ticker",
+        "type": "ticker",
+        "enabled": true,
+        "title": "학사 D-Day & 알림",
+        "subtitle": "실시간 일정 티커",
+        "sourceKey": "neis_schedule",
+        "accent": "",
+        "props": {
+          "intervalMs": 3000
+        },
+        "sheet": {
+          "title": "서전고 주요 일정",
+          "body": "NEIS 학사일정과 자동 연동되며, 관리자 스튜디오에서 소스를 교체할 수 있습니다."
+        }
+      },
+      {
+        "id": "home-meal",
+        "type": "meal",
+        "enabled": false,
+        "title": "오늘의 점심",
+        "subtitle": "서전고 급식실",
+        "sourceKey": "neis_meal",
+        "accent": "",
+        "props": {
+          "showCalories": true
+        },
+        "sheet": {
+          "title": "오늘의 급식 상세",
+          "body": "마이 탭에서 알레르기 번호를 선택하면 해당 성분이 포함된 메뉴가 자동 강조됩니다."
+        }
+      },
+      {
+        "id": "home-timetable",
+        "type": "timetable",
+        "enabled": false,
+        "title": "우리 반 시간표",
+        "subtitle": "1~7교시 라이브 타임라인",
+        "sourceKey": "timetable",
+        "accent": "",
+        "props": {
+          "showPeriodTimes": true
+        },
+        "sheet": {
+          "title": "시간표 안내",
+          "body": "마이 탭에서 학년/반을 변경하면 홈 시간표가 즉시 바뀝니다."
+        }
+      }
+    ],
+    "explore": [],
+    "forest": [],
+    "my": [
+      {
+        "id": "my-guide",
+        "type": "text",
+        "enabled": true,
+        "title": "틈(Teum) v2 안내",
+        "subtitle": "노션 CMS · Zero-Toolchain 포털",
+        "sourceKey": "",
+        "accent": "",
+        "props": {
+          "body": "홈: 주요 요약 · 일정 · 공지\n탐색: 사진 썸네일 블로그 아카이브 (검색·날짜·태그)\n숲: 회계·회의록·공지·자료 통합 창고\n\n관리자 스튜디오(admin.html)에서 코딩 없이 위젯과 블로그 포스트, 사진 썸네일을 관리할 수 있습니다."
+        },
+        "sheet": {
+          "title": "틈(Teum) v2 아키텍처",
+          "body": "노션 통합 마스터 DB에서 글과 사진을 수집해 정적 JSON과 WebP 썸네일로 구워내는 Zero-Ops 포털입니다."
+        }
+      }
+    ]
+  }
+}

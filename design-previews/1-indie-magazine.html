@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>시안 1 — 인디 매거진 스타일</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #FAF7F2;
+      color: #1A1918;
+      font-family: "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.65;
+    }
+    .wrap { max-width: 460px; margin: 0 auto; padding: 28px 22px 60px; }
+    .masthead {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding-bottom: 14px; border-bottom: 1px solid #1A1918; font-size: 0.78rem; letter-spacing: 0.04em;
+    }
+    .masthead strong { font-size: 1.05rem; letter-spacing: -0.02em; }
+    .hero { padding: 36px 0 28px; border-bottom: 1px solid rgba(26, 25, 24, 0.16); }
+    .issue { font-size: 0.75rem; color: #1B4332; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+    h1 {
+      margin: 0; font-family: "Nanum Myeongjo", "Batang", Georgia, serif;
+      font-size: 1.85rem; line-height: 1.32; font-weight: 700; letter-spacing: -0.03em; word-break: keep-all;
+    }
+    .lead { margin: 16px 0 0; font-size: 0.92rem; color: #52504C; word-break: keep-all; }
+    .cta-row { margin-top: 22px; display: flex; gap: 16px; align-items: center; font-size: 0.85rem; font-weight: 700; }
+    .cta-link { color: #1B4332; border-bottom: 1.5px solid #1B4332; padding-bottom: 2px; text-decoration: none; }
+    .toc-head { font-size: 0.75rem; letter-spacing: 0.08em; color: #78756E; margin: 28px 0 8px; font-weight: 700; }
+    .item {
+      padding: 18px 0; border-bottom: 1px solid rgba(26, 25, 24, 0.12);
+      display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start;
+    }
+    .num { font-family: Georgia, serif; font-style: italic; font-size: 0.95rem; color: #1B4332; }
+    .item h2 { margin: 0; font-size: 1.02rem; font-weight: 700; letter-spacing: -0.02em; }
+    .item p { margin: 4px 0 0; font-size: 0.84rem; color: #52504C; word-break: keep-all; }
+    .meta { margin-top: 8px; font-size: 0.74rem; color: #8A867E; }
+    .quote-block {
+      margin-top: 32px; padding: 20px 0 0;
+      font-family: "Nanum Myeongjo", "Batang", serif; font-size: 1.05rem; line-height: 1.6; color: #1B4332;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="masthead">
+      <strong>틈 · 매거진</strong>
+      <span>제10대 학생자치 · 2026</span>
+    </header>
+
+    <section class="hero">
+      <div class="issue">Vol. 01 — 남윤아 × 임준서</div>
+      <h1>현실의 틈을 열어 마당으로,<br>사람과 생각의 마주침을 잇다.</h1>
+      <p class="lead">말뿐인 종이 공약집 대신, 지금 바로 열어볼 수 있는 0.5초 학교 포털과 4단계 공간 순환 이야기를 담았습니다.</p>
+      <div class="cta-row">
+        <a class="cta-link" href="#">오늘 급식·시간표 열어보기 →</a>
+      </div>
+    </section>
+
+    <div class="toc-head">INDEX · 4대 공약</div>
+    <article class="item">
+      <span class="num">01</span>
+      <div>
+        <h2>틈 — 광고 없는 0.5초 생활 포털</h2>
+        <p>아침 등굣길과 쉬는 시간, 오늘 급식과 우리 반 시간표가 로그인 없이 바로 열립니다.</p>
+        <div class="meta">3월 1주 공개 · 온라인 허브</div>
+      </div>
+    </article>
+    <article class="item">
+      <span class="num">02</span>
+      <div>
+        <h2>뜰 — 10년 만에 열리는 지산실 안뜰</h2>
+        <p>닫혀 있던 폴딩도어를 열고 김효영 그늘집을 학생들의 캠퍼스 거실로 바꿉니다.</p>
+        <div class="meta">3월 말 개방 · 오프라인 쉼터</div>
+      </div>
+    </article>
+    <article class="item">
+      <span class="num">03</span>
+      <div>
+        <h2>터 — 빨간 러그 유랑 세바시 &amp; 자원순환</h2>
+        <p>교내 다섯 곳을 도는 팝업 무대와 패스-잇 서가·A5 이면지 패드를 운영합니다.</p>
+        <div class="meta">4–5월 순회 · 만남의 장</div>
+      </div>
+    </article>
+    <article class="item">
+      <span class="num">04</span>
+      <div>
+        <h2>숲 — 1원 단위 투명 장부 &amp; 디운위</h2>
+        <p>선배가 졸업해도 멈추지 않는 기수제 운영 기구와 10년 회의록 아카이브를 세웁니다.</p>
+        <div class="meta">6월~영구 · 제도화</div>
+      </div>
+    </article>
+
+    <blockquote class="quote-block">
+      “거창해서 2주 만에 멈추는 약속보다, 매일 아침 조용히 켜지는 구조가 진짜 실력이라고 믿습니다.”
+    </blockquote>
+  </div>
+</body>
+</html>

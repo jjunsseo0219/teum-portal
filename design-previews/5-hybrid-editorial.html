@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>시안 5 — 현재(인터랙션) × 1번(매거진) × 3번(룩북)</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: light-dark(#FAF8F4, #121211);
+      --surface: light-dark(#FFFFFF, #1B1B19);
+      --subtle: light-dark(#F2EFE9, #242421);
+      --text: light-dark(#141413, #F4F2ED);
+      --muted: light-dark(#64615B, #9E9B93);
+      --line: light-dark(rgba(20, 20, 19, 0.11), rgba(244, 242, 237, 0.12));
+      --ink: light-dark(#1B4332, #6EE7B7);
+      --btn-bg: light-dark(#141413, #F4F2ED);
+      --btn-fg: light-dark(#FAF8F4, #141413);
+      &:has(> head > meta[name="color-scheme"][content="dark"]) { color-scheme: dark; }
+      &:has(> head > meta[name="color-scheme"][content="light"]) { color-scheme: light; }
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text); line-height: 1.65;
+      font-family: "Pretendard Variable", "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", -apple-system, sans-serif;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* Sticky Minimal Header (현재의 앱 편의성 + 1·3번의 절제) */
+    .header {
+      position: sticky; top: 0; z-index: 20;
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(14px); border-bottom: 1px solid var(--line);
+    }
+    .header-in {
+      max-width: 560px; margin: 0 auto; padding: 14px 22px;
+      display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    }
+    .brand { font-size: 1.12rem; font-weight: 800; letter-spacing: -0.03em; }
+    .brand span { font-weight: 500; color: var(--muted); font-size: 0.82rem; margin-left: 8px; }
+    .nav-right { display: flex; align-items: center; gap: 14px; font-size: 0.82rem; font-weight: 600; }
+    .theme-btn {
+      border: 1px solid var(--line); background: transparent; color: var(--text);
+      padding: 4px 10px; border-radius: 6px; font-family: inherit; font-size: 0.76rem; font-weight: 600; cursor: pointer;
+    }
+    .portal-link { color: var(--ink); border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+
+    .wrap { max-width: 560px; margin: 0 auto; padding: 36px 22px 72px; }
+
+    /* Hero: 3번의 넉넉한 여백 + 1번의 명조 타이틀 + 현재의 명확한 행동 버튼 */
+    .hero { padding-bottom: 40px; border-bottom: 1px solid var(--line); }
+    .issue-line {
+      font-size: 0.76rem; font-weight: 700; letter-spacing: 0.06em; color: var(--ink);
+      margin-bottom: 14px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(1.75rem, 5.5vw, 2.2rem); font-weight: 800; line-height: 1.26;
+      letter-spacing: -0.04em; word-break: keep-all;
+    }
+    .hero-sub {
+      margin: 16px 0 0; font-size: 0.94rem; color: var(--muted); word-break: keep-all; max-width: 44ch;
+    }
+    .cta-row { margin-top: 26px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+    .btn-solid {
+      display: inline-flex; align-items: center; padding: 12px 20px; border-radius: 8px;
+      background: var(--btn-bg); color: var(--btn-fg); font-size: 0.86rem; font-weight: 700;
+      transition: transform 140ms ease, opacity 140ms ease;
+    }
+    .btn-solid:active { transform: scale(0.982); opacity: 0.9; }
+    .btn-text {
+      font-size: 0.85rem; font-weight: 600; color: var(--muted);
+      border-bottom: 1px solid var(--line); padding-bottom: 2px;
+    }
+
+    /* Section Label */
+    .sec { padding-top: 38px; }
+    .sec-label {
+      font-size: 0.74rem; font-weight: 700; letter-spacing: 0.08em; color: var(--muted);
+      margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;
+    }
+
+    /* 4대 공약 목차: 3번(박스 제거·여백) + 1번(이탤릭 번호·실선) + 현재(탭 시 시트 열림) */
+    .index-list { border-top: 1px solid var(--line); }
+    .index-row {
+      width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line);
+      background: transparent; color: var(--text); padding: 20px 2px; cursor: pointer;
+      font-family: inherit; display: grid; grid-template-columns: 36px 1fr 20px; gap: 10px; align-items: start;
+      transition: opacity 140ms ease, transform 140ms ease;
+    }
+    .index-row:active { transform: scale(0.99); opacity: 0.72; }
+    .idx-num { font-size: 0.86rem; font-weight: 700; letter-spacing: 0.02em; color: var(--ink); padding-top: 3px; }
+    .idx-title { margin: 0; font-size: 1.04rem; font-weight: 700; letter-spacing: -0.02em; word-break: keep-all; }
+    .idx-desc { margin: 5px 0 0; font-size: 0.85rem; color: var(--muted); word-break: keep-all; }
+    .idx-meta { margin-top: 8px; font-size: 0.74rem; color: var(--muted); font-weight: 600; }
+    .idx-arrow { color: var(--muted); font-size: 0.9rem; padding-top: 2px; }
+
+    /* 매거진 필터 & 아티클: 이모지·알약 배지 없이 단정한 밑줄 탭 */
+    .tabs {
+      display: flex; gap: 18px; overflow-x: auto; border-bottom: 1px solid var(--line);
+      margin-bottom: 8px; scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted);
+      padding: 10px 2px; font-family: inherit; font-size: 0.86rem; font-weight: 600;
+      cursor: pointer; white-space: nowrap; transition: color 140ms ease, border-color 140ms ease;
+    }
+    .tab-btn.is-active { color: var(--text); border-bottom-color: var(--text); font-weight: 700; }
+
+    .article-row {
+      width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line);
+      background: transparent; color: var(--text); padding: 22px 2px; cursor: pointer;
+      font-family: inherit; display: block; transition: opacity 140ms ease;
+    }
+    .article-row:active { opacity: 0.65; }
+    .art-kicker { font-size: 0.75rem; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+    .art-title {
+      margin: 0;
+      font-size: 1.15rem; font-weight: 700; line-height: 1.38; letter-spacing: -0.025em; word-break: keep-all;
+    }
+    .art-excerpt { margin: 8px 0 0; font-size: 0.86rem; color: var(--muted); word-break: keep-all; }
+    .art-foot { margin-top: 10px; font-size: 0.76rem; color: var(--muted); display: flex; justify-content: space-between; }
+
+    /* Closing */
+    .closing {
+      margin-top: 44px; padding: 28px 22px; border-radius: 14px; background: var(--subtle);
+      border: 1px solid var(--line);
+    }
+    .closing h2 {
+      margin: 0;
+      font-size: 1.18rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.4; word-break: keep-all;
+    }
+    .closing p { margin: 8px 0 18px; font-size: 0.85rem; color: var(--muted); }
+
+    /* 현재 방식의 부드러운 바텀시트 리더 */
+    dialog.sheet {
+      margin: auto auto 0; width: 100%; max-width: 560px; height: 90dvh; max-height: 90dvh;
+      border: 0; padding: 0; border-radius: 20px 20px 0 0; background: var(--surface); color: var(--text);
+      box-shadow: 0 -10px 36px rgba(0, 0, 0, 0.18); opacity: 0;
+      transition-property: opacity, transform, display, overlay; transition-duration: 0.24s;
+      transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1); transition-behavior: allow-discrete;
+    }
+    @media (prefers-reduced-motion: no-preference) { dialog.sheet { transform: translateY(100%); } }
+    dialog.sheet::backdrop { background: transparent; transition-property: background-color, display, overlay; transition-duration: 0.24s; transition-behavior: allow-discrete; }
+    dialog.sheet[open] {
+      opacity: 1;
+      @starting-style { opacity: 0; }
+      @media (prefers-reduced-motion: no-preference) { transform: translateY(0); @starting-style { transform: translateY(100%); } }
+      &::backdrop { background: rgb(0 0 0 / 0.45); @starting-style { background: transparent; } }
+    }
+    .sheet-in { height: 100%; overflow-y: auto; padding: 24px 22px 36px; display: flex; flex-direction: column; gap: 18px; }
+    .sheet-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+    .sheet-kicker { font-size: 0.76rem; font-weight: 700; color: var(--ink); display: block; margin-bottom: 6px; }
+    .sheet-title { margin: 0; font-size: 1.22rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.35; word-break: keep-all; }
+    .close-btn { border: 1px solid var(--line); background: transparent; color: var(--text); width: 32px; height: 32px; border-radius: 999px; cursor: pointer; flex-shrink: 0; }
+    .sheet-quote { margin: 0; padding: 12px 14px; border-left: 2.5px solid var(--ink); background: var(--subtle); font-size: 0.9rem; font-weight: 600; word-break: keep-all; }
+    .sheet-body { margin: 0; font-size: 0.92rem; color: var(--muted); line-height: 1.8; word-break: keep-all; }
+    .sheet-foot { padding-top: 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+    .like-btn { border: 1px solid var(--line); background: transparent; color: var(--text); padding: 8px 14px; border-radius: 8px; font-family: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+    .like-btn.is-liked { border-color: var(--ink); color: var(--ink); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-in">
+      <div class="brand">틈.<span>제10대 공약집</span></div>
+      <div class="nav-right">
+        <button type="button" class="theme-btn" id="themeBtn">테마</button>
+        <a class="portal-link" href="../index.html">포털 열기</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="issue-line">VOL. 01 · 남윤아 × 임준서</div>
+      <h1>현실의 틈을 열어 마당으로,<br>사람과 생각의 마주침을 잇다.</h1>
+      <p class="hero-sub">
+        덜어낸 화면 위에 필요한 것만 남겼습니다. 지금 바로 쓸 수 있는 0.5초 생활 포털과 4단계 공간 순환 이야기를 읽고 판단해 보세요.
+      </p>
+      <div class="cta-row">
+        <a class="btn-solid" href="../index.html">오늘 급식·시간표 열어보기 →</a>
+        <a class="btn-text" href="#index">4대 공약 목차 보기</a>
+      </div>
+    </section>
+
+    <section id="index" class="sec">
+      <div class="sec-label"><span>INDEX · 4대 공약</span><span>탭하여 읽기</span></div>
+      <div class="index-list" id="indexList"></div>
+    </section>
+
+    <section class="sec">
+      <div class="sec-label"><span>ESSAYS · 왜, 어떻게</span></div>
+      <div class="tabs" id="tabs"></div>
+      <div id="articleList"></div>
+    </section>
+
+    <section class="closing">
+      <h2>약속이 아니라,<br>이미 움직이는 구조로 남깁니다.</h2>
+      <p>오늘 점심 메뉴와 우리 반 시간표부터 가볍게 먼저 써보세요.</p>
+      <a class="btn-solid" href="../index.html">‘틈’ 포털 바로 실행하기 →</a>
+    </section>
+  </main>
+
+  <dialog id="sheet" class="sheet" closedby="any">
+    <div class="sheet-in">
+      <div class="sheet-top">
+        <div>
+          <span class="sheet-kicker" id="sKicker"></span>
+          <h2 class="sheet-title" id="sTitle"></h2>
+        </div>
+        <button type="button" class="close-btn" id="sClose" aria-label="닫기">✕</button>
+      </div>
+      <blockquote class="sheet-quote" id="sQuote"></blockquote>
+      <p class="sheet-body" id="sBody"></p>
+      <div class="sheet-foot">
+        <button type="button" class="like-btn" id="sLike">공감 0</button>
+        <a class="portal-link" href="../index.html" style="font-size:0.82rem;font-weight:700">포털에서 확인하기 →</a>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    (function () {
+      const DATA = [
+        { id: 'teum', no: '01', cat: '틈', when: '3월 1주 · 온라인', title: '광고 없는 0.5초 생활 포털', summary: '등굣길과 쉬는 시간, 급식과 우리 반 시간표·수행 D-Day가 바로 열립니다.', quote: '“당선되면 만들겠다는 말 대신, 지금 손끝으로 눌러볼 수 있는 결과를 먼저 열었습니다.”', body: '학생들이 매일 찾는 급식과 시간표를 광고 없이 0.5초 만에 볼 수 있도록 가벼운 웹 포털로 만들었습니다. 로그인 없이 반만 한 번 고르면 학교 공지와 수행평가 마감까지 시간표 옆에 자연스럽게 붙습니다.', likes: 86 },
+        { id: 'tteul', no: '02', cat: '뜰', when: '3월 말 · 공간', title: '10년 만에 열리는 지산실 안뜰', summary: '닫혀 있던 1층 지산실 폴딩도어를 열고 김효영 그늘집을 캠퍼스 거실로 가꿉니다.', quote: '“온라인 틈을 연 학생들이, 밖으로 나와 햇살과 바람이 닿는 마당을 만납니다.”', body: '점심시간 50분, 교실을 벗어나 숨 고를 수 있는 쉼터가 필요합니다. 1층 지산실-중정 폴딩도어를 개방하고 그늘집 야외 벤치를 정비해 누구나 편하게 머무는 캠퍼스 거실을 엽니다.', likes: 74 },
+        { id: 'teo', no: '03', cat: '터', when: '4–5월 · 만남·순환', title: '빨간 러그 유랑 세바시 & 무인 순환', summary: '교내 다섯 곳을 도는 1.2m 팝업 무대와 패스-잇 서가, A5 이면지 패드를 운영합니다.', quote: '“거창한 강당 행사 대신, 일상 길목에서 생각과 물건이 도는 터를 만듭니다.”', body: '도서관 앞·그늘집·나무계단을 순회하는 소규모 유랑 세바시와 함께, 관리 인력이 없어도 깨끗이 유지되는 3대 자원순환(패스-잇 수험서가, A5 이면지 패드, 뚜껑 밸럿 빈)을 정착시킵니다.', likes: 69 },
+        { id: 'sup', no: '04', cat: '숲', when: '6월~영구 · 기록·제도', title: '1원 단위 투명 장부 & 디운위', summary: '선배가 졸업해도 멈추지 않는 기수제 기술 기구와 10년 치 회의록 아카이브를 세웁니다.', quote: '“한 사람이 열심히 해서 버티는 학생회가 아니라, 누구나 이어받는 시스템의 숲.”', body: '학생회비 영수증을 1원 단위까지 공개하고, 1학년 크루부터 3학년 고문까지 이어지는 독립 기구 디지털운영위원회(디운위)를 세워 다음 기수에도 그대로 운영되도록 제도화합니다.', likes: 92 }
+      ];
+
+      const CATS = ['전체', '틈', '뜰', '터', '숲'];
+      let activeCat = '전체';
+      const liked = {};
+      const $ = (id) => document.getElementById(id);
+
+      $('indexList').replaceChildren(...DATA.map((d) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'index-row';
+        btn.innerHTML = `<span class="idx-num">${d.no}</span><div><h3 class="idx-title">${d.title}</h3><p class="idx-desc">${d.summary}</p><div class="idx-meta">${d.cat} · ${d.when}</div></div><span class="idx-arrow">→</span>`;
+        btn.onclick = () => openSheet(d);
+        return btn;
+      }));
+
+      function renderTabs() {
+        $('tabs').replaceChildren(...CATS.map((c) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'tab-btn' + (c === activeCat ? ' is-active' : '');
+          b.textContent = c;
+          b.onclick = () => { activeCat = c; renderTabs(); renderArticles(); };
+          return b;
+        }));
+      }
+
+      function renderArticles() {
+        const list = DATA.filter((d) => activeCat === '전체' || d.cat === activeCat);
+        $('articleList').replaceChildren(...list.map((d) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'article-row';
+          b.innerHTML = `<div class="art-kicker">${d.no} · ${d.cat}</div><h3 class="art-title">${d.title}</h3><p class="art-excerpt">${d.summary}</p><div class="art-foot"><span>${d.when}</span><span>공감 ${d.likes + (liked[d.id] ? 1 : 0)} · 읽기 →</span></div>`;
+          b.onclick = () => openSheet(d);
+          return b;
+        }));
+      }
+
+      const sheet = $('sheet');
+      function openSheet(d) {
+        $('sKicker').textContent = `${d.no} · ${d.cat} · ${d.when}`;
+        $('sTitle').textContent = d.title;
+        $('sQuote').textContent = d.quote;
+        $('sBody').textContent = d.body;
+        const syncLike = () => {
+          const on = Boolean(liked[d.id]);
+          $('sLike').className = 'like-btn' + (on ? ' is-liked' : '');
+          $('sLike').textContent = (on ? '공감됨 · ' : '공감 · ') + (d.likes + (on ? 1 : 0));
+        };
+        syncLike();
+        $('sLike').onclick = () => { liked[d.id] = !liked[d.id]; syncLike(); renderArticles(); };
+        if (!sheet.open) sheet.showModal();
+      }
+      $('sClose').onclick = () => sheet.close();
+      sheet.onclick = (e) => { if (e.target === sheet) sheet.close(); };
+
+      const meta = document.querySelector('meta[name="color-scheme"]');
+      $('themeBtn').onclick = () => {
+        const dark = meta.content === 'dark' || (meta.content === 'light dark' && matchMedia('(prefers-color-scheme: dark)').matches);
+        meta.content = dark ? 'light' : 'dark';
+      };
+
+      renderTabs();
+      renderArticles();
+    })();
+  </script>
+</body>
+</html>

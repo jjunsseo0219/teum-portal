@@ -1,0 +1,4 @@
+ArXiv Terms of Use Notification:
+Accessed at: 2026-10-09T00:28:00+09:00
+Please review the arXiv API terms of use at https://info.arxiv.org/help/api/index.html
+Always check the individual license of each paper retrieved for any distribution or usage restrictions.
