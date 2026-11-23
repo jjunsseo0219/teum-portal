@@ -2590,6 +2590,39 @@ dialog.sheet[open]:where(:not([data-closing])) {
   color: var(--accent);
 }
 
+.widget-size-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Default ('md') balanced scrollable heights so neighbor cards naturally align */
+.bento-board .study-links-card.bento-h-md .study-links-grid {
+  max-height: 204px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Compact ('sm') height mode */
+.bento-board .widget-card.bento-h-sm .study-links-grid,
+.bento-board .widget-card.bento-h-sm .planner-list,
+.bento-board .widget-card.bento-h-sm .bento-meal-list,
+.bento-board .widget-card.bento-h-sm .bento-tt-list,
+.bento-board .widget-card.bento-h-sm .list-items,
+.bento-board .widget-card.bento-h-sm .text-body {
+  max-height: 128px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Large ('lg') height mode */
+.bento-board .widget-card.bento-h-lg .study-links-grid,
+.bento-board .widget-card.bento-h-lg .planner-list {
+  max-height: 440px;
+  overflow-y: auto;
+}
+
 @media (min-width: 720px) and (max-width: 1023px) {
   .bento-board {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2608,22 +2641,16 @@ dialog.sheet[open]:where(:not([data-closing])) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-auto-flow: dense;
     gap: 16px;
-    align-items: stretch;
+    align-items: start;
   }
 
   .bento-board > .widget-card.bento-placed-card {
     grid-column: span var(--bento-span, 1);
-    grid-row: auto;
-    display: flex;
-    flex-direction: column;
+    grid-row: span var(--bento-row-span, 1);
   }
 
   .study-links-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .bento-board .study-timer-card .study-clock-box {
-    margin-top: auto;
   }
 }
 

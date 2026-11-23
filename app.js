@@ -34,7 +34,7 @@
     forest: { query: '', year: 'all', month: 'all', dept: 'all', type: 'all' },
     inlineDetail: null,
     homeEditMode: false,
-    homeLayout: { order: [], hidden: [], spans: {}, slots: {} },
+    homeLayout: { order: [], hidden: [], spans: {}, heights: {}, slots: {} },
     studyTimer: {
       subject: '수학',
       mode: 'stopwatch',
@@ -80,6 +80,7 @@
             order: Array.isArray(parsed.order) ? parsed.order : [],
             hidden: Array.isArray(parsed.hidden) ? parsed.hidden : [],
             spans: parsed.spans && typeof parsed.spans === 'object' ? parsed.spans : {},
+            heights: parsed.heights && typeof parsed.heights === 'object' ? parsed.heights : {},
             slots: parsed.slots && typeof parsed.slots === 'object' ? parsed.slots : {}
           };
         }
@@ -151,6 +152,18 @@
     renderFeed();
   }
 
+  function getWidgetHeightMode(item) {
+    const mode = !isAdminPreview && state.homeLayout?.heights ? state.homeLayout.heights[item.id] : '';
+    return (mode === 'sm' || mode === 'md' || mode === 'lg') ? mode : 'md';
+  }
+
+  function setHomeWidgetHeight(widgetId, mode) {
+    if (!state.homeLayout.heights || typeof state.homeLayout.heights !== 'object') state.homeLayout.heights = {};
+    state.homeLayout.heights[widgetId] = (mode === 'sm' || mode === 'md' || mode === 'lg') ? mode : 'md';
+    saveHomeLayout();
+    renderFeed();
+  }
+
   function setHomeWidgetHidden(widgetId, hidden) {
     const set = new Set(Array.isArray(state.homeLayout.hidden) ? state.homeLayout.hidden : []);
     if (hidden) set.add(widgetId);
@@ -161,7 +174,7 @@
   }
 
   function resetHomeLayout() {
-    state.homeLayout = { order: [], hidden: [], spans: {}, slots: {} };
+    state.homeLayout = { order: [], hidden: [], spans: {}, heights: {}, slots: {} };
     saveHomeLayout();
     renderFeed();
   }
@@ -1781,8 +1794,10 @@
       for (const item of visibleItems) {
         const card = item.render();
         const span = getWidgetSpan(item, COLS);
+        const hMode = getWidgetHeightMode(item);
         card.style.setProperty('--bento-span', String(span));
-        card.classList.add('bento-placed-card');
+        card.style.setProperty('--bento-row-span', hMode === 'lg' ? '2' : '1');
+        card.classList.add('bento-placed-card', `bento-h-${hMode}`);
 
         if (!isAdminPreview && state.homeEditMode && item.id) {
           card.classList.add('is-edit-mode');
@@ -1790,16 +1805,34 @@
           card.prepend(
             el('div', { className: 'widget-edit-bar' },
               el('span', { className: 'widget-drag-handle' }, '⋮⋮ 끌어서 이동'),
-              el('div', { className: 'widget-size-group', role: 'group', 'aria-label': '위젯 가로 크기' },
-                [1, 2, 3].map((s) =>
-                  el('button', {
-                    type: 'button',
-                    className: `widget-size-btn ${span === s ? 'is-active' : ''}`.trim(),
-                    onClick: (e) => {
-                      e.stopPropagation();
-                      setHomeWidgetSpan(item.id, s, null, COLS);
-                    }
-                  }, `${s}칸`)
+              el('div', { className: 'widget-size-controls' },
+                el('div', { className: 'widget-size-group', role: 'group', 'aria-label': '위젯 가로 크기' },
+                  [1, 2, 3].map((s) =>
+                    el('button', {
+                      type: 'button',
+                      className: `widget-size-btn ${span === s ? 'is-active' : ''}`.trim(),
+                      onClick: (e) => {
+                        e.stopPropagation();
+                        setHomeWidgetSpan(item.id, s, null, COLS);
+                      }
+                    }, `${s}칸`)
+                  )
+                ),
+                el('div', { className: 'widget-size-group', role: 'group', 'aria-label': '위젯 세로 크기' },
+                  [
+                    { id: 'sm', label: '작게' },
+                    { id: 'md', label: '기본' },
+                    { id: 'lg', label: '크게' }
+                  ].map((h) =>
+                    el('button', {
+                      type: 'button',
+                      className: `widget-size-btn ${hMode === h.id ? 'is-active' : ''}`.trim(),
+                      onClick: (e) => {
+                        e.stopPropagation();
+                        setHomeWidgetHeight(item.id, h.id);
+                      }
+                    }, h.label)
+                  )
                 )
               ),
               el('button', {
