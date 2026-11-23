@@ -130,117 +130,23 @@
     return Math.min(cols, Math.max(1, raw));
   }
 
-  function computeBentoPlacements(items, cols = 3) {
-    const occupied = new Set();
-    const placements = new Map();
-    const isFree = (col, row, span) => {
-      if (col < 1 || col + span - 1 > cols || row < 1) return false;
-      for (let c = col; c < col + span; c++) {
-        if (occupied.has(`${c},${row}`)) return false;
-      }
-      return true;
-    };
-    const occupy = (id, col, row, span) => {
-      for (let c = col; c < col + span; c++) occupied.add(`${c},${row}`);
-      placements.set(id, { col, row, span });
-    };
-    const findFirstFree = (span, startRow = 1) => {
-      for (let r = Math.max(1, startRow); r < 60; r++) {
-        for (let c = 1; c <= cols - span + 1; c++) {
-          if (isFree(c, r, span)) return { col: c, row: r };
-        }
-      }
-      return { col: 1, row: 1 };
-    };
-
-    const savedSlots = (!isAdminPreview && state.homeLayout?.slots && typeof state.homeLayout.slots === 'object')
-      ? state.homeLayout.slots
-      : {};
-
-    const pinned = [];
-    const unpinned = [];
-    for (const it of items) {
-      const s = savedSlots[it.id];
-      if (s && Number(s.col) >= 1 && Number(s.row) >= 1) pinned.push({ item: it, slot: s });
-      else unpinned.push(it);
-    }
-
-    for (const { item, slot } of pinned) {
-      const span = getWidgetSpan(item, cols);
-      const col = Math.min(Math.max(1, Number(slot.col)), cols - span + 1);
-      const row = Math.max(1, Number(slot.row));
-      if (isFree(col, row, span)) {
-        occupy(item.id, col, row, span);
-      } else {
-        const alt = findFirstFree(span, row);
-        occupy(item.id, alt.col, alt.row, span);
-      }
-    }
-
-    for (const item of unpinned) {
-      const span = getWidgetSpan(item, cols);
-      const pos = findFirstFree(span, 1);
-      occupy(item.id, pos.col, pos.row, span);
-    }
-
-    let maxRow = 1;
-    for (const p of placements.values()) {
-      if (p.row > maxRow) maxRow = p.row;
-    }
-    return { placements, occupied, maxRow };
-  }
-
-  function snapshotSlotsFromPlacements(placements) {
-    const nextSlots = {};
-    for (const [id, p] of placements.entries()) {
-      nextSlots[id] = { col: p.col, row: p.row };
-    }
-    state.homeLayout.slots = nextSlots;
-  }
-
-  function placeHomeWidgetAtSlot(widgetId, targetCol, targetRow, placements, items, cols = 3) {
-    if (!widgetId) return;
-    snapshotSlotsFromPlacements(placements);
-    const targetItem = items.find((it) => it.id === widgetId);
-    const span = getWidgetSpan(targetItem || { id: widgetId }, cols);
-    const col = Math.min(Math.max(1, targetCol), cols - span + 1);
-    const row = Math.max(1, targetRow);
-    state.homeLayout.slots[widgetId] = { col, row };
-    saveHomeLayout();
-    renderFeed();
-  }
-
-  function swapHomeWidgets(fromId, toId, placements, allIds) {
+  function moveHomeWidgetOrder(fromId, toId, allIds) {
     if (!fromId || !toId || fromId === toId) return;
-    if (placements && placements.has(fromId) && placements.has(toId)) {
-      snapshotSlotsFromPlacements(placements);
-      const a = state.homeLayout.slots[fromId];
-      const b = state.homeLayout.slots[toId];
-      state.homeLayout.slots[fromId] = { ...b };
-      state.homeLayout.slots[toId] = { ...a };
-    }
     const order = Array.isArray(allIds) ? [...allIds] : [];
-    const fi = order.indexOf(fromId);
-    const ti = order.indexOf(toId);
-    if (fi >= 0 && ti >= 0) {
-      [order[fi], order[ti]] = [order[ti], order[fi]];
-      state.homeLayout.order = order;
-    }
+    const fromIdx = order.indexOf(fromId);
+    const toIdx = order.indexOf(toId);
+    if (fromIdx < 0 || toIdx < 0) return;
+    const [moved] = order.splice(fromIdx, 1);
+    order.splice(toIdx, 0, moved);
+    state.homeLayout.order = order;
+    state.homeLayout.slots = {};
     saveHomeLayout();
     renderFeed();
   }
 
-  function setHomeWidgetSpan(widgetId, span, placements, cols = 3) {
+  function setHomeWidgetSpan(widgetId, span, _placements, cols = 3) {
     if (!state.homeLayout.spans || typeof state.homeLayout.spans !== 'object') state.homeLayout.spans = {};
-    const clamped = Math.min(cols, Math.max(1, Number(span) || 1));
-    state.homeLayout.spans[widgetId] = clamped;
-    if (placements && placements.size > 0) {
-      snapshotSlotsFromPlacements(placements);
-      const cur = state.homeLayout.slots[widgetId];
-      if (cur && cur.col + clamped - 1 > cols) {
-        cur.col = Math.max(1, cols - clamped + 1);
-      }
-    }
+    state.homeLayout.spans[widgetId] = Math.min(cols, Math.max(1, Number(span) || 1));
     saveHomeLayout();
     renderFeed();
   }
@@ -1710,7 +1616,7 @@
         }, state.homeEditMode ? '편집 완료' : '화면 편집') : null
       ),
       (!isAdminPreview && state.homeEditMode) ? el('div', { className: 'home-edit-banner' },
-        el('span', { className: 'home-edit-banner-text' }, '카드를 빈 칸이나 다른 카드 위로 끌어 원하는 위치에 배치하고, 1칸·2칸·3칸 크기도 바꿀 수 있어요.'),
+        el('span', { className: 'home-edit-banner-text' }, '카드를 끌어서 위치를 바꾸고, 1칸·2칸·3칸 크기로 빈틈없이 맞춰보세요.'),
         el('div', { style: { display: 'flex', gap: '6px', flexShrink: 0 } },
           el('button', {
             type: 'button',
@@ -1868,36 +1774,30 @@
       }
 
       const COLS = 3;
-      const { placements, occupied, maxRow } = computeBentoPlacements(visibleItems, COLS);
       const board = el('div', { className: `bento-board ${state.homeEditMode && !isAdminPreview ? 'is-edit-board' : ''}`.trim() });
       const allIds = orderedPool.map((it) => it.id);
       let draggingWidgetId = null;
 
       for (const item of visibleItems) {
         const card = item.render();
-        const pos = placements.get(item.id);
-        if (pos) {
-          card.style.setProperty('--bento-col', String(pos.col));
-          card.style.setProperty('--bento-span', String(pos.span));
-          card.style.setProperty('--bento-row', String(pos.row));
-          card.classList.add('bento-placed-card');
-        }
+        const span = getWidgetSpan(item, COLS);
+        card.style.setProperty('--bento-span', String(span));
+        card.classList.add('bento-placed-card');
 
         if (!isAdminPreview && state.homeEditMode && item.id) {
-          const curSpan = pos ? pos.span : getWidgetSpan(item, COLS);
           card.classList.add('is-edit-mode');
           card.draggable = true;
           card.prepend(
             el('div', { className: 'widget-edit-bar' },
-              el('span', { className: 'widget-drag-handle' }, '⋮⋮ 이동'),
+              el('span', { className: 'widget-drag-handle' }, '⋮⋮ 끌어서 이동'),
               el('div', { className: 'widget-size-group', role: 'group', 'aria-label': '위젯 가로 크기' },
                 [1, 2, 3].map((s) =>
                   el('button', {
                     type: 'button',
-                    className: `widget-size-btn ${curSpan === s ? 'is-active' : ''}`.trim(),
+                    className: `widget-size-btn ${span === s ? 'is-active' : ''}`.trim(),
                     onClick: (e) => {
                       e.stopPropagation();
-                      setHomeWidgetSpan(item.id, s, placements, COLS);
+                      setHomeWidgetSpan(item.id, s, null, COLS);
                     }
                   }, `${s}칸`)
                 )
@@ -1934,7 +1834,7 @@
             const fromId = draggingWidgetId || (e.dataTransfer && e.dataTransfer.getData('text/plain'));
             draggingWidgetId = null;
             if (fromId && fromId !== item.id) {
-              swapHomeWidgets(fromId, item.id, placements, allIds);
+              moveHomeWidgetOrder(fromId, item.id, allIds);
             }
           });
           card.addEventListener('dragend', () => {
@@ -1944,36 +1844,6 @@
           });
         }
         board.appendChild(card);
-      }
-
-      if (!isAdminPreview && state.homeEditMode && isDesktopLayout()) {
-        for (let r = 1; r <= maxRow + 1; r++) {
-          for (let c = 1; c <= COLS; c++) {
-            if (occupied.has(`${c},${r}`)) continue;
-            const slotEl = el('div', {
-              className: 'bento-empty-slot',
-              style: { '--bento-col': String(c), '--bento-row': String(r) }
-            }, `+ 빈 칸 (${r}행 ${c}열)`);
-            slotEl.addEventListener('dragover', (e) => {
-              if (!draggingWidgetId) return;
-              e.preventDefault();
-              slotEl.classList.add('is-drop-target');
-            });
-            slotEl.addEventListener('dragleave', () => {
-              slotEl.classList.remove('is-drop-target');
-            });
-            slotEl.addEventListener('drop', (e) => {
-              e.preventDefault();
-              slotEl.classList.remove('is-drop-target');
-              const fromId = draggingWidgetId || (e.dataTransfer && e.dataTransfer.getData('text/plain'));
-              draggingWidgetId = null;
-              if (fromId) {
-                placeHomeWidgetAtSlot(fromId, c, r, placements, visibleItems, COLS);
-              }
-            });
-            board.appendChild(slotEl);
-          }
-        }
       }
 
       container.appendChild(board);
