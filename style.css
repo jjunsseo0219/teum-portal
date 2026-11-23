@@ -2032,21 +2032,6 @@ dialog.sheet[open]:where(:not([data-closing])) {
     grid-column: 1 / -1;
   }
 
-  .bento-board {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-auto-flow: dense;
-    gap: 16px;
-    align-items: stretch;
-  }
-
-  .bento-board > .widget-card.bento-placed-card {
-    grid-column: span var(--bento-span, 1);
-    grid-row: auto;
-    display: flex;
-    flex-direction: column;
-  }
-
   .widget-card:has(.planner-list) {
     grid-column: auto;
   }
@@ -2172,14 +2157,6 @@ dialog.sheet[open]:where(:not([data-closing])) {
 
   .inline-detail-page .article-cover-img {
     max-height: 360px;
-  }
-
-  .study-links-card {
-    grid-column: span 2;
-  }
-
-  .study-links-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -2584,8 +2561,9 @@ dialog.sheet[open]:where(:not([data-closing])) {
 }
 
 .bento-board .planner-list {
-  max-height: 220px;
+  max-height: 196px;
   overflow-y: auto;
+  padding-right: 2px;
 }
 
 .widget-size-group {
@@ -2621,6 +2599,31 @@ dialog.sheet[open]:where(:not([data-closing])) {
   .bento-board > .widget-card:has(.snap-carousel),
   .bento-board > .study-links-card {
     grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1024px) {
+  .bento-board {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-flow: dense;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .bento-board > .widget-card.bento-placed-card {
+    grid-column: span var(--bento-span, 1);
+    grid-row: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .study-links-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bento-board .study-timer-card .study-clock-box {
+    margin-top: auto;
   }
 }
 
