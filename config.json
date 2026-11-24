@@ -46,7 +46,7 @@
         "sourceKey": "study_links",
         "accent": "",
         "props": {
-          "maxItems": 8
+          "maxItems": 12
         },
         "sheet": {
           "title": "입시 · 학습 추천 사이트",

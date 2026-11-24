@@ -350,11 +350,25 @@
             el('input', { type: 'text', placeholder: '사이트 이름', value: lnk.title || '', onInput: (e) => { lnk.title = e.target.value; syncLinks(); } }),
             el('input', { type: 'text', placeholder: '한 줄 설명', value: lnk.desc || '', onInput: (e) => { lnk.desc = e.target.value; syncLinks(); } }),
             el('input', { type: 'url', placeholder: 'https://...', value: lnk.url || '', onInput: (e) => { lnk.url = e.target.value; syncLinks(); } }),
-            el('button', {
-              type: 'button',
-              className: 'btn btn-sm btn-danger',
-              onClick: () => { linksArr.splice(idx, 1); renderStudioBody(); syncLinks(); }
-            }, '삭제')
+            el('div', { style: { display: 'inline-flex', gap: '4px' } },
+              el('button', {
+                type: 'button',
+                className: 'btn btn-sm',
+                disabled: idx === 0,
+                onClick: () => { [linksArr[idx - 1], linksArr[idx]] = [linksArr[idx], linksArr[idx - 1]]; renderStudioBody(); syncLinks(); }
+              }, '▲'),
+              el('button', {
+                type: 'button',
+                className: 'btn btn-sm',
+                disabled: idx === linksArr.length - 1,
+                onClick: () => { [linksArr[idx], linksArr[idx + 1]] = [linksArr[idx + 1], linksArr[idx]]; renderStudioBody(); syncLinks(); }
+              }, '▼'),
+              el('button', {
+                type: 'button',
+                className: 'btn btn-sm btn-danger',
+                onClick: () => { linksArr.splice(idx, 1); renderStudioBody(); syncLinks(); }
+              }, '삭제')
+            )
           )
         );
       });

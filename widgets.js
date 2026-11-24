@@ -1241,22 +1241,159 @@
 
     study_links(widget, data, ctx) {
       const card = createCardShell(widget, 'study-links-card');
-      card.appendChild(makeCardHeader(widget, ctx.sourceMeta));
-
       const rawItems = Array.isArray(data) ? data : (Array.isArray(widget.props?.items) ? widget.props.items : []);
-      const maxItems = Number(widget.props?.maxItems) || 12;
-      const items = rawItems.slice(0, maxItems);
-      if (items.length === 0) {
+      const maxItems = Number(widget.props?.maxItems) || 16;
+      const baseItems = rawItems.slice(0, maxItems);
+
+      const STORAGE_KEY = `teum_study_links_v1_${widget.id || 'default'}`;
+      const loadPrefs = () => {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+          return {
+            order: Array.isArray(parsed.order) ? parsed.order : [],
+            hidden: Array.isArray(parsed.hidden) ? parsed.hidden : []
+          };
+        } catch (_e) {
+          return { order: [], hidden: [] };
+        }
+      };
+      const savePrefs = (prefs) => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+        } catch (_e) {}
+      };
+      const itemKey = (it) => String(it.url || it.title || '');
+      const getOrderedItems = (prefs) => {
+        const byKey = new Map(baseItems.map((it) => [itemKey(it), it]));
+        const ordered = [];
+        for (const k of prefs.order || []) {
+          if (byKey.has(k)) {
+            ordered.push(byKey.get(k));
+            byKey.delete(k);
+          }
+        }
+        for (const it of byKey.values()) ordered.push(it);
+        return ordered;
+      };
+
+      let prefs = loadPrefs();
+      let editing = false;
+      let activeCat = '전체';
+
+      const editBtn = el('button', {
+        type: 'button',
+        className: 'planner-mini-btn',
+        onClick: () => {
+          editing = !editing;
+          editBtn.textContent = editing ? '완료' : '순서·선택';
+          editBtn.classList.toggle('is-primary', editing);
+          renderBody();
+        }
+      }, '순서·선택');
+
+      card.appendChild(
+        el('div', { className: 'card-head' },
+          el('div', { className: 'card-head-title-group' },
+            el('h2', { className: 'card-title' }, widget.title || '입시 · 학습 추천 사이트'),
+            widget.subtitle ? el('p', { className: 'card-subtitle' }, widget.subtitle) : null
+          ),
+          el('div', { style: { display: 'flex', alignItems: 'center', gap: '6px' } },
+            baseItems.length > 0 ? editBtn : null,
+            makeStatusBadge(ctx.sourceMeta)
+          )
+        )
+      );
+
+      if (baseItems.length === 0) {
         card.appendChild(el('p', { className: 'card-subtitle' }, '등록된 추천 사이트가 없습니다.'));
         return card;
       }
 
-      const categories = ['전체', ...Array.from(new Set(items.map((it) => it.category).filter(Boolean)))];
-      let activeCat = '전체';
       const chipWrap = el('div', { className: 'study-subj-row', style: { marginBottom: '12px' } });
       const gridWrap = el('div', { className: 'study-links-grid' });
+      card.appendChild(chipWrap);
+      card.appendChild(gridWrap);
 
-      const renderLinks = () => {
+      const renderBody = () => {
+        const ordered = getOrderedItems(prefs);
+        const hiddenSet = new Set(prefs.hidden || []);
+
+        if (editing) {
+          chipWrap.style.display = 'flex';
+          chipWrap.replaceChildren(
+            el('span', { className: 'card-subtitle', style: { margin: 0, flex: 1 } }, '보일 사이트를 고르고 ▲▼로 순서를 바꾸세요.'),
+            el('button', {
+              type: 'button',
+              className: 'planner-mini-btn',
+              onClick: () => {
+                prefs = { order: [], hidden: [] };
+                savePrefs(prefs);
+                renderBody();
+              }
+            }, '초기화')
+          );
+
+          gridWrap.replaceChildren(
+            ...ordered.map((it, idx) => {
+              const key = itemKey(it);
+              const isHidden = hiddenSet.has(key);
+              return el('div', {
+                className: 'study-link-item',
+                style: { opacity: isHidden ? 0.55 : 1, gap: '6px' }
+              },
+                el('div', { className: 'study-link-top' },
+                  el('span', { className: 'study-link-cat' }, it.category || '추천'),
+                  el('div', { style: { display: 'inline-flex', gap: '4px' } },
+                    el('button', {
+                      type: 'button',
+                      className: 'planner-mini-btn',
+                      disabled: idx === 0,
+                      onClick: () => {
+                        const keys = ordered.map(itemKey);
+                        [keys[idx - 1], keys[idx]] = [keys[idx], keys[idx - 1]];
+                        prefs.order = keys;
+                        savePrefs(prefs);
+                        renderBody();
+                      }
+                    }, '▲'),
+                    el('button', {
+                      type: 'button',
+                      className: 'planner-mini-btn',
+                      disabled: idx === ordered.length - 1,
+                      onClick: () => {
+                        const keys = ordered.map(itemKey);
+                        [keys[idx], keys[idx + 1]] = [keys[idx + 1], keys[idx]];
+                        prefs.order = keys;
+                        savePrefs(prefs);
+                        renderBody();
+                      }
+                    }, '▼'),
+                    el('button', {
+                      type: 'button',
+                      className: `planner-mini-btn ${isHidden ? '' : 'is-primary'}`.trim(),
+                      onClick: () => {
+                        if (isHidden) hiddenSet.delete(key);
+                        else hiddenSet.add(key);
+                        prefs.hidden = Array.from(hiddenSet);
+                        if (!prefs.order || prefs.order.length === 0) prefs.order = ordered.map(itemKey);
+                        savePrefs(prefs);
+                        renderBody();
+                      }
+                    }, isHidden ? '숨김' : '표시')
+                  )
+                ),
+                el('strong', { className: 'study-link-title' }, it.title || '')
+              );
+            })
+          );
+          return;
+        }
+
+        const visibleItems = ordered.filter((it) => !hiddenSet.has(itemKey(it)));
+        const categories = ['전체', ...Array.from(new Set(visibleItems.map((it) => it.category).filter(Boolean)))];
+        if (!categories.includes(activeCat)) activeCat = '전체';
+
+        chipWrap.style.display = categories.length > 1 ? 'flex' : 'none';
         chipWrap.replaceChildren(
           ...categories.map((cat) =>
             el('button', {
@@ -1264,13 +1401,17 @@
               className: `study-subj-chip ${activeCat === cat ? 'is-active' : ''}`.trim(),
               onClick: () => {
                 activeCat = cat;
-                renderLinks();
+                renderBody();
               }
             }, cat)
           )
         );
 
-        const filtered = activeCat === '전체' ? items : items.filter((it) => it.category === activeCat);
+        const filtered = activeCat === '전체' ? visibleItems : visibleItems.filter((it) => it.category === activeCat);
+        if (filtered.length === 0) {
+          gridWrap.replaceChildren(el('p', { className: 'card-subtitle' }, '선택한 사이트가 없습니다. [순서·선택]에서 켜 보세요.'));
+          return;
+        }
         gridWrap.replaceChildren(
           ...filtered.map((it) => {
             const safeHref = sanitizeUrl(it.url);
@@ -1291,9 +1432,7 @@
         );
       };
 
-      renderLinks();
-      if (categories.length > 1) card.appendChild(chipWrap);
-      card.appendChild(gridWrap);
+      renderBody();
       return card;
     }
   };

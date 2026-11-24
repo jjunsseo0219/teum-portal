@@ -843,6 +843,24 @@
     "label": "입시 · 학습 추천 사이트",
     "data": [
       {
+        "category": "학교·학사",
+        "title": "리로스쿨",
+        "desc": "학교 검색(서전고) · 공지 · 방과후 · 수행",
+        "url": "https://riroschool.kr"
+      },
+      {
+        "category": "학교·학사",
+        "title": "컴시간 알리미",
+        "desc": "실시간 시간표 · 수업 변경 확인",
+        "url": "http://comci.net:4082/st"
+      },
+      {
+        "category": "학교·학사",
+        "title": "서전고 홈페이지",
+        "desc": "공지사항 · 가정통신문 원문 확인",
+        "url": "https://school.cbe.go.kr/seojeon-h"
+      },
+      {
         "category": "입시·진학",
         "title": "대입정보포털 어디가",
         "desc": "대학별 입시결과 · 전형 · 성적 분석",
@@ -883,12 +901,6 @@
         "title": "네이버 영어사전",
         "desc": "어휘 · 예문 · 발음 빠른 검색",
         "url": "https://en.dict.naver.com"
-      },
-      {
-        "category": "학습·인강",
-        "title": "서전고 홈페이지",
-        "desc": "공지사항 · 가정통신문 원문 확인",
-        "url": "https://school.cbe.go.kr/seojeon-h"
       }
     ]
   }
