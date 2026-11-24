@@ -34,7 +34,7 @@
     forest: { query: '', year: 'all', month: 'all', dept: 'all', type: 'all' },
     inlineDetail: null,
     homeEditMode: false,
-    homeLayout: { order: [], hidden: [], spans: {}, heights: {}, slots: {} },
+    homeLayout: { items: {}, hidden: [] },
     studyTimer: {
       subject: '수학',
       mode: 'stopwatch',
@@ -72,16 +72,13 @@
           state.studyTimer = { ...state.studyTimer, ...parsed };
         }
       }
-      const layoutRaw = localStorage.getItem('teum_home_layout_v1');
+      const layoutRaw = localStorage.getItem('teum_bento_v2');
       if (layoutRaw) {
         const parsed = JSON.parse(layoutRaw);
         if (parsed && typeof parsed === 'object') {
           state.homeLayout = {
-            order: Array.isArray(parsed.order) ? parsed.order : [],
-            hidden: Array.isArray(parsed.hidden) ? parsed.hidden : [],
-            spans: parsed.spans && typeof parsed.spans === 'object' ? parsed.spans : {},
-            heights: parsed.heights && typeof parsed.heights === 'object' ? parsed.heights : {},
-            slots: parsed.slots && typeof parsed.slots === 'object' ? parsed.slots : {}
+            items: parsed.items && typeof parsed.items === 'object' ? parsed.items : {},
+            hidden: Array.isArray(parsed.hidden) ? parsed.hidden : []
           };
         }
       }
@@ -90,78 +87,31 @@
 
   function saveHomeLayout() {
     try {
-      localStorage.setItem('teum_home_layout_v1', JSON.stringify(state.homeLayout));
+      localStorage.setItem('teum_bento_v2', JSON.stringify(state.homeLayout));
     } catch (e) {}
   }
 
-  function getOrderedSchoolHomeWidgets(defaultWidgets) {
-    const active = (Array.isArray(defaultWidgets) ? defaultWidgets : []).filter((w) => w && w.enabled !== false);
-    if (isAdminPreview) return active;
-    const order = Array.isArray(state.homeLayout?.order) ? state.homeLayout.order : [];
-    const byId = new Map(active.map((w) => [w.id, w]));
-    const ordered = [];
-    for (const id of order) {
-      if (byId.has(id)) {
-        ordered.push(byId.get(id));
-        byId.delete(id);
-      }
-    }
-    for (const w of byId.values()) ordered.push(w);
-    return ordered;
-  }
-
-  function resolveHomeWidgets(defaultWidgets) {
-    const ordered = getOrderedSchoolHomeWidgets(defaultWidgets);
-    if (isAdminPreview) return ordered;
-    const hidden = new Set(Array.isArray(state.homeLayout?.hidden) ? state.homeLayout.hidden : []);
-    return ordered.filter((w) => !hidden.has(w.id));
-  }
-
-  function getDefaultWidgetSpan(item) {
-    if (!item) return 1;
-    if (item.defaultSpan) return item.defaultSpan;
-    if (item.type === 'carousel' || item.type === 'ticker') return 3;
-    if (item.type === 'study_links') return 2;
-    return 1;
-  }
-
-  function getWidgetSpan(item, cols = 3) {
-    const saved = !isAdminPreview && state.homeLayout?.spans ? Number(state.homeLayout.spans[item.id]) : 0;
-    const raw = saved >= 1 && saved <= cols ? saved : getDefaultWidgetSpan(item);
-    return Math.min(cols, Math.max(1, raw));
-  }
-
-  function moveHomeWidgetOrder(fromId, toId, allIds) {
-    if (!fromId || !toId || fromId === toId) return;
-    const order = Array.isArray(allIds) ? [...allIds] : [];
-    const fromIdx = order.indexOf(fromId);
-    const toIdx = order.indexOf(toId);
-    if (fromIdx < 0 || toIdx < 0) return;
-    const [moved] = order.splice(fromIdx, 1);
-    order.splice(toIdx, 0, moved);
-    state.homeLayout.order = order;
-    state.homeLayout.slots = {};
+  function commitBentoItems(itemsMap) {
+    state.homeLayout.items = itemsMap && typeof itemsMap === 'object' ? itemsMap : {};
     saveHomeLayout();
     renderFeed();
   }
 
-  function setHomeWidgetSpan(widgetId, span, _placements, cols = 3) {
-    if (!state.homeLayout.spans || typeof state.homeLayout.spans !== 'object') state.homeLayout.spans = {};
-    state.homeLayout.spans[widgetId] = Math.min(cols, Math.max(1, Number(span) || 1));
-    saveHomeLayout();
-    renderFeed();
-  }
-
-  function getWidgetHeightMode(item) {
-    const mode = !isAdminPreview && state.homeLayout?.heights ? state.homeLayout.heights[item.id] : '';
-    return (mode === 'sm' || mode === 'md' || mode === 'lg') ? mode : 'md';
-  }
-
-  function setHomeWidgetHeight(widgetId, mode) {
-    if (!state.homeLayout.heights || typeof state.homeLayout.heights !== 'object') state.homeLayout.heights = {};
-    state.homeLayout.heights[widgetId] = (mode === 'sm' || mode === 'md' || mode === 'lg') ? mode : 'md';
-    saveHomeLayout();
-    renderFeed();
+  function compactHomeLayout() {
+    if (!window.TEUM_BENTO) return;
+    const cfg = state.data.config || {};
+    const tabWidgets = (cfg.tabs && cfg.tabs.home) || [];
+    const hiddenSet = new Set(Array.isArray(state.homeLayout?.hidden) ? state.homeLayout.hidden : []);
+    const pool = [
+      { id: 'bento-meal', type: 'meal' },
+      { id: 'bento-timetable', type: 'timetable' },
+      ...tabWidgets.filter((w) => w && w.enabled !== false).map((w) => ({ id: w.id, type: w.type }))
+    ].filter((it) => !hiddenSet.has(it.id));
+    const rects = window.TEUM_BENTO.normalizeLayout(pool, state.homeLayout.items || {});
+    const compacted = window.TEUM_BENTO.compactLayout(rects);
+    const nextMap = {};
+    for (const r of compacted) nextMap[r.id] = { x: r.x, y: r.y, w: r.w, h: r.h };
+    commitBentoItems(nextMap);
   }
 
   function setHomeWidgetHidden(widgetId, hidden) {
@@ -174,7 +124,7 @@
   }
 
   function resetHomeLayout() {
-    state.homeLayout = { order: [], hidden: [], spans: {}, heights: {}, slots: {} };
+    state.homeLayout = { items: {}, hidden: [] };
     saveHomeLayout();
     renderFeed();
   }
@@ -1629,8 +1579,13 @@
         }, state.homeEditMode ? '편집 완료' : '화면 편집') : null
       ),
       (!isAdminPreview && state.homeEditMode) ? el('div', { className: 'home-edit-banner' },
-        el('span', { className: 'home-edit-banner-text' }, '카드를 끌어서 위치를 바꾸고, 1칸·2칸·3칸 크기로 빈틈없이 맞춰보세요.'),
-        el('div', { style: { display: 'flex', gap: '6px', flexShrink: 0 } },
+        el('span', { className: 'home-edit-banner-text' }, '카드를 끌어 원하는 칸에 놓고, 오른쪽 아래 모서리를 당겨 크기를 조절하세요.'),
+        el('div', { style: { display: 'flex', gap: '6px', flexShrink: 0, flexWrap: 'wrap' } },
+          isDesktopLayout() ? el('button', {
+            type: 'button',
+            className: 'planner-mini-btn',
+            onClick: compactHomeLayout
+          }, '빈칸 정리') : null,
           el('button', {
             type: 'button',
             className: 'planner-mini-btn',
@@ -1727,8 +1682,8 @@
       container.appendChild(stripNode);
 
       const coreItems = [
-        { id: 'bento-meal', title: '오늘 급식', defaultSpan: 1, render: () => mealCard },
-        { id: 'bento-timetable', title: '시간표', defaultSpan: 1, render: () => timetableCard }
+        { id: 'bento-meal', type: 'meal', title: '오늘 급식', render: () => mealCard },
+        { id: 'bento-timetable', type: 'timetable', title: '시간표', render: () => timetableCard }
       ];
       const widgetItems = tabWidgets
         .filter((w) => w && w.enabled !== false)
@@ -1736,7 +1691,6 @@
           id: w.id,
           type: w.type,
           title: w.title || w.type,
-          defaultSpan: getDefaultWidgetSpan(w),
           render: () => {
             const sourceKey = w.sourceKey || '';
             const sourceData = sourceKey ? sources[sourceKey] : undefined;
@@ -1766,11 +1720,10 @@
         }));
 
       const allPool = [...coreItems, ...widgetItems];
-      const orderedPool = getOrderedSchoolHomeWidgets(allPool);
       const hiddenSet = isAdminPreview
         ? new Set()
         : new Set(Array.isArray(state.homeLayout?.hidden) ? state.homeLayout.hidden : []);
-      const visibleItems = orderedPool.filter((it) => !hiddenSet.has(it.id));
+      const visibleItems = allPool.filter((it) => !hiddenSet.has(it.id));
 
       if (visibleItems.length === 0) {
         container.appendChild(
@@ -1786,103 +1739,27 @@
         return;
       }
 
-      const COLS = 3;
-      const board = el('div', { className: `bento-board ${state.homeEditMode && !isAdminPreview ? 'is-edit-board' : ''}`.trim() });
-      const allIds = orderedPool.map((it) => it.id);
-      let draggingWidgetId = null;
+      const editActive = !isAdminPreview && state.homeEditMode;
+      const board = el('div', { className: `bento-board ${editActive ? 'is-edit-board' : ''}`.trim() });
 
-      for (const item of visibleItems) {
-        const card = item.render();
-        const span = getWidgetSpan(item, COLS);
-        const hMode = getWidgetHeightMode(item);
-        card.style.setProperty('--bento-span', String(span));
-        card.style.setProperty('--bento-row-span', hMode === 'lg' ? '2' : '1');
-        card.classList.add('bento-placed-card', `bento-h-${hMode}`);
-
-        if (!isAdminPreview && state.homeEditMode && item.id) {
-          card.classList.add('is-edit-mode');
-          card.draggable = true;
-          card.prepend(
-            el('div', { className: 'widget-edit-bar' },
-              el('span', { className: 'widget-drag-handle' }, '⋮⋮ 끌어서 이동'),
-              el('div', { className: 'widget-size-controls' },
-                el('div', { className: 'widget-size-group', role: 'group', 'aria-label': '위젯 가로 크기' },
-                  [1, 2, 3].map((s) =>
-                    el('button', {
-                      type: 'button',
-                      className: `widget-size-btn ${span === s ? 'is-active' : ''}`.trim(),
-                      onClick: (e) => {
-                        e.stopPropagation();
-                        setHomeWidgetSpan(item.id, s, null, COLS);
-                      }
-                    }, `${s}칸`)
-                  )
-                ),
-                el('div', { className: 'widget-size-group', role: 'group', 'aria-label': '위젯 세로 크기' },
-                  [
-                    { id: 'sm', label: '작게' },
-                    { id: 'md', label: '기본' },
-                    { id: 'lg', label: '크게' }
-                  ].map((h) =>
-                    el('button', {
-                      type: 'button',
-                      className: `widget-size-btn ${hMode === h.id ? 'is-active' : ''}`.trim(),
-                      onClick: (e) => {
-                        e.stopPropagation();
-                        setHomeWidgetHeight(item.id, h.id);
-                      }
-                    }, h.label)
-                  )
-                )
-              ),
-              el('button', {
-                type: 'button',
-                className: 'planner-mini-btn',
-                onClick: (e) => {
-                  e.stopPropagation();
-                  setHomeWidgetHidden(item.id, true);
-                }
-              }, '숨기기')
-            )
-          );
-          card.addEventListener('dragstart', (e) => {
-            draggingWidgetId = item.id;
-            card.classList.add('is-dragging');
-            if (e.dataTransfer) {
-              e.dataTransfer.effectAllowed = 'move';
-              e.dataTransfer.setData('text/plain', item.id);
-            }
-          });
-          card.addEventListener('dragover', (e) => {
-            if (!draggingWidgetId || draggingWidgetId === item.id) return;
-            e.preventDefault();
-            card.classList.add('is-drop-target');
-          });
-          card.addEventListener('dragleave', () => {
-            card.classList.remove('is-drop-target');
-          });
-          card.addEventListener('drop', (e) => {
-            e.preventDefault();
-            card.classList.remove('is-drop-target');
-            const fromId = draggingWidgetId || (e.dataTransfer && e.dataTransfer.getData('text/plain'));
-            draggingWidgetId = null;
-            if (fromId && fromId !== item.id) {
-              moveHomeWidgetOrder(fromId, item.id, allIds);
-            }
-          });
-          card.addEventListener('dragend', () => {
-            draggingWidgetId = null;
-            card.classList.remove('is-dragging');
-            board.querySelectorAll('.is-drop-target').forEach((n) => n.classList.remove('is-drop-target'));
-          });
-        }
-        board.appendChild(card);
+      if (window.TEUM_BENTO) {
+        window.TEUM_BENTO.mountBentoBoard({
+          boardEl: board,
+          visiblePool: visibleItems,
+          savedMap: isAdminPreview ? {} : (state.homeLayout.items || {}),
+          editMode: editActive,
+          isDesktop: isDesktopLayout(),
+          onCommit: commitBentoItems,
+          onHide: (id) => setHomeWidgetHidden(id, true)
+        });
+      } else {
+        visibleItems.forEach((it) => board.appendChild(it.render()));
       }
 
       container.appendChild(board);
 
-      if (!isAdminPreview && state.homeEditMode) {
-        const hiddenItems = orderedPool.filter((it) => hiddenSet.has(it.id));
+      if (editActive) {
+        const hiddenItems = allPool.filter((it) => hiddenSet.has(it.id));
         if (hiddenItems.length > 0) {
           container.appendChild(
             el('section', { className: 'widget-card home-hidden-tray' },

@@ -1,10 +1,11 @@
-const CACHE_NAME = 'teum-shell-v9';
+const CACHE_NAME = 'teum-shell-v10';
 const SHELL_ASSETS = [
   './',
   './index.html',
   './pledge.html',
   './style.css',
   './widgets.js',
+  './bento.js',
   './app.js',
   './manifest.json'
 ];
