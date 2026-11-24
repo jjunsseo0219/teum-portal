@@ -1714,7 +1714,7 @@
         "category": "학교·학사",
         "title": "컴시간 알리미",
         "desc": "실시간 시간표 · 수업 변경 확인",
-        "url": "http://comci.net:4082/st"
+        "url": "http://comci.net:4082/st#"
       },
       {
         "category": "학교·학사",
@@ -2987,7 +2987,7 @@
           "category": "학교·학사",
           "title": "컴시간 알리미",
           "desc": "실시간 시간표 · 수업 변경 확인",
-          "url": "http://comci.net:4082/st"
+          "url": "http://comci.net:4082/st#"
         },
         {
           "category": "학교·학사",
@@ -3041,7 +3041,7 @@
     }
   },
   "_meta": {
-    "bakedAt": "2026-11-24 11:43:40 KST",
+    "bakedAt": "2026-11-24 13:05:24 KST",
     "archiveFiles": [
       "data/archive_2025.json",
       "data/archive_2026.json"
@@ -3052,14 +3052,14 @@
         "label": "NEIS 서전고 급식",
         "status": "live",
         "reason": "2026-11-24 NEIS 급식 연동",
-        "durationMs": 242.2
+        "durationMs": 264.7
       },
       "neis_schedule": {
         "type": "neis_schedule",
         "label": "NEIS 학사일정",
         "status": "live",
         "reason": "202611~202612 학사일정 1건 연동",
-        "durationMs": 215.9
+        "durationMs": 215.8
       },
       "timetable": {
         "type": "static",
@@ -3101,7 +3101,7 @@
         "label": "서전고 홈페이지 공지·가정통신문",
         "status": "live",
         "reason": "서전고 홈페이지 10건 자동 수집",
-        "durationMs": 647.6
+        "durationMs": 695.8
       },
       "study_links": {
         "type": "static",
