@@ -180,6 +180,36 @@
     );
     grid.appendChild(makeField('카드 강조색 (선택)', accentRow, true));
 
+    grid.appendChild(makeField('기본 벤토 가로 폭 (6칸 기준)', el('select', {
+      onChange: (e) => {
+        const val = Number(e.target.value);
+        if (val > 0) widget.props.bentoW = val;
+        else delete widget.props.bentoW;
+        syncPreview();
+      }
+    }, [
+      { v: '', label: '자동 기본값' },
+      { v: '2', label: '2칸 (1/3 폭)' },
+      { v: '3', label: '3칸 (1/2 폭)' },
+      { v: '4', label: '4칸 (2/3 폭)' },
+      { v: '6', label: '6칸 (전체 폭)' }
+    ].map((opt) => el('option', { value: opt.v, selected: String(widget.props.bentoW || '') === opt.v }, opt.label)))));
+
+    grid.appendChild(makeField('기본 벤토 세로 높이 (행)', el('select', {
+      onChange: (e) => {
+        const val = Number(e.target.value);
+        if (val > 0) widget.props.bentoH = val;
+        else delete widget.props.bentoH;
+        syncPreview();
+      }
+    }, [
+      { v: '', label: '자동 기본값' },
+      { v: '1', label: '1행 (112px)' },
+      { v: '2', label: '2행 (238px)' },
+      { v: '3', label: '3행 (364px)' },
+      { v: '4', label: '4행 (490px)' }
+    ].map((opt) => el('option', { value: opt.v, selected: String(widget.props.bentoH || '') === opt.v }, opt.label)))));
+
     if (widget.type === 'carousel') {
       const cb = el('input', {
         type: 'checkbox',
@@ -293,6 +323,68 @@
         value: widget.props.intervalMs ?? 3000,
         onInput: (e) => { widget.props.intervalMs = Math.max(1500, Number(e.target.value) || 3000); syncPreview(); }
       })));
+    } else if (widget.type === 'study_links') {
+      grid.appendChild(makeField('최대 표시 개수', el('input', {
+        type: 'number',
+        value: widget.props.maxItems ?? 8,
+        onInput: (e) => { widget.props.maxItems = Math.max(1, Number(e.target.value) || 8); syncPreview(); }
+      })));
+      const useStaticSource = widget.sourceKey && studio.sourcesConfig[widget.sourceKey]?.type === 'static';
+      let linksArr;
+      if (useStaticSource) {
+        if (!Array.isArray(studio.sourcesConfig[widget.sourceKey].data)) studio.sourcesConfig[widget.sourceKey].data = [];
+        linksArr = studio.sourcesConfig[widget.sourceKey].data;
+      } else {
+        if (!Array.isArray(widget.props.items)) widget.props.items = [];
+        linksArr = widget.props.items;
+      }
+      const syncLinks = () => {
+        if (useStaticSource) studio.sourcesData[widget.sourceKey] = linksArr;
+        syncPreview();
+      };
+      const linksWrap = el('div', { className: 'mini-items-wrap' });
+      linksArr.forEach((lnk, idx) => {
+        linksWrap.appendChild(
+          el('div', { className: 'mini-item-card' },
+            el('input', { type: 'text', placeholder: '분류 (예: 입시·진학)', value: lnk.category || '', onInput: (e) => { lnk.category = e.target.value; syncLinks(); } }),
+            el('input', { type: 'text', placeholder: '사이트 이름', value: lnk.title || '', onInput: (e) => { lnk.title = e.target.value; syncLinks(); } }),
+            el('input', { type: 'text', placeholder: '한 줄 설명', value: lnk.desc || '', onInput: (e) => { lnk.desc = e.target.value; syncLinks(); } }),
+            el('input', { type: 'url', placeholder: 'https://...', value: lnk.url || '', onInput: (e) => { lnk.url = e.target.value; syncLinks(); } }),
+            el('button', {
+              type: 'button',
+              className: 'btn btn-sm btn-danger',
+              onClick: () => { linksArr.splice(idx, 1); renderStudioBody(); syncLinks(); }
+            }, '삭제')
+          )
+        );
+      });
+      linksWrap.appendChild(
+        el('div', { style: { display: 'flex', gap: '6px', flexWrap: 'wrap' } },
+          el('button', {
+            type: 'button',
+            className: 'btn btn-sm',
+            onClick: () => {
+              linksArr.push({ category: '추천', title: '새 사이트', desc: '설명 입력', url: 'https://' });
+              renderStudioBody();
+              syncLinks();
+            }
+          }, '+ 링크 추가'),
+          useStaticSource ? el('button', {
+            type: 'button',
+            className: 'btn btn-sm btn-primary',
+            onClick: saveSourcesAction
+          }, '링크 소스 저장') : null
+        )
+      );
+      grid.appendChild(makeField('사이트 링크 목록', linksWrap, true));
+    } else if (widget.type === 'study_timer') {
+      grid.appendChild(makeField('뽀모도로 기본 시간 (분)', el('input', {
+        type: 'number',
+        min: '5',
+        max: '90',
+        value: widget.props.pomodoroMin ?? 25,
+        onInput: (e) => { widget.props.pomodoroMin = Math.max(5, Number(e.target.value) || 25); syncPreview(); }
+      })));
     }
 
     grid.appendChild(makeField('반 시트 제목 (카드 클릭 시)', el('input', {
@@ -328,6 +420,50 @@
       )
     );
 
+    const addWidgetByType = (tKey) => {
+      const tpl = WIDGET_META[tKey] || {};
+      const customOnlyTypes = new Set(['stat', 'list', 'banner', 'text', 'study_links']);
+      const useSource = customOnlyTypes.has(tKey) ? '' : (tpl.defaultSource || '');
+      const baseProps = deepClone(tpl.defaultProps || {});
+      if (tKey === 'study_links' && !useSource && !Array.isArray(baseProps.items)) {
+        baseProps.items = [{ category: '추천', title: '새 링크', desc: '설명을 입력하세요', url: 'https://' }];
+      }
+      const newWidget = {
+        id: `${studio.portalTab}-${tKey}-${Date.now().toString(36)}`,
+        type: tKey,
+        enabled: true,
+        title: `새 ${tpl.label || tKey}`,
+        subtitle: '커스텀 위젯',
+        sourceKey: useSource,
+        accent: '',
+        props: baseProps,
+        sheet: { title: `새 ${tpl.label || tKey}`, body: '관리자 스튜디오에서 추가한 커스텀 위젯입니다.' }
+      };
+      const list = getTabWidgets(studio.portalTab);
+      list.push(newWidget);
+      studio.selectedWidgetId = newWidget.id;
+      renderStudioBody();
+      syncPreview();
+      showToast(`${tpl.label || tKey} 위젯을 추가했습니다!`);
+    };
+
+    const QUICK_CATALOG = ['stat', 'list', 'banner', 'text', 'study_links', 'study_timer'];
+    container.appendChild(
+      el('div', { className: 'type-picker-row', role: 'group', 'aria-label': '빠른 위젯 추가 카탈로그' },
+        QUICK_CATALOG.filter((k) => WIDGET_META[k]).map((k) => {
+          const meta = WIDGET_META[k];
+          return el('button', {
+            type: 'button',
+            className: 'type-chip-btn',
+            onClick: () => addWidgetByType(k)
+          },
+            el('strong', null, `+ ${meta.label}`),
+            el('span', null, meta.description)
+          );
+        })
+      )
+    );
+
     const newTypeSelect = el('select', { 'aria-label': '추가할 위젯 템플릿' },
       Object.entries(WIDGET_META).map(([k, v]) => el('option', { value: k }, `${v.label}: ${v.description}`))
     );
@@ -337,28 +473,8 @@
         el('button', {
           type: 'button',
           className: 'btn btn-primary',
-          onClick: () => {
-            const tKey = newTypeSelect.value;
-            const tpl = WIDGET_META[tKey] || {};
-            const newWidget = {
-              id: `${studio.portalTab}-${tKey}-${Date.now().toString(36)}`,
-              type: tKey,
-              enabled: true,
-              title: `새 ${tpl.label || tKey}`,
-              subtitle: '커스텀 위젯',
-              sourceKey: tpl.defaultSource || '',
-              accent: '',
-              props: deepClone(tpl.defaultProps || {}),
-              sheet: { title: `새 ${tpl.label || tKey}`, body: '관리자 스튜디오에서 추가한 커스텀 위젯입니다.' }
-            };
-            const list = getTabWidgets(studio.portalTab);
-            list.push(newWidget);
-            studio.selectedWidgetId = newWidget.id;
-            renderStudioBody();
-            syncPreview();
-            showToast('새 위젯을 추가했습니다!');
-          }
-        }, '+ 새 위젯 추가')
+          onClick: () => addWidgetByType(newTypeSelect.value)
+        }, '+ 선택한 위젯 추가')
       )
     );
 

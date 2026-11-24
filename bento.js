@@ -43,13 +43,24 @@
 
   function getSpec(item) {
     const id = item && item.id;
-    if (id && DEFAULT_SPECS[id]) return { ...DEFAULT_SPECS[id] };
-    const t = item && item.type;
-    if (t === 'carousel') return { x: 0, y: 0, w: 6, h: 3, minW: 3, minH: 3, maxW: 6, maxH: 5 };
-    if (t === 'ticker') return { x: 0, y: 0, w: 6, h: 1, minW: 2, minH: 1, maxW: 6, maxH: 2 };
-    if (t === 'study_links') return { x: 0, y: 0, w: 4, h: 3, minW: 2, minH: 2, maxW: 6, maxH: 6 };
-    if (t === 'study_timer') return { x: 0, y: 0, w: 2, h: 3, minW: 2, minH: 3, maxW: 6, maxH: 5 };
-    return { x: 0, y: 0, w: 2, h: 2, minW: 2, minH: 1, maxW: 6, maxH: MAX_H };
+    let base;
+    if (id && DEFAULT_SPECS[id]) {
+      base = { ...DEFAULT_SPECS[id] };
+    } else {
+      const t = item && item.type;
+      if (t === 'carousel') base = { x: 0, y: 0, w: 6, h: 3, minW: 3, minH: 3, maxW: 6, maxH: 5 };
+      else if (t === 'ticker') base = { x: 0, y: 0, w: 6, h: 1, minW: 2, minH: 1, maxW: 6, maxH: 2 };
+      else if (t === 'study_links') base = { x: 0, y: 0, w: 4, h: 3, minW: 2, minH: 2, maxW: 6, maxH: 6 };
+      else if (t === 'study_timer') base = { x: 0, y: 0, w: 2, h: 3, minW: 2, minH: 3, maxW: 6, maxH: 5 };
+      else base = { x: 0, y: 0, w: 2, h: 2, minW: 2, minH: 1, maxW: 6, maxH: MAX_H };
+    }
+    if (item && Number(item.defaultW) >= 1) {
+      base.w = clamp(Math.round(Number(item.defaultW)), base.minW, base.maxW);
+    }
+    if (item && Number(item.defaultH) >= 1) {
+      base.h = clamp(Math.round(Number(item.defaultH)), base.minH, base.maxH);
+    }
+    return base;
   }
 
   function rectsOverlap(a, b) {

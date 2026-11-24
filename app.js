@@ -1699,6 +1699,8 @@
           id: w.id,
           type: w.type,
           title: w.title || w.type,
+          defaultW: w.props?.bentoW,
+          defaultH: w.props?.bentoH,
           render: () => {
             const sourceKey = w.sourceKey || '';
             const sourceData = sourceKey ? sources[sourceKey] : undefined;
