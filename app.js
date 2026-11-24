@@ -1559,9 +1559,14 @@
       ? `다음 ${periods[activeIdx + 1]}`
       : '전체 시간표';
 
-    const previewDishes = dishes.slice(0, 4);
-    const startIdx = activeIdx >= 0 ? Math.min(activeIdx, Math.max(0, periods.length - 3)) : 0;
-    const previewPeriods = periods.slice(startIdx, startIdx + 3);
+    const mealRect = !isAdminPreview && state.homeLayout?.items ? state.homeLayout.items['bento-meal'] : null;
+    const mealExpanded = Boolean(mealRect && (mealRect.h >= 3 || mealRect.w >= 3));
+    const previewDishes = mealExpanded ? dishes : dishes.slice(0, 4);
+
+    const ttRect = !isAdminPreview && state.homeLayout?.items ? state.homeLayout.items['bento-timetable'] : null;
+    const ttExpanded = Boolean(ttRect && (ttRect.h >= 3 || ttRect.w >= 3));
+    const startIdx = ttExpanded ? 0 : (activeIdx >= 0 ? Math.min(activeIdx, Math.max(0, periods.length - 3)) : 0);
+    const previewPeriods = ttExpanded ? periods : periods.slice(startIdx, startIdx + 3);
 
     const stripNode = el('section', { className: 'tds-home-top home-dashboard', ariaLabel: '오늘 학교 요약' },
       el('div', { className: 'home-strip-row' },
@@ -1607,17 +1612,20 @@
           el('span', { className: 'bento-meta' }, meal.calories || meal.date || '중식')
         ),
         previewDishes.length > 0
-          ? el('ul', { className: 'bento-meal-list' },
-              previewDishes.map((dish, idx) => {
-                const hits = (dish.allergens || []).filter((n) => userAllergens.has(Number(n)));
-                return el('li', {
-                  className: `bento-meal-item ${idx === 0 ? 'is-lead' : ''} ${hits.length ? 'has-allergen' : ''}`.trim()
-                }, dish.name);
-              })
-            )
-          : el('p', { className: 'bento-empty' }, '급식 정보가 없습니다.'),
+            ? el('ul', { className: 'bento-meal-list' },
+                previewDishes.map((dish, idx) => {
+                  const hits = (dish.allergens || []).filter((n) => userAllergens.has(Number(n)));
+                  const text = (mealExpanded && hits.length)
+                    ? `${dish.name} (주의: ${hits.map((h) => ALLERGENS[h] || h).join(',')})`
+                    : dish.name;
+                  return el('li', {
+                    className: `bento-meal-item ${idx === 0 ? 'is-lead' : ''} ${hits.length ? 'has-allergen' : ''}`.trim()
+                  }, text);
+                })
+              )
+            : el('p', { className: 'bento-empty' }, '급식 정보가 없습니다.'),
         el('div', { className: 'bento-foot' },
-          dishes.length > 4 ? `외 ${dishes.length - 4}개 더보기` : '전체 메뉴 · 알레르기'
+          (!mealExpanded && dishes.length > 4) ? `외 ${dishes.length - 4}개 더보기` : '전체 메뉴 · 알레르기'
         )
       )
     );
