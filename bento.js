@@ -41,13 +41,23 @@
     return node;
   }
 
-  function getSpec(item) {
+  function getSpec(item, cols = COLS) {
     const id = item && item.id;
+    const t = item && item.type;
     let base;
+    if (cols <= 2) {
+      if (id === 'bento-meal') base = { x: 0, y: 0, w: 1, h: 2, minW: 1, minH: 2, maxW: 2, maxH: 4 };
+      else if (id === 'bento-timetable') base = { x: 1, y: 0, w: 1, h: 2, minW: 1, minH: 2, maxW: 2, maxH: 4 };
+      else if (t === 'ticker') base = { x: 0, y: 0, w: 2, h: 1, minW: 1, minH: 1, maxW: 2, maxH: 2 };
+      else if (t === 'study_timer') base = { x: 0, y: 0, w: 2, h: 3, minW: 1, minH: 3, maxW: 2, maxH: 5 };
+      else if (t === 'study_links') base = { x: 0, y: 0, w: 2, h: 3, minW: 1, minH: 2, maxW: 2, maxH: 6 };
+      else if (t === 'carousel') base = { x: 0, y: 0, w: 2, h: 3, minW: 1, minH: 3, maxW: 2, maxH: 5 };
+      else base = { x: 0, y: 0, w: 2, h: 2, minW: 1, minH: 2, maxW: 2, maxH: 5 };
+      return base;
+    }
     if (id && DEFAULT_SPECS[id]) {
       base = { ...DEFAULT_SPECS[id] };
     } else {
-      const t = item && item.type;
       if (t === 'carousel') base = { x: 0, y: 0, w: 6, h: 3, minW: 3, minH: 3, maxW: 6, maxH: 5 };
       else if (t === 'ticker') base = { x: 0, y: 0, w: 6, h: 1, minW: 2, minH: 1, maxW: 6, maxH: 2 };
       else if (t === 'study_links') base = { x: 0, y: 0, w: 4, h: 3, minW: 2, minH: 2, maxW: 6, maxH: 6 };
@@ -119,8 +129,8 @@
 
     for (const item of visiblePool || []) {
       if (!item || !item.id) continue;
-      const spec = getSpec(item);
-      const minW = clamp(spec.minW || 2, 1, cols);
+      const spec = getSpec(item, cols);
+      const minW = clamp(spec.minW || 1, 1, cols);
       const maxW = clamp(spec.maxW || cols, minW, cols);
       const minH = Math.max(1, spec.minH || 1);
       const maxH = Math.max(minH, spec.maxH || MAX_H);
@@ -186,8 +196,8 @@
     if (pill) pill.textContent = `${rect.w}×${rect.h}`;
   }
 
-  function renderGuides(guideLayer, rows) {
-    const total = COLS * rows;
+  function renderGuides(guideLayer, rows, cols = COLS) {
+    const total = cols * rows;
     if (guideLayer.childElementCount === total) return;
     const cells = [];
     for (let i = 0; i < total; i++) {
@@ -196,8 +206,8 @@
     guideLayer.replaceChildren(...cells);
   }
 
-  function mountBentoBoard({ boardEl, visiblePool, savedMap, editMode, isDesktop, onCommit, onHide }) {
-    const rects = normalizeLayout(visiblePool, savedMap, COLS);
+  function mountBentoBoard({ boardEl, visiblePool, savedMap, editMode, cols = COLS, rowH = ROW_H, gap = GAP, onCommit, onHide }) {
+    const rects = normalizeLayout(visiblePool, savedMap, cols);
     rects.sort((a, b) => a.y - b.y || a.x - b.x);
 
     const rectById = new Map(rects.map((r) => [r.id, r]));
@@ -208,9 +218,9 @@
     let ghostLabel = null;
     let currentGuideRows = Math.max(6, ...rects.map((r) => r.y + r.h)) + 1;
 
-    if (editMode && isDesktop) {
+    if (editMode) {
       guideLayer = makeEl('div', { className: 'bento-grid-guides', 'aria-hidden': 'true' });
-      renderGuides(guideLayer, currentGuideRows);
+      renderGuides(guideLayer, currentGuideRows, cols);
       boardEl.appendChild(guideLayer);
 
       ghostLabel = makeEl('span', { className: 'bento-ghost-label' }, '');
@@ -242,7 +252,7 @@
         const neededRows = Math.max(6, ...working.map((r) => r.y + r.h)) + 1;
         if (neededRows > currentGuideRows) {
           currentGuideRows = neededRows;
-          renderGuides(guideLayer, currentGuideRows);
+          renderGuides(guideLayer, currentGuideRows, cols);
         }
       }
     };
@@ -269,185 +279,183 @@
         const bar = makeEl('div', { className: 'bento-tile-bar' },
           makeEl('span', { className: 'bento-tile-handle' }, `⋮⋮ ${r.item.title || r.id}`),
           makeEl('div', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', flexShrink: 0 } },
-            isDesktop ? makeEl('span', { className: 'bento-size-pill' }, `${r.w}×${r.h}`) : null,
+            makeEl('span', { className: 'bento-size-pill' }, `${r.w}×${r.h}`),
             hideBtn
           )
         );
         card.prepend(bar);
 
-        if (isDesktop) {
-          const handle = makeEl('div', {
-            className: 'bento-resize-handle',
-            role: 'button',
-            tabindex: '0',
-            'aria-label': `${r.item.title || r.id} 크기 조절`,
-            title: '모서리를 끌어 크기 조절'
-          });
-          card.appendChild(handle);
+        const handle = makeEl('div', {
+          className: 'bento-resize-handle',
+          role: 'button',
+          tabindex: '0',
+          'aria-label': `${r.item.title || r.id} 크기 조절`,
+          title: '모서리를 끌어 크기 조절'
+        });
+        card.appendChild(handle);
 
-          // Drag-to-move anywhere on tile (except hide button and resize handle)
-          card.addEventListener('pointerdown', (e) => {
-            if (e.pointerType === 'mouse' && e.button !== 0) return;
-            if (e.target.closest('.bento-hide-btn, .bento-resize-handle')) return;
-            const cur = rectById.get(r.id);
-            if (!cur) return;
+        // Drag-to-move anywhere on tile (except hide button and resize handle)
+        card.addEventListener('pointerdown', (e) => {
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          if (e.target.closest('.bento-hide-btn, .bento-resize-handle')) return;
+          const cur = rectById.get(r.id);
+          if (!cur) return;
 
-            const boardRect = boardEl.getBoundingClientRect();
-            const colStep = (boardRect.width + GAP) / COLS;
-            const rowStep = ROW_H + GAP;
-            const startX = e.clientX;
-            const startY = e.clientY;
-            let activated = false;
-            let lastTargetX = cur.x;
-            let lastTargetY = cur.y;
-            let working = rects.map((itemRect) => ({ ...itemRect }));
+          const boardRect = boardEl.getBoundingClientRect();
+          const colStep = (boardRect.width + gap) / cols;
+          const rowStep = rowH + gap;
+          const startX = e.clientX;
+          const startY = e.clientY;
+          let activated = false;
+          let lastTargetX = cur.x;
+          let lastTargetY = cur.y;
+          let working = rects.map((itemRect) => ({ ...itemRect }));
 
+          try {
+            card.setPointerCapture(e.pointerId);
+          } catch (_err) {}
+
+          const onMove = (ev) => {
+            const dx = ev.clientX - startX;
+            const dy = ev.clientY - startY;
+            if (!activated) {
+              if (Math.hypot(dx, dy) <= 4) return;
+              activated = true;
+              card.classList.add('is-dragging');
+              showGhost(cur);
+            }
+            card.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+
+            const nextX = clamp(Math.round(cur.x + dx / colStep), 0, cols - cur.w);
+            const nextY = Math.max(0, Math.round(cur.y + dy / rowStep));
+            if (nextX !== lastTargetX || nextY !== lastTargetY) {
+              lastTargetX = nextX;
+              lastTargetY = nextY;
+              working = rects.map((itemRect) => ({ ...itemRect }));
+              const active = working.find((wItem) => wItem.id === r.id);
+              if (active) {
+                active.x = nextX;
+                active.y = nextY;
+                resolveCollisions(working, r.id, cols);
+                showGhost(active);
+                syncLiveBoard(working, r.id);
+              }
+            }
+          };
+
+          const onUp = (ev) => {
+            card.removeEventListener('pointermove', onMove);
+            card.removeEventListener('pointerup', onUp);
+            card.removeEventListener('pointercancel', onUp);
             try {
-              card.setPointerCapture(e.pointerId);
+              if (card.hasPointerCapture(ev.pointerId)) card.releasePointerCapture(ev.pointerId);
+            } catch (_err) {}
+            card.style.transform = '';
+            card.classList.remove('is-dragging');
+            hideGhost();
+
+            if (activated) {
+              working.forEach((wItem) => {
+                const target = rectById.get(wItem.id);
+                if (target) Object.assign(target, wItem);
+                const elTile = tileMap.get(wItem.id);
+                if (elTile) applyRectToEl(elTile, wItem);
+              });
+              if (onCommit) onCommit(toSavedMap(working));
+            }
+          };
+
+          card.addEventListener('pointermove', onMove);
+          card.addEventListener('pointerup', onUp);
+          card.addEventListener('pointercancel', onUp);
+        });
+
+        // Bottom-right corner drag-to-resize
+        handle.addEventListener('pointerdown', (e) => {
+          if (e.pointerType === 'mouse' && e.button !== 0) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          const cur = rectById.get(r.id);
+          if (!cur) return;
+
+          const boardRect = boardEl.getBoundingClientRect();
+          const colStep = (boardRect.width + gap) / cols;
+          const rowStep = rowH + gap;
+          const startX = e.clientX;
+          const startY = e.clientY;
+          const startPxW = card.offsetWidth;
+          const startPxH = card.offsetHeight;
+          let lastW = cur.w;
+          let lastH = cur.h;
+          let working = rects.map((itemRect) => ({ ...itemRect }));
+
+          try {
+            handle.setPointerCapture(e.pointerId);
+          } catch (_err) {}
+
+          card.classList.add('is-resizing');
+          showGhost(cur);
+
+          const onMove = (ev) => {
+            const dx = ev.clientX - startX;
+            const dy = ev.clientY - startY;
+            const minPxW = cur.minW * colStep - gap;
+            const maxPxW = Math.min(cur.maxW, cols - cur.x) * colStep - gap;
+            const minPxH = cur.minH * rowStep - gap;
+            const maxPxH = cur.maxH * rowStep - gap;
+
+            card.style.width = `${clamp(startPxW + dx, Math.min(120, minPxW), Math.max(startPxW, maxPxW + 18))}px`;
+            card.style.height = `${clamp(startPxH + dy, Math.min(84, minPxH), Math.max(startPxH, maxPxH + 18))}px`;
+
+            const nextW = clamp(Math.round((startPxW + dx + gap) / colStep), cur.minW, Math.min(cur.maxW, cols - cur.x));
+            const nextH = clamp(Math.round((startPxH + dy + gap) / rowStep), cur.minH, cur.maxH);
+
+            if (nextW !== lastW || nextH !== lastH) {
+              lastW = nextW;
+              lastH = nextH;
+              working = rects.map((itemRect) => ({ ...itemRect }));
+              const active = working.find((wItem) => wItem.id === r.id);
+              if (active) {
+                active.w = nextW;
+                active.h = nextH;
+                resolveCollisions(working, r.id, cols);
+                showGhost(active);
+                syncLiveBoard(working, r.id);
+                const pill = card.querySelector('.bento-size-pill');
+                if (pill) pill.textContent = `${nextW}×${nextH}`;
+              }
+            }
+          };
+
+          const onUp = (ev) => {
+            handle.removeEventListener('pointermove', onMove);
+            handle.removeEventListener('pointerup', onUp);
+            handle.removeEventListener('pointercancel', onUp);
+            try {
+              if (handle.hasPointerCapture(ev.pointerId)) handle.releasePointerCapture(ev.pointerId);
             } catch (_err) {}
 
-            const onMove = (ev) => {
-              const dx = ev.clientX - startX;
-              const dy = ev.clientY - startY;
-              if (!activated) {
-                if (Math.hypot(dx, dy) <= 4) return;
-                activated = true;
-                card.classList.add('is-dragging');
-                showGhost(cur);
-              }
-              card.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+            card.style.width = '';
+            card.style.height = '';
+            card.classList.remove('is-resizing');
+            hideGhost();
 
-              const nextX = clamp(Math.round(cur.x + dx / colStep), 0, COLS - cur.w);
-              const nextY = Math.max(0, Math.round(cur.y + dy / rowStep));
-              if (nextX !== lastTargetX || nextY !== lastTargetY) {
-                lastTargetX = nextX;
-                lastTargetY = nextY;
-                working = rects.map((itemRect) => ({ ...itemRect }));
-                const active = working.find((wItem) => wItem.id === r.id);
-                if (active) {
-                  active.x = nextX;
-                  active.y = nextY;
-                  resolveCollisions(working, r.id, COLS);
-                  showGhost(active);
-                  syncLiveBoard(working, r.id);
-                }
-              }
-            };
+            if (lastW !== cur.w || lastH !== cur.h) {
+              working.forEach((wItem) => {
+                const target = rectById.get(wItem.id);
+                if (target) Object.assign(target, wItem);
+                const elTile = tileMap.get(wItem.id);
+                if (elTile) applyRectToEl(elTile, wItem);
+              });
+              if (onCommit) onCommit(toSavedMap(working));
+            }
+          };
 
-            const onUp = (ev) => {
-              card.removeEventListener('pointermove', onMove);
-              card.removeEventListener('pointerup', onUp);
-              card.removeEventListener('pointercancel', onUp);
-              try {
-                if (card.hasPointerCapture(ev.pointerId)) card.releasePointerCapture(ev.pointerId);
-              } catch (_err) {}
-              card.style.transform = '';
-              card.classList.remove('is-dragging');
-              hideGhost();
-
-              if (activated) {
-                working.forEach((wItem) => {
-                  const target = rectById.get(wItem.id);
-                  if (target) Object.assign(target, wItem);
-                  const elTile = tileMap.get(wItem.id);
-                  if (elTile) applyRectToEl(elTile, wItem);
-                });
-                if (onCommit) onCommit(toSavedMap(working));
-              }
-            };
-
-            card.addEventListener('pointermove', onMove);
-            card.addEventListener('pointerup', onUp);
-            card.addEventListener('pointercancel', onUp);
-          });
-
-          // Bottom-right corner drag-to-resize
-          handle.addEventListener('pointerdown', (e) => {
-            if (e.pointerType === 'mouse' && e.button !== 0) return;
-            e.preventDefault();
-            e.stopPropagation();
-
-            const cur = rectById.get(r.id);
-            if (!cur) return;
-
-            const boardRect = boardEl.getBoundingClientRect();
-            const colStep = (boardRect.width + GAP) / COLS;
-            const rowStep = ROW_H + GAP;
-            const startX = e.clientX;
-            const startY = e.clientY;
-            const startPxW = card.offsetWidth;
-            const startPxH = card.offsetHeight;
-            let lastW = cur.w;
-            let lastH = cur.h;
-            let working = rects.map((itemRect) => ({ ...itemRect }));
-
-            try {
-              handle.setPointerCapture(e.pointerId);
-            } catch (_err) {}
-
-            card.classList.add('is-resizing');
-            showGhost(cur);
-
-            const onMove = (ev) => {
-              const dx = ev.clientX - startX;
-              const dy = ev.clientY - startY;
-              const minPxW = cur.minW * colStep - GAP;
-              const maxPxW = Math.min(cur.maxW, COLS - cur.x) * colStep - GAP;
-              const minPxH = cur.minH * rowStep - GAP;
-              const maxPxH = cur.maxH * rowStep - GAP;
-
-              card.style.width = `${clamp(startPxW + dx, Math.min(120, minPxW), Math.max(startPxW, maxPxW + 18))}px`;
-              card.style.height = `${clamp(startPxH + dy, Math.min(84, minPxH), Math.max(startPxH, maxPxH + 18))}px`;
-
-              const nextW = clamp(Math.round((startPxW + dx + GAP) / colStep), cur.minW, Math.min(cur.maxW, COLS - cur.x));
-              const nextH = clamp(Math.round((startPxH + dy + GAP) / rowStep), cur.minH, cur.maxH);
-
-              if (nextW !== lastW || nextH !== lastH) {
-                lastW = nextW;
-                lastH = nextH;
-                working = rects.map((itemRect) => ({ ...itemRect }));
-                const active = working.find((wItem) => wItem.id === r.id);
-                if (active) {
-                  active.w = nextW;
-                  active.h = nextH;
-                  resolveCollisions(working, r.id, COLS);
-                  showGhost(active);
-                  syncLiveBoard(working, r.id);
-                  const pill = card.querySelector('.bento-size-pill');
-                  if (pill) pill.textContent = `${nextW}×${nextH}`;
-                }
-              }
-            };
-
-            const onUp = (ev) => {
-              handle.removeEventListener('pointermove', onMove);
-              handle.removeEventListener('pointerup', onUp);
-              handle.removeEventListener('pointercancel', onUp);
-              try {
-                if (handle.hasPointerCapture(ev.pointerId)) handle.releasePointerCapture(ev.pointerId);
-              } catch (_err) {}
-
-              card.style.width = '';
-              card.style.height = '';
-              card.classList.remove('is-resizing');
-              hideGhost();
-
-              if (lastW !== cur.w || lastH !== cur.h) {
-                working.forEach((wItem) => {
-                  const target = rectById.get(wItem.id);
-                  if (target) Object.assign(target, wItem);
-                  const elTile = tileMap.get(wItem.id);
-                  if (elTile) applyRectToEl(elTile, wItem);
-                });
-                if (onCommit) onCommit(toSavedMap(working));
-              }
-            };
-
-            handle.addEventListener('pointermove', onMove);
-            handle.addEventListener('pointerup', onUp);
-            handle.addEventListener('pointercancel', onUp);
-          });
-        }
+          handle.addEventListener('pointermove', onMove);
+          handle.addEventListener('pointerup', onUp);
+          handle.addEventListener('pointercancel', onUp);
+        });
       }
 
       boardEl.appendChild(card);
@@ -456,7 +464,7 @@
     return {
       rects,
       compact() {
-        const compacted = compactLayout(rects, COLS);
+        const compacted = compactLayout(rects, cols);
         if (onCommit) onCommit(toSavedMap(compacted));
       }
     };

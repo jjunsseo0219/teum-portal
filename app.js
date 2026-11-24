@@ -34,7 +34,7 @@
     forest: { query: '', year: 'all', month: 'all', dept: 'all', type: 'all' },
     inlineDetail: null,
     homeEditMode: false,
-    homeLayout: { items: {}, hidden: [] },
+    homeLayout: { items: {}, mobileItems: {}, hidden: [] },
     studyTimer: {
       subject: '수학',
       mode: 'stopwatch',
@@ -78,6 +78,7 @@
         if (parsed && typeof parsed === 'object') {
           state.homeLayout = {
             items: parsed.items && typeof parsed.items === 'object' ? parsed.items : {},
+            mobileItems: parsed.mobileItems && typeof parsed.mobileItems === 'object' ? parsed.mobileItems : {},
             hidden: Array.isArray(parsed.hidden) ? parsed.hidden : []
           };
         }
@@ -92,23 +93,27 @@
   }
 
   function commitBentoItems(itemsMap) {
-    state.homeLayout.items = itemsMap && typeof itemsMap === 'object' ? itemsMap : {};
+    const key = isDesktopLayout() ? 'items' : 'mobileItems';
+    state.homeLayout[key] = itemsMap && typeof itemsMap === 'object' ? itemsMap : {};
     saveHomeLayout();
     renderFeed();
   }
 
   function compactHomeLayout() {
     if (!window.TEUM_BENTO) return;
+    const isDesktop = isDesktopLayout();
+    const cols = isDesktop ? 6 : 2;
+    const key = isDesktop ? 'items' : 'mobileItems';
     const cfg = state.data.config || {};
     const tabWidgets = (cfg.tabs && cfg.tabs.home) || [];
     const hiddenSet = new Set(Array.isArray(state.homeLayout?.hidden) ? state.homeLayout.hidden : []);
     const pool = [
       { id: 'bento-meal', type: 'meal' },
       { id: 'bento-timetable', type: 'timetable' },
-      ...tabWidgets.filter((w) => w && w.enabled !== false).map((w) => ({ id: w.id, type: w.type }))
+      ...tabWidgets.filter((w) => w && w.enabled !== false).map((w) => ({ id: w.id, type: w.type, defaultW: w.props?.bentoW, defaultH: w.props?.bentoH }))
     ].filter((it) => !hiddenSet.has(it.id));
-    const rects = window.TEUM_BENTO.normalizeLayout(pool, state.homeLayout.items || {});
-    const compacted = window.TEUM_BENTO.compactLayout(rects);
+    const rects = window.TEUM_BENTO.normalizeLayout(pool, state.homeLayout[key] || {}, cols);
+    const compacted = window.TEUM_BENTO.compactLayout(rects, cols);
     const nextMap = {};
     for (const r of compacted) nextMap[r.id] = { x: r.x, y: r.y, w: r.w, h: r.h };
     commitBentoItems(nextMap);
@@ -124,7 +129,7 @@
   }
 
   function resetHomeLayout() {
-    state.homeLayout = { items: {}, hidden: [] };
+    state.homeLayout = { items: {}, mobileItems: {}, hidden: [] };
     saveHomeLayout();
     renderFeed();
   }
@@ -1559,12 +1564,13 @@
       ? `다음 ${periods[activeIdx + 1]}`
       : '전체 시간표';
 
-    const mealRect = !isAdminPreview && state.homeLayout?.items ? state.homeLayout.items['bento-meal'] : null;
-    const mealExpanded = Boolean(mealRect && (mealRect.h >= 3 || mealRect.w >= 3));
+    const activeLayoutMap = isDesktopLayout() ? state.homeLayout?.items : state.homeLayout?.mobileItems;
+    const mealRect = !isAdminPreview && activeLayoutMap ? activeLayoutMap['bento-meal'] : null;
+    const mealExpanded = Boolean(mealRect && (mealRect.h >= 3 || (isDesktopLayout() ? mealRect.w >= 3 : mealRect.w >= 2)));
     const previewDishes = mealExpanded ? dishes : dishes.slice(0, 4);
 
-    const ttRect = !isAdminPreview && state.homeLayout?.items ? state.homeLayout.items['bento-timetable'] : null;
-    const ttExpanded = Boolean(ttRect && (ttRect.h >= 3 || ttRect.w >= 3));
+    const ttRect = !isAdminPreview && activeLayoutMap ? activeLayoutMap['bento-timetable'] : null;
+    const ttExpanded = Boolean(ttRect && (ttRect.h >= 3 || (isDesktopLayout() ? ttRect.w >= 3 : ttRect.w >= 2)));
     const startIdx = ttExpanded ? 0 : (activeIdx >= 0 ? Math.min(activeIdx, Math.max(0, periods.length - 3)) : 0);
     const previewPeriods = ttExpanded ? periods : periods.slice(startIdx, startIdx + 3);
 
@@ -1586,11 +1592,11 @@
       (!isAdminPreview && state.homeEditMode) ? el('div', { className: 'home-edit-banner' },
         el('span', { className: 'home-edit-banner-text' }, '카드를 끌어 원하는 칸에 놓고, 오른쪽 아래 모서리를 당겨 크기를 조절하세요.'),
         el('div', { style: { display: 'flex', gap: '6px', flexShrink: 0, flexWrap: 'wrap' } },
-          isDesktopLayout() ? el('button', {
+          el('button', {
             type: 'button',
             className: 'planner-mini-btn',
             onClick: compactHomeLayout
-          }, '빈칸 정리') : null,
+          }, '빈칸 정리'),
           el('button', {
             type: 'button',
             className: 'planner-mini-btn',
@@ -1753,12 +1759,16 @@
       const board = el('div', { className: `bento-board ${editActive ? 'is-edit-board' : ''}`.trim() });
 
       if (window.TEUM_BENTO) {
+        const isDesktop = isDesktopLayout();
+        const activeSaved = isAdminPreview ? {} : ((isDesktop ? state.homeLayout.items : state.homeLayout.mobileItems) || {});
         window.TEUM_BENTO.mountBentoBoard({
           boardEl: board,
           visiblePool: visibleItems,
-          savedMap: isAdminPreview ? {} : (state.homeLayout.items || {}),
+          savedMap: activeSaved,
           editMode: editActive,
-          isDesktop: isDesktopLayout(),
+          cols: isDesktop ? 6 : 2,
+          rowH: isDesktop ? 112 : 104,
+          gap: isDesktop ? 14 : 12,
           onCommit: commitBentoItems,
           onHide: (id) => setHomeWidgetHidden(id, true)
         });
