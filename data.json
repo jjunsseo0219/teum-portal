@@ -143,49 +143,54 @@
   },
   "sources": {
     "neis_meal": {
-      "date": "2026-11-24",
+      "date": "2026-11-25",
       "mealType": "중식",
-      "calories": "748.3 Kcal",
+      "calories": "837.4 Kcal",
       "dishes": [
         {
-          "name": "혼합잡곡밥",
+          "name": "닭갈비볶음밥!",
           "allergens": [
-            5
-          ]
-        },
-        {
-          "name": "해장국(1)",
-          "allergens": [
+            2,
             5,
             6,
-            16
+            13,
+            15
           ]
         },
         {
-          "name": "돼지갈비김치찜",
-          "allergens": [
-            5,
-            6,
-            9,
-            10
-          ]
-        },
-        {
-          "name": "고사리들깨볶음",
+          "name": "들깨감자수제비국",
           "allergens": [
             5,
             6
           ]
         },
         {
-          "name": "오이김치",
+          "name": "공심채볶음(모닝글로리)",
+          "allergens": [
+            5,
+            6,
+            13,
+            18
+          ]
+        },
+        {
+          "name": "깍두기",
           "allergens": [
             9
           ]
         },
         {
-          "name": "골드키위",
-          "allergens": []
+          "name": "도깨비핫도그",
+          "allergens": [
+            1,
+            2,
+            5,
+            6,
+            10,
+            12,
+            15,
+            18
+          ]
         }
       ]
     },
@@ -3041,7 +3046,7 @@
     }
   },
   "_meta": {
-    "bakedAt": "2026-11-24 17:45:27 KST",
+    "bakedAt": "2026-11-25 12:53:29 KST",
     "archiveFiles": [
       "data/archive_2025.json",
       "data/archive_2026.json"
@@ -3051,15 +3056,15 @@
         "type": "neis_meal",
         "label": "NEIS 서전고 급식",
         "status": "live",
-        "reason": "2026-11-24 NEIS 급식 연동",
-        "durationMs": 254.2
+        "reason": "2026-11-25 NEIS 급식 연동",
+        "durationMs": 1680.3
       },
       "neis_schedule": {
         "type": "neis_schedule",
         "label": "NEIS 학사일정",
         "status": "live",
         "reason": "202611~202612 학사일정 1건 연동",
-        "durationMs": 226.4
+        "durationMs": 1859.4
       },
       "timetable": {
         "type": "static",
@@ -3101,7 +3106,7 @@
         "label": "서전고 홈페이지 공지·가정통신문",
         "status": "live",
         "reason": "서전고 홈페이지 10건 자동 수집",
-        "durationMs": 581.3
+        "durationMs": 3095.5
       },
       "study_links": {
         "type": "static",
