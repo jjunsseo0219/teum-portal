@@ -143,55 +143,38 @@
   },
   "sources": {
     "neis_meal": {
-      "date": "2026-11-26",
+      "date": "2026-11-27",
       "mealType": "중식",
-      "calories": "939.5 Kcal",
+      "calories": "634.0 Kcal",
       "dishes": [
         {
-          "name": "혼합잡곡밥",
-          "allergens": [
-            5
-          ]
-        },
-        {
-          "name": "오징어두부국",
-          "allergens": [
-            5,
-            6,
-            17
-          ]
-        },
-        {
-          "name": "등갈비구이",
-          "allergens": [
-            5,
-            6,
-            10,
-            12,
-            13
-          ]
-        },
-        {
-          "name": "느타리세발초무침",
-          "allergens": [
-            5,
-            6,
-            13
-          ]
-        },
-        {
-          "name": "총각김치",
-          "allergens": [
-            9
-          ]
-        },
-        {
-          "name": "쿠키앤크림슈",
+          "name": "햄치즈포테이토샌드위치",
           "allergens": [
             1,
             2,
             5,
-            6
+            6,
+            10,
+            15,
+            16,
+            18
+          ]
+        },
+        {
+          "name": "요가퐁당견과믹스",
+          "allergens": [
+            2,
+            5
+          ]
+        },
+        {
+          "name": "귤",
+          "allergens": []
+        },
+        {
+          "name": "초코우유200",
+          "allergens": [
+            2
           ]
         }
       ]
@@ -521,6 +504,46 @@
         }
       },
       {
+        "id": "school-M010503-5891839",
+        "date": "2026-11-26",
+        "dept": "서전고 가정통신문",
+        "title": "교육재정 상생안 공감 확산을 위한 가정통신문",
+        "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "forest",
+        "thumbIcon": "가정",
+        "tags": [
+          "#가정통신문"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5891839",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 가정통신문"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-11-26"
+            },
+            {
+              "label": "첨부파일",
+              "value": "없음"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
         "id": "post-mwrszjqe",
         "date": "2026-11-22",
         "dept": "학생자치회",
@@ -708,46 +731,6 @@
             {
               "label": "등록일",
               "value": "2026-11-12"
-            },
-            {
-              "label": "첨부파일",
-              "value": "있음 (원문에서 다운로드)"
-            }
-          ],
-          "attachment": ""
-        }
-      },
-      {
-        "id": "school-M010503-5881229",
-        "date": "2026-11-11",
-        "dept": "서전고 가정통신문",
-        "title": "사교육비 현황 관련 설문조사 시행 안내 가정통신문",
-        "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
-        "pinned": false,
-        "thumbUrl": "",
-        "thumbTheme": "forest",
-        "thumbIcon": "가정",
-        "tags": [
-          "#가정통신문"
-        ],
-        "likes": 0,
-        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5881229",
-        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
-        "article": {
-          "sections": [
-            {
-              "heading": "공식 게시판 안내",
-              "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
-            }
-          ],
-          "facts": [
-            {
-              "label": "게시판",
-              "value": "서전고 가정통신문"
-            },
-            {
-              "label": "등록일",
-              "value": "2026-11-11"
             },
             {
               "label": "첨부파일",
@@ -1310,6 +1293,46 @@
     },
     "school_notices": [
       {
+        "id": "school-M010503-5891839",
+        "date": "2026-11-26",
+        "dept": "서전고 가정통신문",
+        "title": "교육재정 상생안 공감 확산을 위한 가정통신문",
+        "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "pinned": false,
+        "thumbUrl": "",
+        "thumbTheme": "forest",
+        "thumbIcon": "가정",
+        "tags": [
+          "#가정통신문"
+        ],
+        "likes": 0,
+        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5891839",
+        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+        "article": {
+          "sections": [
+            {
+              "heading": "공식 게시판 안내",
+              "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+            }
+          ],
+          "facts": [
+            {
+              "label": "게시판",
+              "value": "서전고 가정통신문"
+            },
+            {
+              "label": "등록일",
+              "value": "2026-11-26"
+            },
+            {
+              "label": "첨부파일",
+              "value": "없음"
+            }
+          ],
+          "attachment": ""
+        }
+      },
+      {
         "id": "school-M010503-5885679",
         "date": "2026-11-17",
         "dept": "서전고 가정통신문",
@@ -1420,46 +1443,6 @@
             {
               "label": "등록일",
               "value": "2026-11-12"
-            },
-            {
-              "label": "첨부파일",
-              "value": "있음 (원문에서 다운로드)"
-            }
-          ],
-          "attachment": ""
-        }
-      },
-      {
-        "id": "school-M010503-5881229",
-        "date": "2026-11-11",
-        "dept": "서전고 가정통신문",
-        "title": "사교육비 현황 관련 설문조사 시행 안내 가정통신문",
-        "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
-        "pinned": false,
-        "thumbUrl": "",
-        "thumbTheme": "forest",
-        "thumbIcon": "가정",
-        "tags": [
-          "#가정통신문"
-        ],
-        "likes": 0,
-        "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5881229",
-        "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
-        "article": {
-          "sections": [
-            {
-              "heading": "공식 게시판 안내",
-              "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
-            }
-          ],
-          "facts": [
-            {
-              "label": "게시판",
-              "value": "서전고 가정통신문"
-            },
-            {
-              "label": "등록일",
-              "value": "2026-11-11"
             },
             {
               "label": "첨부파일",
@@ -1774,6 +1757,20 @@
     ],
     "forest_all": [
       {
+        "id": "notice-school-M010503-5891839",
+        "type": "notice",
+        "date": "2026-11-26",
+        "term": "10대 (2026)",
+        "dept": "서전고 가정통신문",
+        "title": "교육재정 상생안 공감 확산을 위한 가정통신문",
+        "tags": [
+          "#가정통신문"
+        ],
+        "detail": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+        "linkedPostId": "school-M010503-5891839",
+        "attachment": ""
+      },
+      {
         "id": "notice-post-mwrszjqe",
         "type": "notice",
         "date": "2026-11-22",
@@ -1884,20 +1881,6 @@
         ],
         "detail": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
         "linkedPostId": "school-M010503-5883048",
-        "attachment": ""
-      },
-      {
-        "id": "notice-school-M010503-5881229",
-        "type": "notice",
-        "date": "2026-11-11",
-        "term": "10대 (2026)",
-        "dept": "서전고 가정통신문",
-        "title": "사교육비 현황 관련 설문조사 시행 안내 가정통신문",
-        "tags": [
-          "#가정통신문"
-        ],
-        "detail": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
-        "linkedPostId": "school-M010503-5881229",
         "attachment": ""
       },
       {
@@ -3048,7 +3031,7 @@
     }
   },
   "_meta": {
-    "bakedAt": "2026-11-26 12:19:44 KST",
+    "bakedAt": "2026-11-27 12:24:47 KST",
     "archiveFiles": [
       "data/archive_2025.json",
       "data/archive_2026.json"
@@ -3058,15 +3041,15 @@
         "type": "neis_meal",
         "label": "NEIS 서전고 급식",
         "status": "live",
-        "reason": "2026-11-26 NEIS 급식 연동",
-        "durationMs": 2524.6
+        "reason": "2026-11-27 NEIS 급식 연동",
+        "durationMs": 4708.3
       },
       "neis_schedule": {
         "type": "neis_schedule",
         "label": "NEIS 학사일정",
         "status": "live",
         "reason": "202611~202612 학사일정 1건 연동",
-        "durationMs": 2513.2
+        "durationMs": 3873.1
       },
       "timetable": {
         "type": "static",
@@ -3108,7 +3091,7 @@
         "label": "서전고 홈페이지 공지·가정통신문",
         "status": "live",
         "reason": "서전고 홈페이지 10건 자동 수집",
-        "durationMs": 4639.4
+        "durationMs": 3428.6
       },
       "study_links": {
         "type": "static",
