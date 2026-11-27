@@ -89,6 +89,7 @@
   function saveHomeLayout() {
     try {
       localStorage.setItem('teum_bento_v2', JSON.stringify(state.homeLayout));
+      notifyLocalChange();
     } catch (e) {}
   }
 
@@ -142,6 +143,7 @@
   function saveStudyTimerState() {
     try {
       localStorage.setItem('teum_study_timer_v1', JSON.stringify(state.studyTimer));
+      notifyLocalChange();
     } catch (e) {}
   }
 
@@ -324,6 +326,7 @@
         classNum: state.classNum,
         allergens: state.allergens
       }));
+      notifyLocalChange();
     } catch (e) {}
   }
 
@@ -331,6 +334,7 @@
     try {
       localStorage.setItem('teum_bookmarks', JSON.stringify(state.bookmarks));
       localStorage.setItem('teum_likes', JSON.stringify(state.likes));
+      notifyLocalChange();
     } catch (e) {}
   }
 
@@ -361,6 +365,7 @@
   function savePersonalTasks() {
     try {
       localStorage.setItem('teum_personal_tasks', JSON.stringify(state.personalTasks));
+      notifyLocalChange();
     } catch (e) {}
   }
 
@@ -426,7 +431,107 @@
       try { localStorage.removeItem('color-scheme'); } catch (e) {}
       if (meta) meta.content = 'light dark';
     }
+    notifyLocalChange();
   }
+
+  function collectStudyLinksPrefs() {
+    const out = {};
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('teum_study_links_v1_')) {
+          out[k] = JSON.parse(localStorage.getItem(k) || '{}');
+        }
+      }
+    } catch (e) {}
+    return out;
+  }
+
+  function applyStudyLinksPrefs(map) {
+    if (!map || typeof map !== 'object') return;
+    try {
+      for (const [k, val] of Object.entries(map)) {
+        if (k.startsWith('teum_study_links_v1_') && val && typeof val === 'object') {
+          localStorage.setItem(k, JSON.stringify(val));
+        }
+      }
+    } catch (e) {}
+  }
+
+  function collectSyncSnapshot() {
+    return {
+      v: 1,
+      grade: state.grade,
+      classNum: state.classNum,
+      allergens: state.allergens,
+      bookmarks: state.bookmarks,
+      likes: state.likes,
+      personalTasks: state.personalTasks,
+      studyTimer: state.studyTimer,
+      homeLayout: state.homeLayout,
+      theme: getStoredTheme(),
+      studyLinks: collectStudyLinksPrefs()
+    };
+  }
+
+  function applySyncSnapshot(snap) {
+    if (!snap || typeof snap !== 'object') return;
+    if (snap.grade >= 1 && snap.grade <= 3) state.grade = Number(snap.grade);
+    if (snap.classNum >= 1 && snap.classNum <= 8) state.classNum = Number(snap.classNum);
+    if (Array.isArray(snap.allergens)) state.allergens = snap.allergens.map(Number);
+    if (Array.isArray(snap.bookmarks)) state.bookmarks = snap.bookmarks;
+    if (snap.likes && typeof snap.likes === 'object') state.likes = snap.likes;
+    if (Array.isArray(snap.personalTasks)) state.personalTasks = snap.personalTasks;
+    if (snap.studyTimer && typeof snap.studyTimer === 'object') {
+      state.studyTimer = { ...state.studyTimer, ...snap.studyTimer };
+    }
+    if (snap.homeLayout && typeof snap.homeLayout === 'object') {
+      state.homeLayout = {
+        items: snap.homeLayout.items && typeof snap.homeLayout.items === 'object' ? snap.homeLayout.items : {},
+        mobileItems: snap.homeLayout.mobileItems && typeof snap.homeLayout.mobileItems === 'object' ? snap.homeLayout.mobileItems : {},
+        hidden: Array.isArray(snap.homeLayout.hidden) ? snap.homeLayout.hidden : []
+      };
+    }
+
+    try {
+      localStorage.setItem('teum_user_prefs', JSON.stringify({
+        grade: state.grade,
+        classNum: state.classNum,
+        allergens: state.allergens
+      }));
+      localStorage.setItem('teum_bookmarks', JSON.stringify(state.bookmarks));
+      localStorage.setItem('teum_likes', JSON.stringify(state.likes));
+      localStorage.setItem('teum_personal_tasks', JSON.stringify(state.personalTasks));
+      localStorage.setItem('teum_study_timer_v1', JSON.stringify(state.studyTimer));
+      localStorage.setItem('teum_bento_v2', JSON.stringify(state.homeLayout));
+    } catch (e) {}
+
+    if (snap.studyLinks) applyStudyLinksPrefs(snap.studyLinks);
+
+    if (snap.theme === 'light' || snap.theme === 'dark') {
+      try { localStorage.setItem('color-scheme', snap.theme); } catch (e) {}
+      const meta = document.querySelector('meta[name="color-scheme"]');
+      if (meta) meta.content = snap.theme;
+    } else if (snap.theme === 'system') {
+      try { localStorage.removeItem('color-scheme'); } catch (e) {}
+      const meta = document.querySelector('meta[name="color-scheme"]');
+      if (meta) meta.content = 'light dark';
+    }
+
+    renderHeader();
+    renderFeed();
+  }
+
+  function notifyLocalChange() {
+    if (isAdminPreview) return;
+    if (window.TEUM_SYNC && typeof window.TEUM_SYNC.schedulePush === 'function') {
+      window.TEUM_SYNC.schedulePush();
+    }
+  }
+
+  window.addEventListener('teum:local-change', () => {
+    notifyLocalChange();
+  });
 
   window.addEventListener('storage', (e) => {
     if (e.key === 'color-scheme') {
@@ -1301,7 +1406,252 @@
     updateForestView();
   }
 
-  // --- Built-in My Tab: Saved Bookmarks + Settings ---
+  // --- Built-in My Tab: Device Sync + Saved Bookmarks + Settings ---
+  function formatSyncTime(ts) {
+    if (!ts) return '방금 전';
+    const diffSec = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+    if (diffSec < 15) return '방금 전';
+    if (diffSec < 60) return `${diffSec}초 전`;
+    const d = new Date(ts);
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
+
+  function openSyncQrSheet(code) {
+    if (!window.TEUM_SYNC) return;
+    const syncUrl = window.TEUM_SYNC.getSyncUrl(code);
+    const qrBox = el('div', { className: 'sync-qr-box' }, 'QR 생성 중...');
+    const msgEl = el('p', { className: 'card-subtitle', style: { margin: 0, textAlign: 'center' } }, '다른 기기 카메라로 찍으면 바로 연결됩니다.');
+
+    const wrap = el('div', { className: 'sync-qr-wrap' },
+      qrBox,
+      el('div', { className: 'sync-code-value' }, code),
+      msgEl,
+      el('div', { className: 'backup-row', style: { justifyContent: 'center', width: '100%' } },
+        el('button', {
+          type: 'button',
+          className: 'planner-mini-btn',
+          onClick: async () => {
+            try {
+              await navigator.clipboard.writeText(code);
+              msgEl.textContent = '8자리 코드를 복사했습니다.';
+            } catch (e) {
+              msgEl.textContent = `코드: ${code}`;
+            }
+          }
+        }, '코드 복사'),
+        el('button', {
+          type: 'button',
+          className: 'planner-mini-btn is-primary',
+          onClick: async () => {
+            try {
+              await navigator.clipboard.writeText(syncUrl);
+              msgEl.textContent = '연동 링크를 복사했습니다.';
+            } catch (e) {
+              msgEl.textContent = syncUrl;
+            }
+          }
+        }, '연동 링크 복사')
+      )
+    );
+
+    openHalfSheet('로그인 없는 기기 연동', '다른 기기에서 QR 스캔', wrap);
+    window.TEUM_SYNC.renderQrSvg(qrBox, syncUrl);
+  }
+
+  function buildMySyncCard() {
+    const syncApi = window.TEUM_SYNC;
+    const status = syncApi ? syncApi.getStatus() : {
+      code: '',
+      state: 'idle',
+      cloudConfigured: false,
+      lastSyncedAt: 0,
+      message: ''
+    };
+
+    const badgeMap = {
+      connected: status.cloudConfigured
+        ? { text: '실시간 연결됨', cls: 'is-live' }
+        : { text: '로컬 · 링크 모드', cls: 'is-fallback' },
+      connecting: { text: '연결 중...', cls: 'is-fallback' },
+      syncing: { text: '동기화 중...', cls: 'is-fallback' },
+      error: { text: '연결 오류', cls: 'is-error' },
+      idle: { text: '미연결', cls: '' }
+    };
+    const badgeInfo = badgeMap[status.state] || badgeMap.idle;
+
+    const feedbackEl = el('p', { className: `sync-feedback ${status.state === 'error' ? 'is-error' : ''}`.trim(), role: 'status' }, status.message || '');
+    const setFeedback = (text, isErr) => {
+      feedbackEl.textContent = text || '';
+      feedbackEl.classList.toggle('is-error', Boolean(isErr));
+    };
+
+    const card = el('section', { className: 'widget-card sync-card' },
+      el('div', { className: 'card-head' },
+        el('div', { className: 'card-title-wrap' },
+          el('h2', { className: 'card-title' }, '실시간 기기 연동 (코드)'),
+          el('p', { className: 'card-subtitle' }, '로그인 없이 8자리 코드로 폰·태블릿·PC 설정과 일정을 맞춥니다')
+        ),
+        el('span', { className: `badge-pill ${badgeInfo.cls}`.trim() }, badgeInfo.text)
+      )
+    );
+
+    if (!status.code) {
+      const codeInput = el('input', {
+        type: 'text',
+        className: 'planner-input sync-code-input',
+        placeholder: '기존 코드 입력 (예: ABCD-2345)',
+        maxLength: 11,
+        'aria-label': '동기화 코드 입력',
+        onInput: (e) => {
+          e.target.value = e.target.value.toUpperCase();
+        }
+      });
+
+      const handleConnect = async (e) => {
+        if (e) e.preventDefault();
+        if (!syncApi) return;
+        const res = await syncApi.connectCode(codeInput.value);
+        if (!res.ok) {
+          setFeedback(res.error || '코드 형식을 확인해 주세요.', true);
+        } else {
+          renderFeed();
+        }
+      };
+
+      const joinForm = el('form', { className: 'sync-input-row', onSubmit: handleConnect },
+        codeInput,
+        el('button', { type: 'submit', className: 'planner-mini-btn is-primary' }, '연결')
+      );
+
+      card.appendChild(
+        el('div', { className: 'sync-actions-row' },
+          el('button', {
+            type: 'button',
+            className: 'cta-btn sync-create-btn',
+            onClick: async () => {
+              if (!syncApi) return;
+              const res = await syncApi.createCode();
+              if (!res.ok) {
+                setFeedback(res.error || '코드 생성에 실패했습니다.', true);
+              } else {
+                renderFeed();
+              }
+            }
+          }, '새 동기화 코드 만들기'),
+          el('button', {
+            type: 'button',
+            className: 'planner-mini-btn',
+            onClick: async () => {
+              if (!syncApi) return;
+              const url = syncApi.buildSnapshotUrl();
+              try {
+                await navigator.clipboard.writeText(url);
+                setFeedback('1회용 설정 전달 링크를 복사했습니다.', false);
+              } catch (e) {
+                setFeedback('링크 복사에 실패했습니다. 백업/복원 메뉴를 이용해 주세요.', true);
+              }
+            }
+          }, '1회용 설정 링크 복사')
+        )
+      );
+      card.appendChild(joinForm);
+      card.appendChild(feedbackEl);
+    } else {
+      card.appendChild(
+        el('div', { className: 'sync-code-box' },
+          el('div', { className: 'sync-code-main' },
+            el('span', { className: 'sync-code-label' }, '내 연동 코드'),
+            el('strong', { className: 'sync-code-value' }, status.code)
+          ),
+          el('span', { className: 'sync-time-meta' }, `최근 반영: ${formatSyncTime(status.lastSyncedAt)}`)
+        )
+      );
+
+      card.appendChild(
+        el('div', { className: 'sync-actions-row' },
+          el('button', {
+            type: 'button',
+            className: 'planner-mini-btn',
+            onClick: async () => {
+              try {
+                await navigator.clipboard.writeText(status.code);
+                setFeedback(`코드(${status.code})를 복사했습니다.`, false);
+              } catch (e) {
+                setFeedback(`코드: ${status.code}`, false);
+              }
+            }
+          }, '코드 복사'),
+          el('button', {
+            type: 'button',
+            className: 'planner-mini-btn',
+            onClick: async () => {
+              if (!syncApi) return;
+              const url = syncApi.getSyncUrl(status.code);
+              try {
+                await navigator.clipboard.writeText(url);
+                setFeedback('연동 링크를 복사했습니다. 다른 기기에서 열면 자동 연결됩니다.', false);
+              } catch (e) {
+                setFeedback(url, false);
+              }
+            }
+          }, '연동 링크 복사'),
+          el('button', {
+            type: 'button',
+            className: 'planner-mini-btn is-primary',
+            onClick: () => openSyncQrSheet(status.code)
+          }, 'QR 보기'),
+          status.cloudConfigured ? el('button', {
+            type: 'button',
+            className: 'planner-mini-btn',
+            onClick: async () => {
+              if (!syncApi) return;
+              const res = await syncApi.forceSyncNow();
+              setFeedback(res.ok ? '지금 클라우드에 반영했습니다.' : (res.error || '동기화 실패'), !res.ok);
+            }
+          }, '지금 동기화') : el('button', {
+            type: 'button',
+            className: 'planner-mini-btn',
+            onClick: async () => {
+              if (!syncApi) return;
+              const url = syncApi.buildSnapshotUrl();
+              try {
+                await navigator.clipboard.writeText(url);
+                setFeedback('현재 상태 1회용 스냅샷 링크를 복사했습니다.', false);
+              } catch (e) {
+                setFeedback('복사에 실패했습니다.', true);
+              }
+            }
+          }, '스냅샷 링크 복사'),
+          el('button', {
+            type: 'button',
+            className: 'planner-mini-btn',
+            onClick: () => {
+              if (!syncApi) return;
+              syncApi.disconnect();
+              renderFeed();
+            }
+          }, '연결 해제')
+        )
+      );
+
+      card.appendChild(feedbackEl);
+
+      if (!status.cloudConfigured) {
+        card.appendChild(
+          el('div', { className: 'sync-notice' },
+            '현재는 같은 기기 탭 실시간 동기화 · 1회용 스냅샷 링크로 동작 중입니다. ',
+            el('code', null, 'sync-config.js'),
+            '에 무료 Firebase 키를 입력하면 폰·태블릿·PC 간 클라우드 실시간 푸시가 즉시 활성화됩니다.'
+          )
+        );
+      }
+    }
+
+    return card;
+  }
+
   function buildMySavedCard() {
     const posts = Array.isArray(state.data.sources?.archive_posts) ? state.data.sources.archive_posts : [];
     const savedPosts = posts.filter((p) => isBookmarked(p.id));
@@ -1810,6 +2160,7 @@
     } else if (state.tab === 'forest') {
       renderForestFunnel(container);
     } else if (state.tab === 'my') {
+      if (!isAdminPreview) container.appendChild(buildMySyncCard());
       container.appendChild(buildMySavedCard());
       container.appendChild(buildMySettingsCard());
     }
@@ -1907,6 +2258,15 @@
   }
 
   loadUserPrefs();
+  if (!isAdminPreview && window.TEUM_SYNC) {
+    window.TEUM_SYNC.init({
+      getSnapshot: collectSyncSnapshot,
+      applySnapshot: applySyncSnapshot,
+      onStatusChange: () => {
+        if (state.tab === 'my') renderFeed();
+      }
+    });
+  }
   renderHeader();
   renderFeed();
   syncServerStateIfAvailable();

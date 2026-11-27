@@ -1,0 +1,152 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: teum_sync
+// Document ID: {roomId} (64-character lowercase SHA-256 hex digest of 8-char sync code XXXX-XXXX)
+// Zero-login real-time sync document written by sync.js (pushToCloud):
+//   - payload: map (required) - client snapshot from app.js collectSyncSnapshot()
+//       - v: int (optional, must equal 1 if present)
+//       - grade: int (optional, 1..3)
+//       - classNum: int (optional, 1..8)
+//       - allergens: list (optional, max 30 items)
+//       - bookmarks: list (optional, max 100 items)
+//       - likes: map (optional, max 200 keys)
+//       - personalTasks: list (optional, max 150 items)
+//       - studyTimer: map (optional, max 20 keys)
+//       - homeLayout: map (optional, keys limited to ['items', 'mobileItems', 'hidden'])
+//       - theme: string (optional, one of ['system', 'light', 'dark'])
+//       - studyLinks: map (optional, max 20 keys)
+//   - updatedAt: number (required, > 0; monotonic >= resource.data.updatedAt on update)
+//   - deviceId: string (required, length 1..64)
+//   - version: int (required, must equal 1; immutable on update)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isValidRoomId(roomId) {
+      return roomId is string && roomId.matches('^[a-f0-9]{64}$');
+    }
+
+    function hasOnlyAllowedFields(data, fields) {
+      return data.keys().hasOnly(fields);
+    }
+
+    function hasRequiredFields(data, fields) {
+      return data.keys().hasAll(fields);
+    }
+
+    function isValidOptionalIntRange(mapData, key, minVal, maxVal) {
+      return !(key in mapData) ||
+        (mapData[key] is int && mapData[key] >= minVal && mapData[key] <= maxVal);
+    }
+
+    function isValidOptionalList(mapData, key, maxSize) {
+      return !(key in mapData) ||
+        (mapData[key] is list && mapData[key].size() <= maxSize);
+    }
+
+    function isValidOptionalMapSize(mapData, key, maxKeys) {
+      return !(key in mapData) ||
+        (mapData[key] is map && mapData[key].keys().size() <= maxKeys);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidHomeLayout(layout) {
+      return layout is map &&
+        layout.keys().hasOnly(['items', 'mobileItems', 'hidden']) &&
+        (!('items' in layout) || (layout.items is map && layout.items.keys().size() <= 50)) &&
+        (!('mobileItems' in layout) || (layout.mobileItems is map && layout.mobileItems.keys().size() <= 50)) &&
+        (!('hidden' in layout) || (layout.hidden is list && layout.hidden.size() <= 50));
+    }
+
+    function isValidStudyTimer(timer) {
+      return timer is map &&
+        timer.keys().size() <= 20 &&
+        (!('subject' in timer) || (timer.subject is string && timer.subject.size() <= 40)) &&
+        (!('mode' in timer) || (timer.mode is string && timer.mode in ['stopwatch', 'pomodoro'])) &&
+        (!('running' in timer) || timer.running is bool) &&
+        (!('startedAt' in timer) || (timer.startedAt is number && timer.startedAt >= 0)) &&
+        (!('accumulatedMs' in timer) || (timer.accumulatedMs is number && timer.accumulatedMs >= 0)) &&
+        (!('dailyLogs' in timer) || (timer.dailyLogs is map && timer.dailyLogs.keys().size() <= 1000));
+    }
+
+    function isValidPayload(p) {
+      return p is map &&
+        p.keys().hasOnly([
+          'v',
+          'grade',
+          'classNum',
+          'allergens',
+          'bookmarks',
+          'likes',
+          'personalTasks',
+          'studyTimer',
+          'homeLayout',
+          'theme',
+          'studyLinks'
+        ]) &&
+        (!('v' in p) || (p.v is int && p.v == 1)) &&
+        isValidOptionalIntRange(p, 'grade', 1, 3) &&
+        isValidOptionalIntRange(p, 'classNum', 1, 8) &&
+        isValidOptionalList(p, 'allergens', 30) &&
+        isValidOptionalList(p, 'bookmarks', 100) &&
+        isValidOptionalMapSize(p, 'likes', 200) &&
+        isValidOptionalList(p, 'personalTasks', 150) &&
+        (!('studyTimer' in p) || isValidStudyTimer(p.studyTimer)) &&
+        (!('homeLayout' in p) || isValidHomeLayout(p.homeLayout)) &&
+        (!('theme' in p) || (p.theme is string && p.theme in ['system', 'light', 'dark'])) &&
+        isValidOptionalMapSize(p, 'studyLinks', 20);
+    }
+
+    function isValidSyncDoc(data) {
+      return hasOnlyAllowedFields(data, ['payload', 'updatedAt', 'deviceId', 'version']) &&
+        hasRequiredFields(data, ['payload', 'updatedAt', 'deviceId', 'version']) &&
+        data.version is int && data.version == 1 &&
+        data.updatedAt is number && data.updatedAt > 0 &&
+        data.deviceId is string && data.deviceId.size() > 0 && data.deviceId.size() <= 64 &&
+        isValidPayload(data.payload);
+    }
+
+    function isValidSyncUpdate(newData, oldData) {
+      return newData.updatedAt >= oldData.updatedAt &&
+        newData.version == oldData.version;
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    match /teum_sync/{roomId} {
+      // Prevent room enumeration and remote deletion
+      allow list, delete: if false;
+
+      // Only allow direct document reads with a valid 64-char SHA-256 hex roomId
+      allow get: if isValidRoomId(roomId);
+
+      // Validate full schema and bounds on both create and update
+      allow create: if isValidRoomId(roomId) &&
+        isValidSyncDoc(request.resource.data);
+
+      allow update: if isValidRoomId(roomId) &&
+        isValidSyncDoc(request.resource.data) &&
+        isValidSyncUpdate(request.resource.data, resource.data);
+    }
+
+    // Explicit default deny for all other paths and subcollections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

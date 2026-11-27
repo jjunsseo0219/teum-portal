@@ -472,6 +472,11 @@ html, body {
   color: var(--fallback-text);
 }
 
+.badge-pill.is-error {
+  background-color: color-mix(in srgb, #dc2626 14%, transparent);
+  color: var(--warn-text);
+}
+
 /* Horizontal Image-First Carousel Widget */
 .carousel-shell {
   padding: 18px 20px 20px;
@@ -2054,6 +2059,10 @@ dialog.sheet[open]:where(:not([data-closing])) {
     grid-column: span 2;
   }
 
+  .widget-card.sync-card {
+    grid-column: 1 / -1;
+  }
+
   .feed:has(.settings-group) {
     align-items: start;
   }
@@ -2771,4 +2780,125 @@ dialog.sheet[open]:where(:not([data-closing])) {
     width: min(84vw, 1080px);
     max-width: 1080px;
   }
+}
+
+/* Zero-Login Device Sync Card & QR Sheet */
+.sync-card {
+  grid-column: 1 / -1;
+}
+
+.sync-code-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background-color: var(--surface-subtle);
+  margin-bottom: 12px;
+}
+
+.sync-code-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sync-code-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.sync-code-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.sync-time-meta {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.sync-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.sync-create-btn {
+  background-color: var(--accent);
+  width: auto;
+  padding: 9px 14px;
+  font-size: 0.84rem;
+}
+
+.sync-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.sync-code-input {
+  flex: 1;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sync-feedback {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  min-height: 1.1em;
+}
+
+.sync-feedback.is-error {
+  color: var(--warn-text);
+}
+
+.sync-notice {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background-color: var(--surface-subtle);
+  border: 1px solid var(--border);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.sync-qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0 4px;
+}
+
+.sync-qr-box {
+  width: 200px;
+  max-width: 100%;
+  min-height: 200px;
+  padding: 12px;
+  border-radius: 14px;
+  background-color: #ffffff;
+  color: #111827;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.8rem;
 }

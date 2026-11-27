@@ -1260,6 +1260,7 @@
       const savePrefs = (prefs) => {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+          window.dispatchEvent(new CustomEvent('teum:local-change', { detail: { source: 'study_links' } }));
         } catch (_e) {}
       };
       const itemKey = (it) => String(it.url || it.title || '');

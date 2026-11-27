@@ -1,4 +1,4 @@
-const CACHE_NAME = 'teum-shell-v10';
+const CACHE_NAME = 'teum-shell-v11';
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,8 @@ const SHELL_ASSETS = [
   './style.css',
   './widgets.js',
   './bento.js',
+  './sync-config.js',
+  './sync.js',
   './app.js',
   './manifest.json'
 ];
