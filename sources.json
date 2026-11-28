@@ -346,64 +346,7 @@
     "envToken": "NOTION_TOKEN",
     "databaseId": "",
     "mode": "assessments",
-    "fallback": [
-      {
-        "id": "ass-1-math",
-        "grade": 1,
-        "subject": "수학",
-        "title": "공통수학2 도형의 방정식 문제풀이 보고서",
-        "dueDate": "2026-11-24",
-        "note": "풀이 과정 자필 스캔본 업로드 또는 수업 시간 제출"
-      },
-      {
-        "id": "ass-1-kor",
-        "grade": 1,
-        "subject": "국어",
-        "title": "비판적 읽기 논설문 초고 마감",
-        "dueDate": "2026-11-26",
-        "note": "A4 1장 분량 개요서 지참"
-      },
-      {
-        "id": "ass-1-sci",
-        "grade": 1,
-        "subject": "통합과학",
-        "title": "지속가능발전(ESD) 에너지 전환 실험 보고서",
-        "dueDate": "2026-11-28",
-        "note": "조별 데이터 시트 첨부 필수"
-      },
-      {
-        "id": "ass-1-eng",
-        "grade": 1,
-        "subject": "영어",
-        "title": "영어 에세이 스피킹 대본 최종본",
-        "dueDate": "2026-12-02",
-        "note": "2분 발표 기준 원고 작성"
-      },
-      {
-        "id": "ass-2-phys",
-        "grade": 2,
-        "subject": "물리학Ⅰ",
-        "title": "역학적 에너지 보존 실험 분석지",
-        "dueDate": "2026-11-25",
-        "note": "오차 원인 2가지 이상 서술"
-      },
-      {
-        "id": "ass-2-lit",
-        "grade": 2,
-        "subject": "문학",
-        "title": "현대시 비평문 작성 제출",
-        "dueDate": "2026-11-27",
-        "note": "수업 시간 현장 작성"
-      },
-      {
-        "id": "ass-3-calc",
-        "grade": 3,
-        "subject": "미적분",
-        "title": "정적분 활용 실생활 탐구 발표",
-        "dueDate": "2026-11-25",
-        "note": "슬라이드 5매 이내 요약"
-      }
-    ]
+    "fallback": []
   },
   "custom_api_demo": {
     "type": "generic_json",

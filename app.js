@@ -11,16 +11,7 @@
     window.parent.postMessage({ type: 'TEUM_ADMIN_ACTION', action, ...(payload || {}) }, '*');
   }
 
-  const DEFAULT_SEED_TASKS = [
-    {
-      id: 'ass-1-math',
-      title: '공통수학2 도형의 방정식 문제풀이 보고서',
-      dueDate: '2026-11-24',
-      subject: '수학',
-      source: '수행',
-      done: false
-    }
-  ];
+  const DEFAULT_SEED_TASKS = [];
 
   const state = {
     tab: 'home',
