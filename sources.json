@@ -79,9 +79,12 @@
     ]
   },
   "timetable": {
-    "type": "static",
-    "label": "반별 주간 시간표 (월~금)",
-    "data": {
+    "type": "neis_timetable",
+    "label": "NEIS 서전고 주간 시간표",
+    "officeCode": "M10",
+    "schoolName": "서전고등학교",
+    "schoolCode": "8000376",
+    "fallback": {
       "1-1": {
         "월": [
           "국어",

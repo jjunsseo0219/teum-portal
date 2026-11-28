@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Callable, Dict, Tuple
 
 from .generic_json import fetch_generic_json
-from .neis import fetch_meal, fetch_schedule
+from .neis import fetch_meal, fetch_schedule, fetch_timetable
 from .notion import fetch_notion_db
 from .school_board import fetch_school_board
 
@@ -20,6 +20,7 @@ ConnectorFn = Callable[[Dict[str, Any], Dict[str, str]], Tuple[Any, str, str]]
 CONNECTORS: Dict[str, ConnectorFn] = {
     "neis_meal": fetch_meal,
     "neis_schedule": fetch_schedule,
+    "neis_timetable": fetch_timetable,
     "notion_db": fetch_notion_db,
     "school_board": fetch_school_board,
     "generic_json": fetch_generic_json,

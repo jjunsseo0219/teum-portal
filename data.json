@@ -2225,9 +2225,12 @@
       ]
     },
     "timetable": {
-      "type": "static",
-      "label": "반별 주간 시간표 (월~금)",
-      "data": {
+      "type": "neis_timetable",
+      "label": "NEIS 서전고 주간 시간표",
+      "officeCode": "M10",
+      "schoolName": "서전고등학교",
+      "schoolCode": "8000376",
+      "fallback": {
         "1-1": {
           "월": [
             "국어",
@@ -3052,7 +3055,7 @@
     }
   },
   "_meta": {
-    "bakedAt": "2026-11-28 12:00:33 KST",
+    "bakedAt": "2026-11-28 18:03:20 KST",
     "archiveFiles": [
       "data/archive_2025.json",
       "data/archive_2026.json"
@@ -3063,21 +3066,21 @@
         "label": "NEIS 서전고 급식",
         "status": "live",
         "reason": "2026-11-30 NEIS 급식 연동",
-        "durationMs": 5154.9
+        "durationMs": 409.1
       },
       "neis_schedule": {
         "type": "neis_schedule",
         "label": "NEIS 학사일정",
         "status": "live",
         "reason": "202611~202612 학사일정 1건 연동",
-        "durationMs": 1882.0
+        "durationMs": 213.2
       },
       "timetable": {
-        "type": "static",
-        "label": "반별 주간 시간표 (월~금)",
-        "status": "static",
-        "reason": "로컬 정적 데이터",
-        "durationMs": 0.0
+        "type": "neis_timetable",
+        "label": "NEIS 서전고 주간 시간표",
+        "status": "fallback",
+        "reason": "NEIS_API_KEY 미설정 (샘플 5건 제한으로 기본 시간표 유지 · .env 또는 GitHub Secrets에 키 등록 시 자동 연동)",
+        "durationMs": 0.2
       },
       "archive_posts": {
         "type": "notion_db",
@@ -3112,7 +3115,7 @@
         "label": "서전고 홈페이지 공지·가정통신문",
         "status": "live",
         "reason": "서전고 홈페이지 10건 자동 수집",
-        "durationMs": 3652.7
+        "durationMs": 622.4
       },
       "study_links": {
         "type": "static",

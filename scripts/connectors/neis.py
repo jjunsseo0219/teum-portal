@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 import re
 import urllib.parse
@@ -9,6 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 KST = timezone(timedelta(hours=9))
 NEIS_BASE = "https://open.neis.go.kr/hub"
+WEEKDAY_LABELS = ("월", "화", "수", "목", "금")
 _SCHOOL_CODE_CACHE: Dict[Tuple[str, str], str] = {}
 
 
@@ -213,3 +215,134 @@ def fetch_schedule(cfg: Dict[str, Any], env: Dict[str, str]) -> Tuple[Any, str, 
         return selected, "live", f"{ym_current}~{ym_next} 학사일정 {len(selected)}건 연동"
     except Exception as exc:
         return fallback, "fallback", f"NEIS 일정 호출 실패 ({exc})"
+
+
+def _clean_subject_name(raw_name: str) -> str:
+    text = re.sub(r"^[*•\s]+", "", str(raw_name or "")).strip()
+    text = re.sub(r"\s+", " ", text)
+    return text
+
+
+def _target_school_week_bounds(today_date: Any) -> Tuple[Any, Any]:
+    monday = today_date - timedelta(days=today_date.weekday())
+    if today_date.weekday() >= 5:
+        monday = monday + timedelta(days=7)
+    return monday, monday + timedelta(days=4)
+
+
+def fetch_timetable(cfg: Dict[str, Any], env: Dict[str, str]) -> Tuple[Any, str, str]:
+    """Fetch weekly class timetable from NEIS hisTimetable API, falling back safely."""
+    raw_fallback = cfg.get("fallback") if isinstance(cfg.get("fallback"), dict) else cfg.get("data")
+    fallback = copy.deepcopy(raw_fallback) if isinstance(raw_fallback, dict) else {}
+
+    office_code = str(cfg.get("officeCode", "M10")).strip()
+    school_name = str(cfg.get("schoolName", "서전고등학교")).strip()
+    school_code = str(cfg.get("schoolCode", "8000376")).strip()
+    api_key = env.get("NEIS_API_KEY", "").strip()
+
+    if not api_key:
+        return (
+            fallback,
+            "fallback",
+            "NEIS_API_KEY 미설정 (샘플 5건 제한으로 기본 시간표 유지 · .env 또는 GitHub Secrets에 키 등록 시 자동 연동)",
+        )
+
+    if not school_code:
+        resolved, err = _resolve_school_code(office_code, school_name, api_key)
+        if not resolved:
+            return fallback, "fallback", err or "학교코드 조회 불가"
+        school_code = resolved
+
+    today = datetime.now(KST).date()
+    monday, friday = _target_school_week_bounds(today)
+    from_ymd = monday.strftime("%Y%m%d")
+    to_ymd = friday.strftime("%Y%m%d")
+
+    all_rows: List[Dict[str, Any]] = []
+    try:
+        for page_idx in range(1, 6):
+            params: Dict[str, str] = {
+                "KEY": api_key,
+                "ATPT_OFCDC_SC_CODE": office_code,
+                "SD_SCHUL_CODE": school_code,
+                "TI_FROM_YMD": from_ymd,
+                "TI_TO_YMD": to_ymd,
+                "pIndex": str(page_idx),
+                "pSize": "1000",
+            }
+            payload = _request_neis("hisTimetable", params, timeout=8.0)
+            rows, err = _extract_rows(payload, "hisTimetable")
+            if err:
+                if page_idx == 1 and "INFO-200" in err:
+                    return fallback, "fallback", f"{from_ymd}~{to_ymd} NEIS 시간표 없음 (방학·휴일)"
+                if page_idx == 1:
+                    return fallback, "fallback", err
+                break
+            if not rows:
+                break
+            all_rows.extend(rows)
+            if len(rows) < 1000:
+                break
+    except Exception as exc:
+        return fallback, "fallback", f"NEIS 시간표 호출 실패 ({exc})"
+
+    if not all_rows:
+        return fallback, "fallback", f"{from_ymd}~{to_ymd} NEIS 시간표 없음 (방학·휴일)"
+
+    # Group by class_key -> day_label -> period_num -> list of subject names
+    grouped: Dict[str, Dict[str, Dict[int, List[str]]]] = {}
+    for row in all_rows:
+        grade = str(row.get("GRADE", "")).strip()
+        class_nm = str(row.get("CLASS_NM", "")).strip()
+        ymd = str(row.get("ALL_TI_YMD", "")).strip()
+        perio_str = str(row.get("PERIO", "")).strip()
+        subj = _clean_subject_name(str(row.get("ITRT_CNTNT", "")))
+        if not (grade.isdigit() and class_nm.isdigit() and len(ymd) == 8 and perio_str.isdigit() and subj):
+            continue
+        try:
+            wd = datetime.strptime(ymd, "%Y%m%d").weekday()
+        except ValueError:
+            continue
+        if wd < 0 or wd > 4:
+            continue
+        perio = int(perio_str)
+        if perio < 1 or perio > 12:
+            continue
+        class_key = f"{int(grade)}-{int(class_nm)}"
+        day_label = WEEKDAY_LABELS[wd]
+        periods_map = grouped.setdefault(class_key, {}).setdefault(day_label, {})
+        items = periods_map.setdefault(perio, [])
+        if subj not in items:
+            items.append(subj)
+
+    if not grouped:
+        return fallback, "fallback", f"{from_ymd}~{to_ymd} 유효한 시간표 행 없음"
+
+    merged = copy.deepcopy(fallback)
+    updated_classes = 0
+    for class_key, day_map in sorted(grouped.items()):
+        class_entry = merged.get(class_key)
+        if not isinstance(class_entry, dict):
+            class_entry = {}
+        day_updated = False
+        for day_label, periods_map in day_map.items():
+            if not periods_map:
+                continue
+            max_p = max(periods_map.keys())
+            arr = []
+            for p in range(1, max_p + 1):
+                subjs = periods_map.get(p)
+                if subjs:
+                    arr.append("/".join(subjs[:3]))
+                else:
+                    arr.append("-")
+            class_entry[day_label] = arr
+            day_updated = True
+        if day_updated:
+            merged[class_key] = class_entry
+            updated_classes += 1
+
+    if isinstance(merged.get("1-1"), dict):
+        merged["default"] = copy.deepcopy(merged["1-1"])
+
+    return merged, "live", f"{from_ymd}~{to_ymd} NEIS 시간표 {updated_classes}개 반 연동"
