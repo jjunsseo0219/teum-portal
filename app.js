@@ -44,8 +44,54 @@
       dailyLogs: {}
     },
     data: window.TEUM_DATA || { config: { tabs: {} }, sources: {}, _meta: {} },
+    publicOverrides: { posts: [], deletedPostIds: [], forest: [], deletedForestIds: [] },
     timers: []
   };
+
+  let baseArchivePosts = Array.isArray(state.data.sources?.archive_posts)
+    ? JSON.parse(JSON.stringify(state.data.sources.archive_posts))
+    : [];
+  let baseForestRecords = Array.isArray(state.data.sources?.forest_all)
+    ? JSON.parse(JSON.stringify(state.data.sources.forest_all))
+    : [];
+
+  function isInAppAdmin() {
+    return !isAdminPreview && Boolean(window.TEUM_SYNC && window.TEUM_SYNC.isAdminActive());
+  }
+
+  function canEditPortal() {
+    return isAdminPreview || isInAppAdmin();
+  }
+
+  function mergePortalLists(baseArr, overrideArr, deletedIds) {
+    const delSet = new Set(Array.isArray(deletedIds) ? deletedIds : []);
+    const overList = Array.isArray(overrideArr) ? overrideArr.filter((it) => it && it.id && !delSet.has(it.id)) : [];
+    const overIds = new Set(overList.map((it) => it.id));
+    const keptBase = (Array.isArray(baseArr) ? baseArr : []).filter((it) => it && !delSet.has(it.id) && !overIds.has(it.id));
+    return [...overList, ...keptBase].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+  }
+
+  function applyPublicOverrides(overrides) {
+    const o = overrides && typeof overrides === 'object' ? overrides : {};
+    state.publicOverrides = {
+      posts: Array.isArray(o.posts) ? o.posts : [],
+      deletedPostIds: Array.isArray(o.deletedPostIds) ? o.deletedPostIds : [],
+      forest: Array.isArray(o.forest) ? o.forest : [],
+      deletedForestIds: Array.isArray(o.deletedForestIds) ? o.deletedForestIds : []
+    };
+    if (!state.data.sources || typeof state.data.sources !== 'object') state.data.sources = {};
+    state.data.sources.archive_posts = mergePortalLists(
+      baseArchivePosts,
+      state.publicOverrides.posts,
+      state.publicOverrides.deletedPostIds
+    );
+    state.data.sources.forest_all = mergePortalLists(
+      baseForestRecords,
+      state.publicOverrides.forest,
+      state.publicOverrides.deletedForestIds
+    );
+    renderFeed();
+  }
 
   function loadUserPrefs() {
     try {
@@ -678,12 +724,323 @@
         if (state.inlineDetail) renderFeed();
         else if (fullSheet.open) document.getElementById('fullBody').replaceChildren(renderBody());
       },
-      onEditPost: isAdminPreview ? (p) => {
+      onEditPost: canEditPortal() ? (p) => {
         closeFullDetail();
-        sendAdminAction('editPost', { postId: p.id });
+        if (isAdminPreview) sendAdminAction('editPost', { postId: p.id });
+        else openPostEditorSheet(p);
       } : null
     });
     openFullSheet(`${post.dept || '학생자치회'} · ${post.date || ''}`, post.title || '블로그 포스트', renderBody);
+  }
+
+  function postSectionsToPlainText(post) {
+    const secs = Array.isArray(post?.article?.sections) ? post.article.sections : [];
+    if (secs.length > 0) {
+      return secs
+        .map((s) => `${s.heading ? `## ${s.heading}\n` : ''}${s.body || ''}`.trim())
+        .filter(Boolean)
+        .join('\n\n');
+    }
+    const rawHtml = String(post?.article?.bodyHtml || post?.article?.html || '');
+    if (rawHtml) {
+      return rawHtml.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n\n').replace(/<[^>]+>/g, '').trim();
+    }
+    return '';
+  }
+
+  function plainTextToSections(text) {
+    const blocks = String(text || '').split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+    if (blocks.length === 0) return [{ heading: '', body: '' }];
+    return blocks.map((b) => {
+      const lines = b.split('\n');
+      if (lines[0].startsWith('## ')) {
+        return { heading: lines[0].slice(3).trim(), body: lines.slice(1).join('\n').trim() };
+      }
+      return { heading: '', body: b };
+    });
+  }
+
+  async function savePortalPostOverride(postObj, isDelete) {
+    if (!window.TEUM_SYNC) return { ok: false, error: '동기화 모듈이 없습니다.' };
+    const cur = state.publicOverrides || { posts: [], deletedPostIds: [], forest: [], deletedForestIds: [] };
+    const nextPosts = (cur.posts || []).filter((p) => p && p.id !== postObj.id);
+    const nextDeleted = (cur.deletedPostIds || []).filter((id) => id !== postObj.id);
+    if (isDelete) nextDeleted.push(postObj.id);
+    else nextPosts.unshift(postObj);
+    return window.TEUM_SYNC.savePublicOverrides({
+      ...cur,
+      posts: nextPosts,
+      deletedPostIds: nextDeleted
+    });
+  }
+
+  async function savePortalForestOverride(recObj, isDelete) {
+    if (!window.TEUM_SYNC) return { ok: false, error: '동기화 모듈이 없습니다.' };
+    const cur = state.publicOverrides || { posts: [], deletedPostIds: [], forest: [], deletedForestIds: [] };
+    const nextForest = (cur.forest || []).filter((r) => r && r.id !== recObj.id);
+    const nextDeleted = (cur.deletedForestIds || []).filter((id) => id !== recObj.id);
+    if (isDelete) nextDeleted.push(recObj.id);
+    else nextForest.unshift(recObj);
+    return window.TEUM_SYNC.savePublicOverrides({
+      ...cur,
+      forest: nextForest,
+      deletedForestIds: nextDeleted
+    });
+  }
+
+  function openPostEditorSheet(existingPost) {
+    const isEdit = Boolean(existingPost && existingPost.id);
+    const today = new Date().toISOString().slice(0, 10);
+    const titleInput = el('input', { type: 'text', className: 'planner-input', placeholder: '공지 · 글 제목', value: existingPost?.title || '' });
+    const dateInput = el('input', { type: 'date', className: 'planner-input', value: existingPost?.date || today });
+    const deptInput = el('input', { type: 'text', className: 'planner-input', placeholder: '학생자치회', value: existingPost?.dept || '학생자치회' });
+    const tagsInput = el('input', {
+      type: 'text',
+      className: 'planner-input',
+      placeholder: '#공지 #행사 (띄어쓰기/쉼표 구분)',
+      value: Array.isArray(existingPost?.tags) ? existingPost.tags.join(' ') : '#공지'
+    });
+    const excerptInput = el('input', { type: 'text', className: 'planner-input', placeholder: '목록에 보일 한 줄 요약', value: existingPost?.excerpt || '' });
+    const bodyArea = el('textarea', {
+      className: 'planner-input editor-textarea',
+      placeholder: '본문 내용을 입력하세요. (빈 줄로 문단 구분, "## 소제목" 사용 가능)'
+    }, postSectionsToPlainText(existingPost));
+    const attachInput = el('input', { type: 'text', className: 'planner-input', placeholder: '예: 안내문.pdf (없으면 비워두기)', value: existingPost?.article?.attachment || '' });
+    const pinnedCheck = el('input', { type: 'checkbox', checked: Boolean(existingPost?.pinned) });
+    const statusMsg = el('p', { className: 'sync-feedback', role: 'status' }, '');
+
+    const saveBtn = el('button', { type: 'submit', className: 'cta-btn', style: { flex: '1', backgroundColor: 'var(--accent)' } }, '저장 후 바로 반영');
+    const delBtn = isEdit ? el('button', {
+      type: 'button',
+      className: 'planner-mini-btn is-danger',
+      onClick: async () => {
+        saveBtn.disabled = true;
+        delBtn.disabled = true;
+        statusMsg.textContent = '삭제 중...';
+        const res = await savePortalPostOverride(existingPost, true);
+        if (!res.ok) {
+          statusMsg.textContent = res.error || '삭제에 실패했습니다.';
+          statusMsg.classList.add('is-error');
+          saveBtn.disabled = false;
+          delBtn.disabled = false;
+          return;
+        }
+        closeFullDetail();
+      }
+    }, '삭제') : null;
+
+    const form = el('form', {
+      className: 'editor-form',
+      onSubmit: async (e) => {
+        e.preventDefault();
+        const title = titleInput.value.trim();
+        if (!title) {
+          titleInput.focus();
+          statusMsg.textContent = '제목을 입력해 주세요.';
+          statusMsg.classList.add('is-error');
+          return;
+        }
+        const parsedTags = tagsInput.value
+          .split(/[\s,]+/)
+          .map((t) => t.trim())
+          .filter(Boolean)
+          .map((t) => (t.startsWith('#') ? t : `#${t}`));
+        const bodyText = bodyArea.value.trim();
+        const postObj = {
+          ...(existingPost || {}),
+          id: isEdit ? existingPost.id : `post-${Date.now().toString(36)}`,
+          title,
+          date: dateInput.value || today,
+          dept: deptInput.value.trim() || '학생자치회',
+          tags: parsedTags.length ? parsedTags : ['#공지'],
+          excerpt: excerptInput.value.trim() || bodyText.split('\n')[0].slice(0, 70),
+          pinned: Boolean(pinnedCheck.checked),
+          thumbUrl: existingPost?.thumbUrl || '',
+          thumbTheme: existingPost?.thumbTheme || 'forest',
+          thumbIcon: existingPost?.thumbIcon || '공지',
+          article: {
+            ...(existingPost?.article || {}),
+            sections: plainTextToSections(bodyText),
+            bodyHtml: '',
+            html: '',
+            attachment: attachInput.value.trim()
+          }
+        };
+        saveBtn.disabled = true;
+        if (delBtn) delBtn.disabled = true;
+        statusMsg.classList.remove('is-error');
+        statusMsg.textContent = '전교생 포털에 반영 중...';
+        const res = await savePortalPostOverride(postObj, false);
+        if (!res.ok) {
+          statusMsg.textContent = res.error || '저장에 실패했습니다.';
+          statusMsg.classList.add('is-error');
+          saveBtn.disabled = false;
+          if (delBtn) delBtn.disabled = false;
+          return;
+        }
+        closeFullDetail();
+      }
+    },
+      el('label', { className: 'planner-field-label' }, '제목 *', titleInput),
+      el('div', { className: 'editor-row-2' },
+        el('label', { className: 'planner-field-label' }, '날짜', dateInput),
+        el('label', { className: 'planner-field-label' }, '담당 부서', deptInput)
+      ),
+      el('div', { className: 'editor-row-2' },
+        el('label', { className: 'planner-field-label' }, '태그', tagsInput),
+        el('label', { className: 'planner-field-label' }, '첨부 안내 (선택)', attachInput)
+      ),
+      el('label', { className: 'planner-field-label' }, '한 줄 요약', excerptInput),
+      el('label', { className: 'planner-field-label' }, '본문', bodyArea),
+      el('label', { className: 'editor-check-row' }, pinnedCheck, '홈 화면 중요 공지 캐러셀에 고정'),
+      statusMsg,
+      el('div', { className: 'editor-actions-row' }, saveBtn, delBtn)
+    );
+
+    openFullSheet('관리자 바로 편집 · 실시간 반영', isEdit ? '공지 · 글 수정' : '새 공지 · 글 쓰기', form);
+  }
+
+  function openForestEditorSheet(existingRec) {
+    const isEdit = Boolean(existingRec && existingRec.id);
+    const today = new Date().toISOString().slice(0, 10);
+    const typeSelect = el('select', { className: 'planner-input' }, [
+      el('option', { value: 'accounting', selected: (existingRec?.type || 'accounting') === 'accounting' }, '회계 (수입/지출)'),
+      el('option', { value: 'minutes', selected: existingRec?.type === 'minutes' }, '회의록'),
+      el('option', { value: 'notice', selected: existingRec?.type === 'notice' }, '공지'),
+      el('option', { value: 'docs', selected: existingRec?.type === 'docs' }, '자료 · 데이터')
+    ]);
+    const dateInput = el('input', { type: 'date', className: 'planner-input', value: existingRec?.date || today });
+    const termInput = el('input', { type: 'text', className: 'planner-input', placeholder: '10대 (2026)', value: existingRec?.term || '10대 (2026)' });
+    const deptInput = el('input', { type: 'text', className: 'planner-input', placeholder: '학생자치회', value: existingRec?.dept || '학생자치회' });
+    const titleInput = el('input', { type: 'text', className: 'planner-input', placeholder: '기록 제목', value: existingRec?.title || '' });
+    const detailArea = el('textarea', { className: 'planner-input editor-textarea', placeholder: '상세 내용이나 영수증·안건 설명을 입력하세요' }, existingRec?.detail || '');
+    const attachInput = el('input', { type: 'text', className: 'planner-input', placeholder: '예: 영수증_20261128.jpg (선택)', value: existingRec?.attachment || '' });
+
+    const flowSelect = el('select', { className: 'planner-input' }, [
+      el('option', { value: 'expense', selected: (existingRec?.flow || 'expense') === 'expense' }, '지출 (-)'),
+      el('option', { value: 'income', selected: existingRec?.flow === 'income' }, '수입 (+)')
+    ]);
+    const amountInput = el('input', { type: 'number', className: 'planner-input', min: '0', step: '100', placeholder: '금액 (원)', value: existingRec?.amount ?? '' });
+    const sessionInput = el('input', { type: 'text', className: 'planner-input', placeholder: '예: 정기 3차', value: existingRec?.session || '' });
+    const agendaInput = el('input', { type: 'number', className: 'planner-input', min: '1', placeholder: '안건 수', value: existingRec?.agendaCount ?? 1 });
+    const fileTypeInput = el('input', { type: 'text', className: 'planner-input', placeholder: '예: PDF', value: existingRec?.fileType || 'PDF' });
+    const fileNameInput = el('input', { type: 'text', className: 'planner-input', placeholder: '예: 자료.pdf', value: existingRec?.fileName || '' });
+
+    const extraSlot = el('div', { className: 'editor-row-2' });
+    function renderExtraFields() {
+      const t = typeSelect.value;
+      if (t === 'accounting') {
+        extraSlot.style.display = 'grid';
+        extraSlot.replaceChildren(
+          el('label', { className: 'planner-field-label' }, '수입/지출 구분', flowSelect),
+          el('label', { className: 'planner-field-label' }, '금액 (원)', amountInput)
+        );
+      } else if (t === 'minutes') {
+        extraSlot.style.display = 'grid';
+        extraSlot.replaceChildren(
+          el('label', { className: 'planner-field-label' }, '회차', sessionInput),
+          el('label', { className: 'planner-field-label' }, '안건 수', agendaInput)
+        );
+      } else if (t === 'docs') {
+        extraSlot.style.display = 'grid';
+        extraSlot.replaceChildren(
+          el('label', { className: 'planner-field-label' }, '파일 형식', fileTypeInput),
+          el('label', { className: 'planner-field-label' }, '파일명', fileNameInput)
+        );
+      } else {
+        extraSlot.style.display = 'none';
+        extraSlot.replaceChildren();
+      }
+    }
+    typeSelect.addEventListener('change', renderExtraFields);
+    renderExtraFields();
+
+    const statusMsg = el('p', { className: 'sync-feedback', role: 'status' }, '');
+    const saveBtn = el('button', { type: 'submit', className: 'cta-btn', style: { flex: '1', backgroundColor: 'var(--accent)' } }, '저장 후 바로 반영');
+    const delBtn = isEdit ? el('button', {
+      type: 'button',
+      className: 'planner-mini-btn is-danger',
+      onClick: async () => {
+        saveBtn.disabled = true;
+        delBtn.disabled = true;
+        statusMsg.textContent = '삭제 중...';
+        const res = await savePortalForestOverride(existingRec, true);
+        if (!res.ok) {
+          statusMsg.textContent = res.error || '삭제에 실패했습니다.';
+          statusMsg.classList.add('is-error');
+          saveBtn.disabled = false;
+          delBtn.disabled = false;
+          return;
+        }
+        closeFullDetail();
+      }
+    }, '삭제') : null;
+
+    const form = el('form', {
+      className: 'editor-form',
+      onSubmit: async (e) => {
+        e.preventDefault();
+        const title = titleInput.value.trim();
+        if (!title) {
+          titleInput.focus();
+          statusMsg.textContent = '제목을 입력해 주세요.';
+          statusMsg.classList.add('is-error');
+          return;
+        }
+        const t = typeSelect.value;
+        const recObj = {
+          ...(existingRec || {}),
+          id: isEdit ? existingRec.id : `f-${t.slice(0, 3)}-${Date.now().toString(36)}`,
+          type: t,
+          date: dateInput.value || today,
+          term: termInput.value.trim() || '10대 (2026)',
+          dept: deptInput.value.trim() || '학생자치회',
+          title,
+          detail: detailArea.value.trim(),
+          attachment: attachInput.value.trim()
+        };
+        if (t === 'accounting') {
+          recObj.flow = flowSelect.value === 'income' ? 'income' : 'expense';
+          recObj.amount = Math.max(0, Number(amountInput.value) || 0);
+        } else if (t === 'minutes') {
+          recObj.session = sessionInput.value.trim() || '정기 회의';
+          recObj.agendaCount = Math.max(1, Number(agendaInput.value) || 1);
+        } else if (t === 'docs') {
+          recObj.fileType = fileTypeInput.value.trim() || 'PDF';
+          recObj.fileName = fileNameInput.value.trim() || attachInput.value.trim();
+        }
+        saveBtn.disabled = true;
+        if (delBtn) delBtn.disabled = true;
+        statusMsg.classList.remove('is-error');
+        statusMsg.textContent = '전교생 기록실에 반영 중...';
+        const res = await savePortalForestOverride(recObj, false);
+        if (!res.ok) {
+          statusMsg.textContent = res.error || '저장에 실패했습니다.';
+          statusMsg.classList.add('is-error');
+          saveBtn.disabled = false;
+          if (delBtn) delBtn.disabled = false;
+          return;
+        }
+        closeFullDetail();
+      }
+    },
+      el('div', { className: 'editor-row-2' },
+        el('label', { className: 'planner-field-label' }, '유형', typeSelect),
+        el('label', { className: 'planner-field-label' }, '날짜', dateInput)
+      ),
+      el('div', { className: 'editor-row-2' },
+        el('label', { className: 'planner-field-label' }, '대수', termInput),
+        el('label', { className: 'planner-field-label' }, '담당 부서', deptInput)
+      ),
+      el('label', { className: 'planner-field-label' }, '제목 *', titleInput),
+      extraSlot,
+      el('label', { className: 'planner-field-label' }, '상세 기록', detailArea),
+      el('label', { className: 'planner-field-label' }, '첨부 파일명 안내 (선택)', attachInput),
+      statusMsg,
+      el('div', { className: 'editor-actions-row' }, saveBtn, delBtn)
+    );
+
+    openFullSheet('관리자 바로 편집 · 실시간 반영', isEdit ? '숲 기록 수정' : '새 숲 기록 추가', form);
   }
 
   function openAddTaskSheet() {
@@ -961,10 +1318,13 @@
 
     const controls = el('section', { className: 'archive-controls' });
     const countBadge = el('span', { className: 'badge-pill' }, '');
-    const writeBtn = isAdminPreview ? el('button', {
+    const writeBtn = canEditPortal() ? el('button', {
       type: 'button',
       className: 'planner-mini-btn is-primary',
-      onClick: () => sendAdminAction('newPost')
+      onClick: () => {
+        if (isAdminPreview) sendAdminAction('newPost');
+        else openPostEditorSheet(null);
+      }
     }, '+ 글쓰기') : null;
     controls.appendChild(
       el('div', { className: 'archive-head-row' },
@@ -1086,7 +1446,10 @@
             isBookmarked,
             onOpen: openFullArticle,
             onToggleBookmark: toggleBookmark,
-            onEditPost: isAdminPreview ? (p) => sendAdminAction('editPost', { postId: p.id }) : null,
+            onEditPost: canEditPortal() ? (p) => {
+              if (isAdminPreview) sendAdminAction('editPost', { postId: p.id });
+              else openPostEditorSheet(p);
+            } : null,
             onClickTag: (tag) => {
               state.explore.tag = tag;
               renderTagChips();
@@ -1153,13 +1516,14 @@
         el('span', null, `첨부: ${rec.attachment || rec.fileName}`),
         el('span', { style: { color: 'var(--accent)' } }, '원본 보관됨')
       ) : null,
-      isAdminPreview ? el('div', { style: { display: 'flex', justifyContent: 'flex-end', marginTop: '12px' } },
+      canEditPortal() ? el('div', { style: { display: 'flex', justifyContent: 'flex-end', marginTop: '12px' } },
         el('button', {
           type: 'button',
           className: 'planner-mini-btn is-primary',
           onClick: () => {
             closeFullDetail();
-            sendAdminAction('editForest', { recordId: rec.id });
+            if (isAdminPreview) sendAdminAction('editForest', { recordId: rec.id });
+            else openForestEditorSheet(rec);
           }
         }, '이 기록 수정')
       ) : null
@@ -1186,10 +1550,13 @@
       el('div', { className: 'archive-head-row' },
         el('h2', { className: 'section-heading' }, '숲 · 투명 기록실'),
         el('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
-          isAdminPreview ? el('button', {
+          canEditPortal() ? el('button', {
             type: 'button',
             className: 'planner-mini-btn is-primary',
-            onClick: () => sendAdminAction('newForest')
+            onClick: () => {
+              if (isAdminPreview) sendAdminAction('newForest');
+              else openForestEditorSheet(null);
+            }
           }, '+ 기록 추가') : null,
           el('span', { className: 'badge-pill' }, `총 ${records.length}건`)
         )
@@ -1377,7 +1744,7 @@
           rightEl
         );
 
-        if (isAdminPreview) {
+        if (canEditPortal()) {
           resultsSlot.appendChild(
             el('div', { className: 'forest-row-item' },
               rowBtn,
@@ -1385,10 +1752,19 @@
                 type: 'button',
                 className: 'bookmark-btn',
                 onClick: () => {
-                  if (rec.type === 'notice' && rec.linkedPostId) {
-                    sendAdminAction('editPost', { postId: rec.linkedPostId });
+                  if (isAdminPreview) {
+                    if (rec.type === 'notice' && rec.linkedPostId) {
+                      sendAdminAction('editPost', { postId: rec.linkedPostId });
+                    } else {
+                      sendAdminAction('editForest', { recordId: rec.id });
+                    }
                   } else {
-                    sendAdminAction('editForest', { recordId: rec.id });
+                    if (rec.type === 'notice' && rec.linkedPostId) {
+                      const posts = Array.isArray(state.data.sources?.archive_posts) ? state.data.sources.archive_posts : [];
+                      const linked = posts.find((p) => p.id === rec.linkedPostId);
+                      if (linked) { openPostEditorSheet(linked); return; }
+                    }
+                    openForestEditorSheet(rec);
                   }
                 }
               }, '수정')
@@ -1501,9 +1877,9 @@
       const codeInput = el('input', {
         type: 'text',
         className: 'planner-input sync-code-input',
-        placeholder: '기존 코드 입력 (예: ABCD-2345)',
-        maxLength: 11,
-        'aria-label': '동기화 코드 입력',
+        placeholder: '동기화 코드 (ABCD-2345) 또는 관리자 코드',
+        maxLength: 40,
+        'aria-label': '동기화 또는 관리자 코드 입력',
         onInput: (e) => {
           e.target.value = e.target.value.toUpperCase();
         }
@@ -1516,6 +1892,7 @@
         if (!res.ok) {
           setFeedback(res.error || '코드 형식을 확인해 주세요.', true);
         } else {
+          codeInput.value = '';
           renderFeed();
         }
       };
@@ -1647,6 +2024,58 @@
           )
         );
       }
+
+      if (!status.adminActive) {
+        const adminCodeInput = el('input', {
+          type: 'text',
+          className: 'planner-input sync-code-input',
+          placeholder: '관리자 코드 입력 (TEUM-ADMIN-...)',
+          maxLength: 40,
+          'aria-label': '관리자 코드 입력',
+          onInput: (e) => {
+            e.target.value = e.target.value.toUpperCase();
+          }
+        });
+        card.appendChild(
+          el('form', {
+            className: 'sync-input-row',
+            style: { marginTop: '10px' },
+            onSubmit: async (e) => {
+              e.preventDefault();
+              if (!syncApi) return;
+              const res = await syncApi.activateAdmin(adminCodeInput.value);
+              if (!res.ok) {
+                setFeedback(res.error || '관리자 코드가 올바르지 않습니다.', true);
+              } else {
+                renderFeed();
+              }
+            }
+          },
+            adminCodeInput,
+            el('button', { type: 'submit', className: 'planner-mini-btn' }, '관리자 열기')
+          )
+        );
+      }
+    }
+
+    if (status.adminActive) {
+      card.appendChild(
+        el('div', { className: 'sync-admin-banner' },
+          el('div', { className: 'sync-admin-info' },
+            el('span', { className: 'badge-pill is-live' }, '관리자 모드 ON'),
+            el('span', { className: 'sync-admin-desc' }, '탐색(공지·글)과 숲(기록)에서 바로 작성·수정할 수 있습니다.')
+          ),
+          el('button', {
+            type: 'button',
+            className: 'planner-mini-btn',
+            onClick: async () => {
+              if (!syncApi) return;
+              await syncApi.signOutAdmin();
+              renderFeed();
+            }
+          }, '관리자 끄기')
+        )
+      );
     }
 
     return card;
@@ -1697,8 +2126,7 @@
         el('div', { className: 'card-title-wrap' },
           el('h2', { className: 'card-title' }, '내 설정 & 환경'),
           el('p', { className: 'card-subtitle' }, '변경 즉시 홈 피드에 반영됩니다')
-        ),
-        el('a', { className: 'badge-pill', href: './admin.html', style: { textDecoration: 'none' } }, '관리자')
+        )
       )
     );
 
@@ -2244,6 +2672,13 @@
       const res = await resp.json();
       if (res && res.ok && res.baked) {
         state.data = res.baked;
+        baseArchivePosts = Array.isArray(res.baked.sources?.archive_posts)
+          ? JSON.parse(JSON.stringify(res.baked.sources.archive_posts))
+          : [];
+        baseForestRecords = Array.isArray(res.baked.sources?.forest_all)
+          ? JSON.parse(JSON.stringify(res.baked.sources.forest_all))
+          : [];
+        applyPublicOverrides(state.publicOverrides);
         renderHeader();
         renderFeed();
       }
@@ -2263,7 +2698,10 @@
       getSnapshot: collectSyncSnapshot,
       applySnapshot: applySyncSnapshot,
       onStatusChange: () => {
-        if (state.tab === 'my') renderFeed();
+        if (state.tab === 'my' || state.tab === 'explore' || state.tab === 'forest') renderFeed();
+      },
+      onPublicUpdate: (overrides) => {
+        applyPublicOverrides(overrides);
       }
     });
   }

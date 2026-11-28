@@ -6,6 +6,7 @@
   const SYNC_CODE_KEY = 'teum_sync_code_v1';
   const DEVICE_ID_KEY = 'teum_sync_device_v1';
   const LAST_SYNC_KEY = 'teum_sync_last_at_v1';
+  const ADMIN_HINT_KEY = 'teum_admin_hint_v1';
   const CHANNEL_NAME = 'teum-sync-v1';
   const SNAPSHOT_HASH_PREFIX = '#teum-snap=';
   const PUSH_DEBOUNCE_MS = 450;
@@ -13,7 +14,8 @@
   let callbacks = {
     getSnapshot: () => ({}),
     applySnapshot: () => {},
-    onStatusChange: () => {}
+    onStatusChange: () => {},
+    onPublicUpdate: () => {}
   };
 
   let deviceId = '';
@@ -26,8 +28,19 @@
   let isApplyingRemote = false;
   let pushTimer = null;
   let unsubscribeRemote = null;
+  let unsubscribePublic = null;
   let channel = null;
+  let firebaseApp = null;
   let firestoreCtx = null;
+  let authCtx = null;
+  let adminActive = false;
+  let publicOverrides = {
+    posts: [],
+    deletedPostIds: [],
+    forest: [],
+    deletedForestIds: [],
+    updatedAt: 0
+  };
   let qrFactoryPromise = null;
 
   function loadDeviceId() {
@@ -133,18 +146,63 @@
     return String(cfg.collection || 'teum_sync').trim() || 'teum_sync';
   }
 
+  function getPublicCollectionName() {
+    const cfg = window.TEUM_SYNC_CONFIG || {};
+    return String(cfg.publicCollection || 'teum_public').trim() || 'teum_public';
+  }
+
+  function getPublicDocId() {
+    const cfg = window.TEUM_SYNC_CONFIG || {};
+    return String(cfg.publicDocId || 'portal').trim() || 'portal';
+  }
+
+  function getAdminEmail() {
+    const cfg = window.TEUM_SYNC_CONFIG || {};
+    return String(cfg.adminEmail || 'admin@teum.seojeon').trim() || 'admin@teum.seojeon';
+  }
+
+  function getAdminPrefix() {
+    const cfg = window.TEUM_SYNC_CONFIG || {};
+    return String(cfg.adminPrefix || 'TEUM-ADMIN-').toUpperCase();
+  }
+
+  function normalizeAdminCode(raw) {
+    const cleaned = String(raw || '').trim().toUpperCase().replace(/\s+/g, '');
+    const prefix = getAdminPrefix();
+    if (!cleaned.startsWith(prefix)) return null;
+    if (cleaned.length < prefix.length + 6) return null;
+    return cleaned;
+  }
+
+  async function ensureFirebaseApp() {
+    if (firebaseApp) return firebaseApp;
+    const fb = getFirebaseConfig();
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js');
+    const existing = getApps();
+    firebaseApp = existing.length ? existing[0] : initializeApp(fb);
+    return firebaseApp;
+  }
+
   async function ensureFirestore() {
     if (firestoreCtx) return firestoreCtx;
-    const fb = getFirebaseConfig();
-    const [{ initializeApp, getApps }, fs] = await Promise.all([
-      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
+    const [app, fs] = await Promise.all([
+      ensureFirebaseApp(),
       import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js')
     ]);
-    const existing = getApps();
-    const app = existing.length ? existing[0] : initializeApp(fb);
     const db = fs.getFirestore(app);
     firestoreCtx = { db, fs };
     return firestoreCtx;
+  }
+
+  async function ensureAuth() {
+    if (authCtx) return authCtx;
+    const [app, fa] = await Promise.all([
+      ensureFirebaseApp(),
+      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js')
+    ]);
+    const auth = fa.getAuth(app);
+    authCtx = { auth, fa };
+    return authCtx;
   }
 
   function emitStatus() {
@@ -166,10 +224,139 @@
       state: statusState,
       mode: isCloudConfigured() ? 'cloud' : 'local-only',
       cloudConfigured: isCloudConfigured(),
+      adminActive,
       lastSyncedAt,
       message: statusMessage,
       deviceId
     };
+  }
+
+  function normalizePublicDoc(data) {
+    const d = data && typeof data === 'object' ? data : {};
+    return {
+      posts: Array.isArray(d.posts) ? d.posts : [],
+      deletedPostIds: Array.isArray(d.deletedPostIds) ? d.deletedPostIds : [],
+      forest: Array.isArray(d.forest) ? d.forest : [],
+      deletedForestIds: Array.isArray(d.deletedForestIds) ? d.deletedForestIds : [],
+      updatedAt: Number(d.updatedAt || 0)
+    };
+  }
+
+  async function subscribePublicPortal() {
+    if (!isCloudConfigured() || unsubscribePublic) return;
+    try {
+      const { db, fs } = await ensureFirestore();
+      const docRef = fs.doc(db, getPublicCollectionName(), getPublicDocId());
+      unsubscribePublic = fs.onSnapshot(
+        docRef,
+        (docSnap) => {
+          publicOverrides = docSnap.exists()
+            ? normalizePublicDoc(docSnap.data())
+            : normalizePublicDoc(null);
+          try {
+            callbacks.onPublicUpdate(publicOverrides);
+          } catch (e) {}
+        },
+        () => {}
+      );
+    } catch (e) {}
+  }
+
+  async function restoreAdminIfHinted() {
+    if (!isCloudConfigured()) return;
+    let hinted = false;
+    try {
+      hinted = localStorage.getItem(ADMIN_HINT_KEY) === '1';
+    } catch (e) {}
+    if (!hinted) return;
+    try {
+      const { auth, fa } = await ensureAuth();
+      fa.onAuthStateChanged(auth, (user) => {
+        const nextActive = Boolean(user);
+        if (nextActive !== adminActive) {
+          adminActive = nextActive;
+          if (!nextActive) {
+            try { localStorage.removeItem(ADMIN_HINT_KEY); } catch (e) {}
+          }
+          emitStatus();
+        }
+      });
+    } catch (e) {}
+  }
+
+  async function activateAdmin(raw) {
+    const adminCode = normalizeAdminCode(raw);
+    if (!adminCode) {
+      return { ok: false, error: '관리자 코드 형식이 올바르지 않습니다.' };
+    }
+    if (!isCloudConfigured()) {
+      return { ok: false, error: '클라우드 연결이 설정되지 않았습니다.' };
+    }
+    try {
+      const { auth, fa } = await ensureAuth();
+      await fa.signInWithEmailAndPassword(auth, getAdminEmail(), adminCode);
+      adminActive = true;
+      try {
+        localStorage.setItem(ADMIN_HINT_KEY, '1');
+      } catch (e) {}
+      emitStatus();
+      return { ok: true, admin: true };
+    } catch (err) {
+      return { ok: false, error: '관리자 코드가 올바르지 않습니다.' };
+    }
+  }
+
+  async function signOutAdmin() {
+    adminActive = false;
+    try {
+      localStorage.removeItem(ADMIN_HINT_KEY);
+    } catch (e) {}
+    try {
+      if (authCtx && authCtx.auth && authCtx.fa) {
+        await authCtx.fa.signOut(authCtx.auth);
+      } else if (isCloudConfigured()) {
+        const { auth, fa } = await ensureAuth();
+        await fa.signOut(auth);
+      }
+    } catch (e) {}
+    emitStatus();
+  }
+
+  function isAdminActive() {
+    return adminActive;
+  }
+
+  function getPublicOverrides() {
+    return publicOverrides;
+  }
+
+  async function savePublicOverrides(next) {
+    if (!adminActive) {
+      return { ok: false, error: '관리자 권한이 필요합니다.' };
+    }
+    if (!isCloudConfigured()) {
+      return { ok: false, error: '클라우드 연결이 설정되지 않았습니다.' };
+    }
+    try {
+      const { db, fs } = await ensureFirestore();
+      const docRef = fs.doc(db, getPublicCollectionName(), getPublicDocId());
+      const clean = {
+        posts: Array.isArray(next.posts) ? next.posts : [],
+        deletedPostIds: Array.isArray(next.deletedPostIds) ? next.deletedPostIds : [],
+        forest: Array.isArray(next.forest) ? next.forest : [],
+        deletedForestIds: Array.isArray(next.deletedForestIds) ? next.deletedForestIds : [],
+        updatedAt: Date.now(),
+        version: 1
+      };
+      await fs.setDoc(docRef, clean);
+      publicOverrides = normalizePublicDoc(clean);
+      try {
+        callbacks.onPublicUpdate(publicOverrides);
+      } catch (e) {}
+      return { ok: true, data: publicOverrides };
+    } catch (err) {
+      return { ok: false, error: (err && err.message) || '저장에 실패했습니다.' };
+    }
   }
 
   function safeApplyRemote(payload, remoteTs) {
@@ -343,9 +530,13 @@
   }
 
   async function connectCode(raw) {
+    const adminCode = normalizeAdminCode(raw);
+    if (adminCode) {
+      return activateAdmin(adminCode);
+    }
     const norm = normalizeCode(raw);
     if (!norm) {
-      return { ok: false, error: '8자리 코드(예: ABCD-2345) 형식이 올바르지 않습니다.' };
+      return { ok: false, error: '8자리 동기화 코드(예: ABCD-2345) 또는 관리자 코드를 확인해 주세요.' };
     }
     return attachRoom(norm, { mode: 'join' });
   }
@@ -441,10 +632,14 @@
     callbacks = {
       getSnapshot: (opts && opts.getSnapshot) || (() => ({})),
       applySnapshot: (opts && opts.applySnapshot) || (() => {}),
-      onStatusChange: (opts && opts.onStatusChange) || (() => {})
+      onStatusChange: (opts && opts.onStatusChange) || (() => {}),
+      onPublicUpdate: (opts && opts.onPublicUpdate) || (() => {})
     };
     deviceId = loadDeviceId();
     lastSyncedAt = loadLastSyncAt();
+
+    subscribePublicPortal();
+    restoreAdminIfHinted();
 
     if ('BroadcastChannel' in window) {
       try {
@@ -500,6 +695,11 @@
     createCode,
     connectCode,
     disconnect,
+    activateAdmin,
+    signOutAdmin,
+    isAdminActive,
+    getPublicOverrides,
+    savePublicOverrides,
     schedulePush,
     forceSyncNow,
     getSyncUrl,

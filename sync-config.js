@@ -19,6 +19,10 @@
 window.TEUM_SYNC_CONFIG = {
   provider: 'firebase',
   collection: 'teum_sync',
+  publicCollection: 'teum_public',
+  publicDocId: 'portal',
+  adminEmail: 'admin@teum.seojeon',
+  adminPrefix: 'TEUM-ADMIN-',
   firebase: {
     apiKey: 'AIzaSyAo027JUtLg0TD67aijPRQBirZME8ASOcI',
     authDomain: 'teum-portal-seojeon-2bf52.firebaseapp.com',

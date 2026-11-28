@@ -23,6 +23,16 @@ rules_version = '2';
 //   - deviceId: string (required, length 1..64)
 //   - version: int (required, must equal 1; immutable on update)
 //
+// Collection: teum_public
+// Document ID: portal
+// Admin-published portal overrides (notices/forest), publicly readable via get:
+//   - posts: list (optional, max 150 items)
+//   - deletedPostIds: list (optional, max 200 items)
+//   - forest: list (optional, max 300 items)
+//   - deletedForestIds: list (optional, max 300 items)
+//   - updatedAt: number (required, > 0)
+//   - version: int (optional, must equal 1 if present)
+//
 // ===============================================================
 
 service cloud.firestore {
@@ -124,6 +134,24 @@ service cloud.firestore {
         newData.version == oldData.version;
     }
 
+    function isValidPublicPortalDoc(data) {
+      return hasOnlyAllowedFields(data, [
+          'posts',
+          'deletedPostIds',
+          'forest',
+          'deletedForestIds',
+          'updatedAt',
+          'version'
+        ]) &&
+        hasRequiredFields(data, ['updatedAt']) &&
+        (!('version' in data) || (data.version is int && data.version == 1)) &&
+        data.updatedAt is number && data.updatedAt > 0 &&
+        isValidOptionalList(data, 'posts', 150) &&
+        isValidOptionalList(data, 'deletedPostIds', 200) &&
+        isValidOptionalList(data, 'forest', 300) &&
+        isValidOptionalList(data, 'deletedForestIds', 300);
+    }
+
     // ===============================================================
     // Collection Rules
     // ===============================================================
@@ -142,6 +170,19 @@ service cloud.firestore {
       allow update: if isValidRoomId(roomId) &&
         isValidSyncDoc(request.resource.data) &&
         isValidSyncUpdate(request.resource.data, resource.data);
+    }
+
+    match /teum_public/portal {
+      // All students read published notices/forest overrides in real time via direct document get
+      allow get: if true;
+
+      // Prevent collection listing and remote deletion
+      allow list, delete: if false;
+
+      // Only the designated admin UID may create or update, with full schema validation
+      allow create, update: if request.auth != null &&
+        request.auth.uid == 'JTEgBNJCGTV1xqugpWdzf30ekli2' &&
+        isValidPublicPortalDoc(request.resource.data);
     }
 
     // Explicit default deny for all other paths and subcollections
