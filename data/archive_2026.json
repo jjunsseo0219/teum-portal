@@ -1,6 +1,6 @@
 {
   "year": "2026",
-  "bakedAt": "2026-11-27 12:24:47 KST",
+  "bakedAt": "2026-11-28 12:00:33 KST",
   "posts": [
     {
       "id": "post-jisan",
@@ -79,6 +79,86 @@
           }
         ],
         "attachment": "2026_돌실제_부스신청_가이드.hwp"
+      }
+    },
+    {
+      "id": "school-M010503-5892663",
+      "date": "2026-11-27",
+      "dept": "서전고 가정통신문",
+      "title": "2026. 12월 일반학생 석식비 납입 가정통신문",
+      "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+      "pinned": false,
+      "thumbUrl": "",
+      "thumbTheme": "forest",
+      "thumbIcon": "가정",
+      "tags": [
+        "#가정통신문"
+      ],
+      "likes": 0,
+      "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5892663",
+      "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+      "article": {
+        "sections": [
+          {
+            "heading": "공식 게시판 안내",
+            "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+          }
+        ],
+        "facts": [
+          {
+            "label": "게시판",
+            "value": "서전고 가정통신문"
+          },
+          {
+            "label": "등록일",
+            "value": "2026-11-27"
+          },
+          {
+            "label": "첨부파일",
+            "value": "있음 (원문에서 다운로드)"
+          }
+        ],
+        "attachment": ""
+      }
+    },
+    {
+      "id": "school-M010503-5892662",
+      "date": "2026-11-27",
+      "dept": "서전고 가정통신문",
+      "title": "2026. 12월 기숙사 운영비 납입 가정통신문 안내",
+      "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+      "pinned": false,
+      "thumbUrl": "",
+      "thumbTheme": "forest",
+      "thumbIcon": "가정",
+      "tags": [
+        "#가정통신문"
+      ],
+      "likes": 0,
+      "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5892662",
+      "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
+      "article": {
+        "sections": [
+          {
+            "heading": "공식 게시판 안내",
+            "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
+          }
+        ],
+        "facts": [
+          {
+            "label": "게시판",
+            "value": "서전고 가정통신문"
+          },
+          {
+            "label": "등록일",
+            "value": "2026-11-27"
+          },
+          {
+            "label": "첨부파일",
+            "value": "있음 (원문에서 다운로드)"
+          }
+        ],
+        "attachment": ""
       }
     },
     {
@@ -229,86 +309,6 @@
           {
             "label": "등록일",
             "value": "2026-11-17"
-          },
-          {
-            "label": "첨부파일",
-            "value": "있음 (원문에서 다운로드)"
-          }
-        ],
-        "attachment": ""
-      }
-    },
-    {
-      "id": "school-M010503-5884525",
-      "date": "2026-11-16",
-      "dept": "서전고 가정통신문",
-      "title": "2026. AI-ONE FESTIVAL 행사 안내 가정통신문",
-      "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
-      "pinned": false,
-      "thumbUrl": "",
-      "thumbTheme": "forest",
-      "thumbIcon": "가정",
-      "tags": [
-        "#가정통신문"
-      ],
-      "likes": 0,
-      "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5884525",
-      "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
-      "article": {
-        "sections": [
-          {
-            "heading": "공식 게시판 안내",
-            "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
-          }
-        ],
-        "facts": [
-          {
-            "label": "게시판",
-            "value": "서전고 가정통신문"
-          },
-          {
-            "label": "등록일",
-            "value": "2026-11-16"
-          },
-          {
-            "label": "첨부파일",
-            "value": "있음 (원문에서 다운로드)"
-          }
-        ],
-        "attachment": ""
-      }
-    },
-    {
-      "id": "school-M010503-5883048",
-      "date": "2026-11-12",
-      "dept": "서전고 가정통신문",
-      "title": "2026. 가족과 함께하는 미니 해커톤 참가 신청 안내 가정통신문",
-      "excerpt": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
-      "pinned": false,
-      "thumbUrl": "",
-      "thumbTheme": "forest",
-      "thumbIcon": "가정",
-      "tags": [
-        "#가정통신문"
-      ],
-      "likes": 0,
-      "ctaUrl": "https://school.cbe.go.kr/seojeon-h/M010503/view/5883048",
-      "ctaLabel": "서전고 홈페이지 원문 · 첨부파일 보기 ↗",
-      "article": {
-        "sections": [
-          {
-            "heading": "공식 게시판 안내",
-            "body": "서전고등학교 공식 홈페이지 [가정통신문]에서 자동 수집된 게시물입니다.\n원문 본문과 첨부파일(HWP·PDF)은 아래 공식 링크에서 바로 열람할 수 있습니다."
-          }
-        ],
-        "facts": [
-          {
-            "label": "게시판",
-            "value": "서전고 가정통신문"
-          },
-          {
-            "label": "등록일",
-            "value": "2026-11-12"
           },
           {
             "label": "첨부파일",
@@ -661,6 +661,34 @@
   ],
   "forest": [
     {
+      "id": "notice-school-M010503-5892663",
+      "type": "notice",
+      "date": "2026-11-27",
+      "term": "10대 (2026)",
+      "dept": "서전고 가정통신문",
+      "title": "2026. 12월 일반학생 석식비 납입 가정통신문",
+      "tags": [
+        "#가정통신문"
+      ],
+      "detail": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+      "linkedPostId": "school-M010503-5892663",
+      "attachment": ""
+    },
+    {
+      "id": "notice-school-M010503-5892662",
+      "type": "notice",
+      "date": "2026-11-27",
+      "term": "10대 (2026)",
+      "dept": "서전고 가정통신문",
+      "title": "2026. 12월 기숙사 운영비 납입 가정통신문 안내",
+      "tags": [
+        "#가정통신문"
+      ],
+      "detail": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
+      "linkedPostId": "school-M010503-5892662",
+      "attachment": ""
+    },
+    {
       "id": "notice-school-M010503-5891839",
       "type": "notice",
       "date": "2026-11-26",
@@ -733,20 +761,6 @@
       "attachment": ""
     },
     {
-      "id": "notice-school-M010503-5884525",
-      "type": "notice",
-      "date": "2026-11-16",
-      "term": "10대 (2026)",
-      "dept": "서전고 가정통신문",
-      "title": "2026. AI-ONE FESTIVAL 행사 안내 가정통신문",
-      "tags": [
-        "#가정통신문"
-      ],
-      "detail": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
-      "linkedPostId": "school-M010503-5884525",
-      "attachment": ""
-    },
-    {
       "id": "notice-post-dolsil",
       "type": "notice",
       "date": "2026-11-15",
@@ -772,20 +786,6 @@
       "amount": 80000,
       "detail": "수능 D-3 응원 박스 8반 분량 일괄 구매 영수증 처리 완료 (반별 10,000원).",
       "attachment": "수능간식_영수증_20261112.jpg"
-    },
-    {
-      "id": "notice-school-M010503-5883048",
-      "type": "notice",
-      "date": "2026-11-12",
-      "term": "10대 (2026)",
-      "dept": "서전고 가정통신문",
-      "title": "2026. 가족과 함께하는 미니 해커톤 참가 신청 안내 가정통신문",
-      "tags": [
-        "#가정통신문"
-      ],
-      "detail": "서전고 공식 홈페이지 가정통신문에 등록된 게시물입니다. 아래 버튼에서 원문과 첨부파일을 바로 확인할 수 있습니다.",
-      "linkedPostId": "school-M010503-5883048",
-      "attachment": ""
     },
     {
       "id": "notice-post-woodumji-32",
