@@ -2315,7 +2315,7 @@
         el('div', { className: 'sync-admin-banner' },
           el('div', { className: 'sync-admin-info' },
             el('span', { className: 'badge-pill is-live' }, '관리자 모드 ON'),
-            el('span', { className: 'sync-admin-desc' }, '탐색(공지·글)과 숲(기록)에서 바로 작성·수정할 수 있습니다.')
+            el('span', { className: 'sync-admin-desc' }, '탐색 탭에서 학교 공지·안내 글을 바로 작성·수정할 수 있습니다.')
           ),
           el('button', {
             type: 'button',
