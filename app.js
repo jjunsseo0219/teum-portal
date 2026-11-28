@@ -27,6 +27,19 @@
     homeEditMode: false,
     homeLayout: { items: {}, mobileItems: {}, hidden: [] },
     customTimetable: {},
+    studyLogs: [],
+    schedule: {
+      view: 'tasks',
+      taskMode: 'list',
+      filter: 'all',
+      sort: 'dueDate',
+      query: '',
+      calMode: 'month',
+      calCursor: '',
+      selectedDate: '',
+      logFilter: 'all',
+      logQuery: ''
+    },
     studyTimer: {
       subject: '수학',
       mode: 'stopwatch',
@@ -101,7 +114,20 @@
       const tasksRaw = localStorage.getItem('teum_personal_tasks');
       if (tasksRaw !== null) {
         const parsed = JSON.parse(tasksRaw);
-        if (Array.isArray(parsed)) state.personalTasks = parsed;
+        if (Array.isArray(parsed)) {
+          state.personalTasks = window.TEUM_SCHEDULE
+            ? parsed.map((t) => window.TEUM_SCHEDULE.normalizeTask(t))
+            : parsed;
+        }
+      }
+      const logsRaw = localStorage.getItem('teum_study_logs_v1');
+      if (logsRaw !== null) {
+        const parsed = JSON.parse(logsRaw);
+        if (Array.isArray(parsed)) {
+          state.studyLogs = window.TEUM_SCHEDULE
+            ? parsed.map((l) => window.TEUM_SCHEDULE.normalizeLog(l))
+            : parsed;
+        }
       }
       const studyRaw = localStorage.getItem('teum_study_timer_v1');
       if (studyRaw) {
@@ -421,6 +447,66 @@
     } catch (e) {}
   }
 
+  function saveStudyLogs() {
+    try {
+      localStorage.setItem('teum_study_logs_v1', JSON.stringify(state.studyLogs || []));
+      notifyLocalChange();
+    } catch (e) {}
+  }
+
+  function getStudentSubjects() {
+    const classKey = `${state.grade}-${state.classNum}`;
+    const ttMap = state.data.sources?.timetable || {};
+    const rawEntry = ttMap[classKey] || ttMap.default || [];
+    const customMap = state.customTimetable && typeof state.customTimetable === 'object' ? state.customTimetable : {};
+    const found = new Set();
+    const resolved = typeof resolveWeekTimetable === 'function' ? resolveWeekTimetable(rawEntry) : { week: {} };
+    const week = resolved.week || {};
+    Object.values(week).forEach((arr) => {
+      if (Array.isArray(arr)) {
+        arr.forEach((s) => {
+          const v = String(s || '').trim();
+          if (v && v !== '-') found.add(v);
+        });
+      }
+    });
+    Object.values(customMap).forEach((s) => {
+      const v = String(s || '').trim();
+      if (v && v !== '-') found.add(v);
+    });
+    ['직접', '국어', '수학', '영어', '독서', '동아리', '진로', '기타'].forEach((d) => found.add(d));
+    return ['직접', ...Array.from(found).filter((x) => x !== '직접')];
+  }
+
+  let toastTimer = null;
+  function showUndoToast(message, onUndo) {
+    let toast = document.getElementById('teumToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'teumToast';
+      toast.className = 'teum-toast';
+      toast.setAttribute('role', 'status');
+      document.body.appendChild(toast);
+    }
+    toast.replaceChildren(
+      el('span', { className: 'teum-toast-msg' }, message),
+      onUndo ? el('button', {
+        type: 'button',
+        className: 'teum-toast-undo',
+        onClick: () => {
+          if (toastTimer) clearTimeout(toastTimer);
+          toast.classList.remove('is-visible');
+          onUndo();
+        }
+      }, '실행 취소') : null
+    );
+    toast.classList.add('is-visible');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toast.classList.remove('is-visible');
+    }, 5000);
+  }
+
   function hasTaskId(id) {
     return state.personalTasks.some((t) => t.id === id);
   }
@@ -451,17 +537,189 @@
   }
 
   function toggleTaskDone(id) {
+    const prevSnapshot = JSON.parse(JSON.stringify(state.personalTasks));
+    const target = state.personalTasks.find((t) => t.id === id);
+    if (!target) return;
+    const nextDone = !target.done;
+    let recurringSpawned = false;
+    state.personalTasks = state.personalTasks.map((t) => {
+      if (t.id !== id) return t;
+      return Object.assign({}, t, {
+        done: nextDone,
+        status: nextDone ? 'done' : 'todo',
+        completedAt: nextDone ? Date.now() : null
+      });
+    });
+
+    if (nextDone && target.recurrence && target.recurrence !== 'none' && window.TEUM_SCHEDULE) {
+      const nextDue = window.TEUM_SCHEDULE.computeNextDueDate(target.dueDate, target.recurrence);
+      const nextCopy = window.TEUM_SCHEDULE.normalizeTask({
+        ...target,
+        id: `task-${Date.now().toString(36)}r`,
+        dueDate: nextDue,
+        status: 'todo',
+        done: false,
+        completedAt: null,
+        createdAt: Date.now(),
+        subtasks: Array.isArray(target.subtasks)
+          ? target.subtasks.map((s) => ({ ...s, done: false }))
+          : []
+      });
+      state.personalTasks = [nextCopy, ...state.personalTasks];
+      recurringSpawned = true;
+    }
+
+    savePersonalTasks();
+    renderFeed();
+    showUndoToast(
+      recurringSpawned
+        ? '완료 처리됨 · 다음 반복 일정이 생성되었습니다.'
+        : (nextDone ? '일정을 완료했습니다.' : '완료 처리를 해제했습니다.'),
+      () => {
+        state.personalTasks = prevSnapshot;
+        savePersonalTasks();
+        renderFeed();
+      }
+    );
+  }
+
+  function deleteTask(id) {
+    const prevSnapshot = JSON.parse(JSON.stringify(state.personalTasks));
+    const target = state.personalTasks.find((t) => t.id === id);
+    if (!target) return;
+    state.personalTasks = state.personalTasks.filter((t) => t.id !== id);
+    savePersonalTasks();
+    renderFeed();
+    showUndoToast(`"${target.title}" 삭제됨`, () => {
+      state.personalTasks = prevSnapshot;
+      savePersonalTasks();
+      renderFeed();
+    });
+  }
+
+  function upsertTask(taskObj) {
+    const idx = state.personalTasks.findIndex((t) => t.id === taskObj.id);
+    if (idx >= 0) {
+      state.personalTasks = state.personalTasks.map((t, i) => (i === idx ? taskObj : t));
+    } else {
+      state.personalTasks = [taskObj, ...state.personalTasks];
+    }
+    savePersonalTasks();
+    renderFeed();
+  }
+
+  function toggleTaskImportant(id) {
     state.personalTasks = state.personalTasks.map((t) =>
-      t.id === id ? Object.assign({}, t, { done: !t.done }) : t
+      t.id === id ? Object.assign({}, t, { important: !t.important }) : t
     );
     savePersonalTasks();
     renderFeed();
   }
 
-  function deleteTask(id) {
-    state.personalTasks = state.personalTasks.filter((t) => t.id !== id);
+  function setTaskStatus(id, nextStatus) {
+    const prevSnapshot = JSON.parse(JSON.stringify(state.personalTasks));
+    const target = state.personalTasks.find((t) => t.id === id);
+    if (!target) return;
+    const done = nextStatus === 'done';
+    state.personalTasks = state.personalTasks.map((t) =>
+      t.id === id
+        ? Object.assign({}, t, { status: nextStatus, done, completedAt: done ? Date.now() : null })
+        : t
+    );
+    if (done && !target.done && target.recurrence && target.recurrence !== 'none' && window.TEUM_SCHEDULE) {
+      const nextDue = window.TEUM_SCHEDULE.computeNextDueDate(target.dueDate, target.recurrence);
+      const nextCopy = window.TEUM_SCHEDULE.normalizeTask({
+        ...target,
+        id: `task-${Date.now().toString(36)}r`,
+        dueDate: nextDue,
+        status: 'todo',
+        done: false,
+        completedAt: null,
+        createdAt: Date.now(),
+        subtasks: Array.isArray(target.subtasks)
+          ? target.subtasks.map((s) => ({ ...s, done: false }))
+          : []
+      });
+      state.personalTasks = [nextCopy, ...state.personalTasks];
+    }
     savePersonalTasks();
     renderFeed();
+    if (done && !target.done) {
+      showUndoToast('일정을 완료했습니다.', () => {
+        state.personalTasks = prevSnapshot;
+        savePersonalTasks();
+        renderFeed();
+      });
+    }
+  }
+
+  function moveTaskDueDate(id, nextDate) {
+    state.personalTasks = state.personalTasks.map((t) =>
+      t.id === id ? Object.assign({}, t, { dueDate: nextDate }) : t
+    );
+    savePersonalTasks();
+    renderFeed();
+  }
+
+  function clearCompletedTasks() {
+    const doneCount = state.personalTasks.filter((t) => t.done).length;
+    if (!doneCount) return;
+    const prevSnapshot = JSON.parse(JSON.stringify(state.personalTasks));
+    state.personalTasks = state.personalTasks.filter((t) => !t.done);
+    savePersonalTasks();
+    renderFeed();
+    showUndoToast(`완료 일정 ${doneCount}건 정리됨`, () => {
+      state.personalTasks = prevSnapshot;
+      savePersonalTasks();
+      renderFeed();
+    });
+  }
+
+  function upsertLog(logObj) {
+    const idx = state.studyLogs.findIndex((l) => l.id === logObj.id);
+    if (idx >= 0) {
+      state.studyLogs = state.studyLogs.map((l, i) => (i === idx ? logObj : l));
+    } else {
+      state.studyLogs = [logObj, ...state.studyLogs];
+    }
+    saveStudyLogs();
+    renderFeed();
+  }
+
+  function deleteLog(id) {
+    const prev = JSON.parse(JSON.stringify(state.studyLogs));
+    const target = state.studyLogs.find((l) => l.id === id);
+    if (!target) return;
+    state.studyLogs = state.studyLogs.filter((l) => l.id !== id);
+    saveStudyLogs();
+    renderFeed();
+    showUndoToast(`"${target.title}" 기록 삭제됨`, () => {
+      state.studyLogs = prev;
+      saveStudyLogs();
+      renderFeed();
+    });
+  }
+
+  function buildScheduleCtx() {
+    return {
+      tasks: state.personalTasks,
+      logs: state.studyLogs,
+      neisSchedule: Array.isArray(state.data.sources?.neis_schedule) ? state.data.sources.neis_schedule : [],
+      uiState: state.schedule,
+      getStudentSubjects,
+      toggleTaskDone,
+      toggleTaskImportant,
+      setTaskStatus,
+      moveTaskDueDate,
+      clearCompletedTasks,
+      upsertTask,
+      deleteTask,
+      upsertLog,
+      deleteLog,
+      openFullSheet,
+      closeFullSheet: closeFullDetail,
+      rerender: renderFeed
+    };
   }
 
   // Dark Mode Toggle Helpers
@@ -519,6 +777,7 @@
       bookmarks: state.bookmarks,
       likes: state.likes,
       personalTasks: state.personalTasks,
+      studyLogs: state.studyLogs,
       studyTimer: state.studyTimer,
       homeLayout: state.homeLayout,
       customTimetable: state.customTimetable,
@@ -534,7 +793,16 @@
     if (Array.isArray(snap.allergens)) state.allergens = snap.allergens.map(Number);
     if (Array.isArray(snap.bookmarks)) state.bookmarks = snap.bookmarks;
     if (snap.likes && typeof snap.likes === 'object') state.likes = snap.likes;
-    if (Array.isArray(snap.personalTasks)) state.personalTasks = snap.personalTasks;
+    if (Array.isArray(snap.personalTasks)) {
+      state.personalTasks = window.TEUM_SCHEDULE
+        ? snap.personalTasks.map((t) => window.TEUM_SCHEDULE.normalizeTask(t))
+        : snap.personalTasks;
+    }
+    if (Array.isArray(snap.studyLogs)) {
+      state.studyLogs = window.TEUM_SCHEDULE
+        ? snap.studyLogs.map((l) => window.TEUM_SCHEDULE.normalizeLog(l))
+        : snap.studyLogs;
+    }
     if (snap.studyTimer && typeof snap.studyTimer === 'object') {
       state.studyTimer = { ...state.studyTimer, ...snap.studyTimer };
     }
@@ -558,6 +826,7 @@
       localStorage.setItem('teum_bookmarks', JSON.stringify(state.bookmarks));
       localStorage.setItem('teum_likes', JSON.stringify(state.likes));
       localStorage.setItem('teum_personal_tasks', JSON.stringify(state.personalTasks));
+      localStorage.setItem('teum_study_logs_v1', JSON.stringify(state.studyLogs || []));
       localStorage.setItem('teum_study_timer_v1', JSON.stringify(state.studyTimer));
       localStorage.setItem('teum_bento_v2', JSON.stringify(state.homeLayout));
       localStorage.setItem('teum_custom_tt_v1', JSON.stringify(state.customTimetable || {}));
@@ -2862,6 +3131,8 @@
               openAddTaskSheet,
               openAssessmentPicker,
               openAllTasksSheet,
+              openTaskDetailSheet: (task, defaults) => window.TEUM_SCHEDULE && window.TEUM_SCHEDULE.openTaskDetailSheet(task, defaults, buildScheduleCtx()),
+              openScheduleTab: () => switchTab('schedule'),
               studyTimer: state.studyTimer,
               getStudyElapsedMs,
               toggleStudyTimer,
@@ -2947,6 +3218,8 @@
 
     if (state.tab === 'explore') {
       renderExploreArchive(container);
+    } else if (state.tab === 'schedule' && window.TEUM_SCHEDULE) {
+      window.TEUM_SCHEDULE.renderScheduleTab(container, buildScheduleCtx());
     } else if (state.tab === 'forest') {
       renderForestFunnel(container);
     } else if (state.tab === 'my') {
@@ -2971,6 +3244,8 @@
         openAddTaskSheet,
         openAssessmentPicker,
         openAllTasksSheet,
+        openTaskDetailSheet: (task, defaults) => window.TEUM_SCHEDULE && window.TEUM_SCHEDULE.openTaskDetailSheet(task, defaults, buildScheduleCtx()),
+        openScheduleTab: () => switchTab('schedule'),
         studyTimer: state.studyTimer,
         getStudyElapsedMs,
         toggleStudyTimer,
@@ -3060,7 +3335,7 @@
       getSnapshot: collectSyncSnapshot,
       applySnapshot: applySyncSnapshot,
       onStatusChange: () => {
-        if (state.tab === 'my' || state.tab === 'explore' || state.tab === 'forest') renderFeed();
+        if (state.tab === 'my' || state.tab === 'explore' || state.tab === 'forest' || state.tab === 'schedule') renderFeed();
       },
       onPublicUpdate: (overrides) => {
         applyPublicOverrides(overrides);

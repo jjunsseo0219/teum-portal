@@ -15,6 +15,7 @@ rules_version = '2';
 //       - bookmarks: list (optional, max 100 items)
 //       - likes: map (optional, max 200 keys)
 //       - personalTasks: list (optional, max 150 items)
+//       - studyLogs: list (optional, max 200 items)
 //       - studyTimer: map (optional, max 20 keys)
 //       - homeLayout: map (optional, keys limited to ['items', 'mobileItems', 'hidden'])
 //       - theme: string (optional, one of ['system', 'light', 'dark'])
@@ -102,6 +103,7 @@ service cloud.firestore {
           'bookmarks',
           'likes',
           'personalTasks',
+          'studyLogs',
           'studyTimer',
           'homeLayout',
           'theme',
@@ -115,6 +117,7 @@ service cloud.firestore {
         isValidOptionalList(p, 'bookmarks', 100) &&
         isValidOptionalMapSize(p, 'likes', 200) &&
         isValidOptionalList(p, 'personalTasks', 150) &&
+        isValidOptionalList(p, 'studyLogs', 200) &&
         (!('studyTimer' in p) || isValidStudyTimer(p.studyTimer)) &&
         (!('homeLayout' in p) || isValidHomeLayout(p.homeLayout)) &&
         (!('theme' in p) || (p.theme is string && p.theme in ['system', 'light', 'dark'])) &&

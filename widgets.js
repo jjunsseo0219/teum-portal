@@ -719,6 +719,7 @@
 
       tasks.sort((a, b) => {
         if (Boolean(a.done) !== Boolean(b.done)) return a.done ? 1 : -1;
+        if (Boolean(a.important) !== Boolean(b.important)) return a.important ? -1 : 1;
         return String(a.dueDate || '9999-99-99').localeCompare(String(b.dueDate || '9999-99-99'));
       });
 
@@ -728,15 +729,19 @@
           widget.subtitle ? el('p', { className: 'card-subtitle' }, widget.subtitle) : null
         ),
         el('div', { className: 'planner-actions' },
-          ctx.openAssessmentPicker ? el('button', {
+          ctx.openScheduleTab ? el('button', {
+            type: 'button',
+            className: 'planner-mini-btn',
+            onClick: () => ctx.openScheduleTab()
+          }, '일정 탭') : (ctx.openAssessmentPicker ? el('button', {
             type: 'button',
             className: 'planner-mini-btn',
             onClick: () => ctx.openAssessmentPicker(assessments)
-          }, '수행 담기') : null,
-          ctx.openAddTaskSheet ? el('button', {
+          }, '수행 담기') : null),
+          (ctx.openTaskDetailSheet || ctx.openAddTaskSheet) ? el('button', {
             type: 'button',
             className: 'planner-mini-btn is-primary',
-            onClick: () => ctx.openAddTaskSheet()
+            onClick: () => (ctx.openTaskDetailSheet ? ctx.openTaskDetailSheet(null, null) : ctx.openAddTaskSheet())
           }, '+ 추가') : null
         )
       );
@@ -749,15 +754,17 @@
       if (visibleTasks.length === 0) {
         list.appendChild(
           el('p', { className: 'card-subtitle', style: { margin: '4px 0 0' } },
-            '등록된 일정이 없습니다. [+ 추가]를 누르거나 탐색 공지에서 [일정 담기]를 눌러 보세요.'
+            '등록된 일정이 없습니다. [+ 추가]를 누르거나 [일정 탭]에서 달력·할 일·기록을 관리해 보세요.'
           )
         );
       } else {
         visibleTasks.forEach((task) => {
           const diff = calcDiffDays(task.dueDate);
           const ddayText = task.dueDate ? calcDday(task.dueDate) : '';
-          const isUrgent = !task.done && diff !== null && diff >= 0 && diff <= 3;
-          const metaParts = [task.subject || '일정', task.dueDate || '날짜 미정'].filter(Boolean).join(' · ');
+          const isUrgent = !task.done && diff !== null && diff <= 3;
+          const subArr = Array.isArray(task.subtasks) ? task.subtasks : [];
+          const subBadge = subArr.length ? `✓ ${subArr.filter((s) => s.done).length}/${subArr.length}` : '';
+          const metaParts = [task.subject || '일정', task.dueDate || '날짜 미정', subBadge].filter(Boolean).join(' · ');
 
           list.appendChild(
             el('div', { className: `planner-row ${task.done ? 'is-done' : ''}`.trim() },
@@ -768,8 +775,12 @@
                 'aria-label': `${task.title} 완료 여부`,
                 onChange: () => ctx.toggleTaskDone && ctx.toggleTaskDone(task.id)
               }),
-              el('div', { className: 'planner-main' },
-                el('span', { className: 'planner-title' }, task.title || ''),
+              el('button', {
+                type: 'button',
+                className: 'planner-main planner-main-btn',
+                onClick: () => ctx.openTaskDetailSheet && ctx.openTaskDetailSheet(task, null)
+              },
+                el('span', { className: 'planner-title' }, `${task.important ? '★ ' : ''}${task.title || ''}`),
                 el('span', { className: 'planner-meta' }, metaParts)
               ),
               ddayText ? el('span', { className: `dday-pill ${isUrgent ? 'is-urgent' : ''}`.trim() }, ddayText) : null,

@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./style.css?v=29">
+  <link rel="stylesheet" href="./style.css?v=30">
 </head>
 <body>
   <div class="app-shell">
@@ -41,6 +41,13 @@
           <path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5.5v-6.5h-5V21H4a1 1 0 0 1-1-1z" />
         </svg>
         <span>홈</span>
+      </button>
+      <button type="button" class="nav-btn" data-tab="schedule" aria-label="일정">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="5" width="18" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2" />
+          <path d="M8 3v4M16 3v4M3 10h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <span>일정</span>
       </button>
       <button type="button" class="nav-btn" data-tab="explore" aria-label="탐색">
         <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -88,10 +95,11 @@
   </dialog>
 
   <script src="./data.js?v=13"></script>
-  <script src="./widgets.js?v=14"></script>
+  <script src="./widgets.js?v=15"></script>
   <script src="./bento.js?v=4"></script>
   <script src="./sync-config.js?v=3"></script>
   <script src="./sync.js?v=2"></script>
-  <script src="./app.js?v=28"></script>
+  <script src="./schedule.js?v=1"></script>
+  <script src="./app.js?v=29"></script>
 </body>
 </html>
