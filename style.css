@@ -1858,12 +1858,14 @@ dialog.sheet[open]:where(:not([data-closing])) {
 
 .tt-td {
   padding: 9px 3px;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text);
   border-bottom: 1px solid var(--border);
   border-left: 1px solid var(--border);
-  word-break: keep-all;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  overflow: hidden;
   line-height: 1.25;
 }
 
@@ -3099,16 +3101,35 @@ dialog.sheet[open]:where(:not([data-closing])) {
 }
 
 .tt-cell-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  min-height: 36px;
-  padding: 6px 4px;
+  min-width: 0;
+  min-height: 38px;
+  padding: 6px 2px;
   border: 0;
   background: transparent;
   color: inherit;
   font: inherit;
+  line-height: 1.22;
+  white-space: normal;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  text-align: center;
   cursor: pointer;
   border-radius: 6px;
   transition: background-color 120ms ease;
+}
+
+@media (max-width: 520px) {
+  .tt-period-col {
+    width: 38px;
+  }
+
+  .tt-td {
+    font-size: 0.7rem;
+  }
 }
 
 .tt-cell-btn:hover {
