@@ -27,7 +27,7 @@
     grade: 1,
     classNum: 1,
     allergens: [],
-    bookmarks: ['post-jisan'],
+    bookmarks: [],
     likes: {},
     personalTasks: [...DEFAULT_SEED_TASKS],
     explore: { query: '', month: 'all', tag: '전체' },
