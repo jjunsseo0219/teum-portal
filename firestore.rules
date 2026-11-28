@@ -105,7 +105,8 @@ service cloud.firestore {
           'studyTimer',
           'homeLayout',
           'theme',
-          'studyLinks'
+          'studyLinks',
+          'customTimetable'
         ]) &&
         (!('v' in p) || (p.v is int && p.v == 1)) &&
         isValidOptionalIntRange(p, 'grade', 1, 3) &&
@@ -117,7 +118,8 @@ service cloud.firestore {
         (!('studyTimer' in p) || isValidStudyTimer(p.studyTimer)) &&
         (!('homeLayout' in p) || isValidHomeLayout(p.homeLayout)) &&
         (!('theme' in p) || (p.theme is string && p.theme in ['system', 'light', 'dark'])) &&
-        isValidOptionalMapSize(p, 'studyLinks', 20);
+        isValidOptionalMapSize(p, 'studyLinks', 20) &&
+        isValidOptionalMapSize(p, 'customTimetable', 60);
     }
 
     function isValidSyncDoc(data) {

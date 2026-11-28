@@ -3048,3 +3048,79 @@ dialog.sheet[open]:where(:not([data-closing])) {
   font-weight: 800;
   color: var(--text);
 }
+
+/* Custom Elective Timetable Editor */
+.tt-sheet-root {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tt-hint-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tt-hint-text {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.tt-edit-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--accent);
+  background-color: var(--accent-weak);
+}
+
+.tt-edit-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.tt-cell-input {
+  flex: 1;
+  min-width: 120px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+}
+
+.tt-td-editable {
+  padding: 0;
+}
+
+.tt-cell-btn {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 4px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 120ms ease;
+}
+
+.tt-cell-btn:hover {
+  background-color: var(--accent-weak);
+}
+
+.tt-td.is-custom-cell {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.tt-td.is-editing-cell {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}

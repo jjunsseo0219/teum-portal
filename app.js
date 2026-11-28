@@ -35,6 +35,7 @@
     inlineDetail: null,
     homeEditMode: false,
     homeLayout: { items: {}, mobileItems: {}, hidden: [] },
+    customTimetable: {},
     studyTimer: {
       subject: '수학',
       mode: 'stopwatch',
@@ -129,6 +130,20 @@
           };
         }
       }
+      const ttRaw = localStorage.getItem('teum_custom_tt_v1');
+      if (ttRaw) {
+        const parsed = JSON.parse(ttRaw);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          state.customTimetable = parsed;
+        }
+      }
+    } catch (e) {}
+  }
+
+  function saveCustomTimetable() {
+    try {
+      localStorage.setItem('teum_custom_tt_v1', JSON.stringify(state.customTimetable || {}));
+      notifyLocalChange();
     } catch (e) {}
   }
 
@@ -515,6 +530,7 @@
       personalTasks: state.personalTasks,
       studyTimer: state.studyTimer,
       homeLayout: state.homeLayout,
+      customTimetable: state.customTimetable,
       theme: getStoredTheme(),
       studyLinks: collectStudyLinksPrefs()
     };
@@ -538,6 +554,9 @@
         hidden: Array.isArray(snap.homeLayout.hidden) ? snap.homeLayout.hidden : []
       };
     }
+    if (snap.customTimetable && typeof snap.customTimetable === 'object' && !Array.isArray(snap.customTimetable)) {
+      state.customTimetable = snap.customTimetable;
+    }
 
     try {
       localStorage.setItem('teum_user_prefs', JSON.stringify({
@@ -550,6 +569,7 @@
       localStorage.setItem('teum_personal_tasks', JSON.stringify(state.personalTasks));
       localStorage.setItem('teum_study_timer_v1', JSON.stringify(state.studyTimer));
       localStorage.setItem('teum_bento_v2', JSON.stringify(state.homeLayout));
+      localStorage.setItem('teum_custom_tt_v1', JSON.stringify(state.customTimetable || {}));
     } catch (e) {}
 
     if (snap.studyLinks) applyStudyLinksPrefs(snap.studyLinks);
@@ -2514,9 +2534,27 @@
       }
       return { week: {}, today: todayLabel, periods: [] };
     };
-    const { week, today, periods } = typeof resolveWeekTimetable === 'function'
+    const resolvedTt = typeof resolveWeekTimetable === 'function'
       ? resolveWeekTimetable(rawEntry)
       : fallbackResolve(rawEntry);
+    const today = resolvedTt.today;
+    const baseWeek = resolvedTt.week || {};
+    const customMap = state.customTimetable && typeof state.customTimetable === 'object' ? state.customTimetable : {};
+    const daysList = Array.isArray(WEEKDAYS) ? WEEKDAYS : ['월', '화', '수', '목', '금'];
+    const week = {};
+    daysList.forEach((d) => {
+      const baseArr = Array.isArray(baseWeek[d]) ? [...baseWeek[d]] : [];
+      const maxLen = Math.max(7, baseArr.length);
+      for (let i = 0; i < maxLen; i++) {
+        const key = `${d}-${i + 1}`;
+        if (typeof customMap[key] === 'string' && customMap[key].trim()) {
+          while (baseArr.length <= i) baseArr.push('-');
+          baseArr[i] = customMap[key].trim();
+        }
+      }
+      week[d] = baseArr;
+    });
+    const periods = Array.isArray(week[today]) ? week[today] : (Array.isArray(resolvedTt.periods) ? resolvedTt.periods : []);
     const activeIdx = typeof getCurrentPeriodIndex === 'function' ? getCurrentPeriodIndex() : -1;
     const userAllergens = new Set(state.allergens || []);
 
@@ -2539,41 +2577,133 @@
     const openTimetableSheet = () => {
       const days = Array.isArray(WEEKDAYS) ? WEEKDAYS : ['월', '화', '수', '목', '금'];
       const maxPeriods = Math.max(7, periods.length);
-      const table = el('table', { className: 'tt-table' },
-        el('thead', null,
-          el('tr', null,
-            el('th', { className: 'tt-th tt-period-col', scope: 'col' }, '교시'),
-            ...days.map((d) =>
-              el('th', {
-                className: `tt-th ${d === today ? 'is-today-col' : ''}`.trim(),
-                scope: 'col'
-              }, d)
-            )
-          )
-        ),
-        el('tbody', null,
-          Array.from({ length: maxPeriods }, (_, idx) =>
+      let editingCell = null; // { day, periodIdx, baseSubj }
+      const rootWrap = el('div', { className: 'tt-sheet-root' });
+
+      function renderSheetContent() {
+        const customCount = Object.keys(state.customTimetable || {}).length;
+        const hintBar = el('div', { className: 'tt-hint-bar' },
+          el('span', { className: 'tt-hint-text' }, '칸을 눌러 내 선택과목으로 직접 바꿀 수 있습니다. (동기화 코드 연동)'),
+          customCount > 0 ? el('button', {
+            type: 'button',
+            className: 'planner-mini-btn',
+            onClick: () => {
+              state.customTimetable = {};
+              editingCell = null;
+              saveCustomTimetable();
+              renderSheetContent();
+              renderFeed();
+            }
+          }, '전체 초기화') : null
+        );
+
+        let editorBar = null;
+        if (editingCell) {
+          const { day, periodIdx, baseSubj } = editingCell;
+          const slotKey = `${day}-${periodIdx + 1}`;
+          const curVal = (state.customTimetable && state.customTimetable[slotKey]) || (baseSubj === '-' ? '' : baseSubj);
+          const subjInput = el('input', {
+            type: 'text',
+            className: 'planner-input tt-cell-input',
+            placeholder: '과목명 입력 (예: 물리학Ⅰ)',
+            value: curVal,
+            maxLength: 24
+          });
+          editorBar = el('form', {
+            className: 'tt-edit-bar',
+            onSubmit: (e) => {
+              e.preventDefault();
+              const v = subjInput.value.trim();
+              if (!state.customTimetable || typeof state.customTimetable !== 'object') state.customTimetable = {};
+              if (v) state.customTimetable[slotKey] = v;
+              else delete state.customTimetable[slotKey];
+              editingCell = null;
+              saveCustomTimetable();
+              renderSheetContent();
+              renderFeed();
+            }
+          },
+            el('span', { className: 'tt-edit-label' }, `${day} ${periodIdx + 1}교시`),
+            subjInput,
+            el('button', { type: 'submit', className: 'planner-mini-btn is-primary' }, '저장'),
+            el('button', {
+              type: 'button',
+              className: 'planner-mini-btn',
+              onClick: () => {
+                if (state.customTimetable) delete state.customTimetable[slotKey];
+                editingCell = null;
+                saveCustomTimetable();
+                renderSheetContent();
+                renderFeed();
+              }
+            }, '기본값'),
+            el('button', {
+              type: 'button',
+              className: 'planner-mini-btn',
+              onClick: () => {
+                editingCell = null;
+                renderSheetContent();
+              }
+            }, '취소')
+          );
+          window.requestAnimationFrame(() => { try { subjInput.focus(); subjInput.select(); } catch (e) {} });
+        }
+
+        const table = el('table', { className: 'tt-table' },
+          el('thead', null,
             el('tr', null,
-              el('th', { className: 'tt-td tt-period-col', scope: 'row' },
-                el('span', { className: 'tt-pnum' }, `${idx + 1}`),
-                PERIOD_TIMES && PERIOD_TIMES[idx]
-                  ? el('span', { className: 'tt-ptime' }, PERIOD_TIMES[idx])
-                  : null
-              ),
-              ...days.map((d) => {
-                const subj = (week[d] && week[d][idx]) || '-';
-                const isToday = d === today;
-                const isNow = isToday && idx === activeIdx;
-                return el('td', {
-                  className: `tt-td ${isToday ? 'is-today-col' : ''} ${isNow ? 'is-now-cell' : ''}`.trim()
-                }, String(subj));
-              })
+              el('th', { className: 'tt-th tt-period-col', scope: 'col' }, '교시'),
+              ...days.map((d) =>
+                el('th', {
+                  className: `tt-th ${d === today ? 'is-today-col' : ''}`.trim(),
+                  scope: 'col'
+                }, d)
+              )
+            )
+          ),
+          el('tbody', null,
+            Array.from({ length: maxPeriods }, (_, idx) =>
+              el('tr', null,
+                el('th', { className: 'tt-td tt-period-col', scope: 'row' },
+                  el('span', { className: 'tt-pnum' }, `${idx + 1}`),
+                  PERIOD_TIMES && PERIOD_TIMES[idx]
+                    ? el('span', { className: 'tt-ptime' }, PERIOD_TIMES[idx])
+                    : null
+                ),
+                ...days.map((d) => {
+                  const baseSubj = (baseWeek[d] && baseWeek[d][idx]) || '-';
+                  const slotKey = `${d}-${idx + 1}`;
+                  const customVal = state.customTimetable && state.customTimetable[slotKey];
+                  const subj = customVal || baseSubj;
+                  const isToday = d === today;
+                  const isNow = isToday && idx === activeIdx;
+                  const isEditing = Boolean(editingCell && editingCell.day === d && editingCell.periodIdx === idx);
+                  return el('td', {
+                    className: `tt-td tt-td-editable ${isToday ? 'is-today-col' : ''} ${isNow ? 'is-now-cell' : ''} ${customVal ? 'is-custom-cell' : ''} ${isEditing ? 'is-editing-cell' : ''}`.trim()
+                  },
+                    el('button', {
+                      type: 'button',
+                      className: 'tt-cell-btn',
+                      title: `${d} ${idx + 1}교시 선택과목 수정`,
+                      onClick: () => {
+                        editingCell = { day: d, periodIdx: idx, baseSubj };
+                        renderSheetContent();
+                      }
+                    }, String(subj))
+                  );
+                })
+              )
             )
           )
-        )
-      );
-      const wrap = el('div', { className: 'tt-table-wrap' }, table);
-      openHalfSheet(`${cfg.schoolName || '서전고'} ${classKey}반 · ${today}요일`, '주간 전체 시간표', wrap);
+        );
+        const children = [hintBar];
+        if (editorBar) children.push(editorBar);
+        children.push(el('div', { className: 'tt-table-wrap' }, table));
+        rootWrap.replaceChildren(...children);
+      }
+
+      renderSheetContent();
+      openHalfSheet(`${cfg.schoolName || '서전고'} ${classKey}반 · ${today}요일`, '주간 전체 시간표', rootWrap);
     };
 
     const nowMain = activeIdx >= 0 && periods[activeIdx]
