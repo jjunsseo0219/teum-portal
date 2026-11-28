@@ -1,4 +1,4 @@
-const CACHE_NAME = 'teum-shell-v12';
+const CACHE_NAME = 'teum-shell-v13';
 const SHELL_ASSETS = [
   './',
   './index.html',

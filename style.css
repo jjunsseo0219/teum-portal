@@ -2976,3 +2976,75 @@ dialog.sheet[open]:where(:not([data-closing])) {
   color: var(--warn-text);
   background-color: color-mix(in srgb, #dc2626 10%, transparent);
 }
+
+.editor-mode-bar {
+  max-width: 240px;
+}
+
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.editor-tool-btn {
+  border: 1px solid var(--border);
+  background-color: var(--chip-bg);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+.editor-tool-btn:hover {
+  border-color: var(--accent);
+  background-color: var(--accent-weak);
+  color: var(--accent);
+}
+
+.editor-cover-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.editor-cover-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.editor-cover-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editor-cover-thumb {
+  width: 64px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.editor-preview-box {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  background-color: var(--surface-subtle);
+}
+
+.editor-preview-title {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text);
+}

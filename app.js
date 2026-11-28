@@ -733,14 +733,40 @@
     openFullSheet(`${post.dept || '학생자치회'} · ${post.date || ''}`, post.title || '블로그 포스트', renderBody);
   }
 
-  function postSectionsToPlainText(post) {
-    const secs = Array.isArray(post?.article?.sections) ? post.article.sections : [];
-    if (secs.length > 0) {
-      return secs
-        .map((s) => `${s.heading ? `## ${s.heading}\n` : ''}${s.body || ''}`.trim())
-        .filter(Boolean)
-        .join('\n\n');
+  function postToEditorMarkup(post) {
+    const blocks = Array.isArray(post?.article?.blocks) ? post.article.blocks : [];
+    if (blocks.length > 0) {
+      return blocks.map((blk) => {
+        if (!blk || typeof blk !== 'object') return '';
+        if (blk.type === 'quote' && blk.text) {
+          return String(blk.text).split('\n').map((l) => `> ${l}`).join('\n');
+        }
+        if (blk.type === 'facts' && Array.isArray(blk.items)) {
+          return blk.items.map((f) => `${f.label || ''} | ${f.value || ''}`).join('\n');
+        }
+        if (blk.type === 'cta' && blk.label && blk.url) {
+          return `[${blk.label}](${blk.url})`;
+        }
+        if (blk.type === 'paragraph') {
+          return `${blk.heading ? `## ${blk.heading}\n` : ''}${blk.body || ''}`.trim();
+        }
+        return '';
+      }).filter(Boolean).join('\n\n');
     }
+    const parts = [];
+    if (post?.article?.quote) {
+      parts.push(String(post.article.quote).split('\n').map((l) => `> ${l}`).join('\n'));
+    }
+    const secs = Array.isArray(post?.article?.sections) ? post.article.sections : [];
+    secs.forEach((s) => {
+      const chunk = `${s.heading ? `## ${s.heading}\n` : ''}${s.body || ''}`.trim();
+      if (chunk) parts.push(chunk);
+    });
+    const facts = Array.isArray(post?.article?.facts) ? post.article.facts : [];
+    if (facts.length > 0) {
+      parts.push(facts.map((f) => `${f.label || ''} | ${f.value || ''}`).join('\n'));
+    }
+    if (parts.length > 0) return parts.join('\n\n');
     const rawHtml = String(post?.article?.bodyHtml || post?.article?.html || '');
     if (rawHtml) {
       return rawHtml.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n\n').replace(/<[^>]+>/g, '').trim();
@@ -748,15 +774,90 @@
     return '';
   }
 
-  function plainTextToSections(text) {
-    const blocks = String(text || '').split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
-    if (blocks.length === 0) return [{ heading: '', body: '' }];
-    return blocks.map((b) => {
-      const lines = b.split('\n');
-      if (lines[0].startsWith('## ')) {
-        return { heading: lines[0].slice(3).trim(), body: lines.slice(1).join('\n').trim() };
+  function markupToArticleContent(text) {
+    const chunks = String(text || '').split(/\n\s*\n/).map((c) => c.trim()).filter(Boolean);
+    const blocks = [];
+    const sections = [];
+
+    chunks.forEach((chunk) => {
+      const lines = chunk.split('\n').map((l) => l.trimEnd());
+      if (lines.length > 0 && lines.every((l) => l.trim().startsWith('>'))) {
+        const quoteText = lines.map((l) => l.trim().replace(/^>\s?/, '')).join('\n').trim();
+        if (quoteText) blocks.push({ type: 'quote', text: quoteText });
+        return;
       }
-      return { heading: '', body: b };
+      const ctaMatch = lines.length === 1 && lines[0].trim().match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+      if (ctaMatch) {
+        blocks.push({ type: 'cta', label: ctaMatch[1].trim(), url: ctaMatch[2].trim() });
+        return;
+      }
+      const nonEmptyLines = lines.filter((l) => l.trim());
+      if (nonEmptyLines.length > 0 && nonEmptyLines.every((l) => l.includes('|'))) {
+        const items = nonEmptyLines.map((l) => {
+          const idx = l.indexOf('|');
+          return {
+            label: l.slice(0, idx).trim(),
+            value: l.slice(idx + 1).trim()
+          };
+        }).filter((it) => it.label || it.value);
+        if (items.length > 0) blocks.push({ type: 'facts', items });
+        return;
+      }
+      if (lines[0].startsWith('## ')) {
+        const heading = lines[0].slice(3).trim();
+        const body = lines.slice(1).join('\n').trim();
+        blocks.push({ type: 'paragraph', heading, body });
+        sections.push({ heading, body });
+        return;
+      }
+      blocks.push({ type: 'paragraph', heading: '', body: chunk });
+      sections.push({ heading: '', body: chunk });
+    });
+
+    return { blocks, sections };
+  }
+
+  function insertSnippetAtCursor(textarea, snippet) {
+    const start = typeof textarea.selectionStart === 'number' ? textarea.selectionStart : textarea.value.length;
+    const end = typeof textarea.selectionEnd === 'number' ? textarea.selectionEnd : textarea.value.length;
+    const before = textarea.value.slice(0, start);
+    const after = textarea.value.slice(end);
+    const prefix = before && !before.endsWith('\n\n') ? (before.endsWith('\n') ? '\n' : '\n\n') : '';
+    const suffix = after && !after.startsWith('\n\n') ? (after.startsWith('\n') ? '\n' : '\n\n') : '';
+    const inserted = `${prefix}${snippet}${suffix}`;
+    textarea.value = before + inserted + after;
+    const caret = (before + inserted).length;
+    textarea.focus();
+    try { textarea.setSelectionRange(caret, caret); } catch (e) {}
+  }
+
+  function compressCoverImage(file) {
+    return new Promise((resolve, reject) => {
+      if (!file) { reject(new Error('파일이 없습니다.')); return; }
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('이미지를 읽을 수 없습니다.'));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('올바른 이미지 파일이 아닙니다.'));
+        img.onload = () => {
+          const maxW = 720;
+          const scale = img.width > maxW ? maxW / img.width : 1;
+          const w = Math.max(1, Math.round(img.width * scale));
+          const h = Math.max(1, Math.round(img.height * scale));
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          let out = canvas.toDataURL('image/webp', 0.72);
+          if (!out.startsWith('data:image/webp')) {
+            out = canvas.toDataURL('image/jpeg', 0.72);
+          }
+          resolve(out);
+        };
+        img.src = String(reader.result || '');
+      };
+      reader.readAsDataURL(file);
     });
   }
 
@@ -791,9 +892,19 @@
   function openPostEditorSheet(existingPost) {
     const isEdit = Boolean(existingPost && existingPost.id);
     const today = new Date().toISOString().slice(0, 10);
+    let currentThumbUrl = existingPost?.thumbUrl || '';
+    let activeMode = 'edit'; // 'edit' | 'preview'
+
     const titleInput = el('input', { type: 'text', className: 'planner-input', placeholder: '공지 · 글 제목', value: existingPost?.title || '' });
     const dateInput = el('input', { type: 'date', className: 'planner-input', value: existingPost?.date || today });
     const deptInput = el('input', { type: 'text', className: 'planner-input', placeholder: '학생자치회', value: existingPost?.dept || '학생자치회' });
+    const themeSelect = el('select', { className: 'planner-input' }, [
+      el('option', { value: 'forest', selected: (existingPost?.thumbTheme || 'forest') === 'forest' }, '서전 그린'),
+      el('option', { value: 'ocean', selected: existingPost?.thumbTheme === 'ocean' }, '오션 블루'),
+      el('option', { value: 'amber', selected: existingPost?.thumbTheme === 'amber' }, '앰버 오렌지'),
+      el('option', { value: 'rose', selected: existingPost?.thumbTheme === 'rose' }, '로즈 레드'),
+      el('option', { value: 'slate', selected: existingPost?.thumbTheme === 'slate' }, '다크 슬레이트')
+    ]);
     const tagsInput = el('input', {
       type: 'text',
       className: 'planner-input',
@@ -803,11 +914,171 @@
     const excerptInput = el('input', { type: 'text', className: 'planner-input', placeholder: '목록에 보일 한 줄 요약', value: existingPost?.excerpt || '' });
     const bodyArea = el('textarea', {
       className: 'planner-input editor-textarea',
-      placeholder: '본문 내용을 입력하세요. (빈 줄로 문단 구분, "## 소제목" 사용 가능)'
-    }, postSectionsToPlainText(existingPost));
+      placeholder: '본문을 입력하세요. 위 버튼을 누르면 소제목 · 인용구 · 정보 표 · 링크 버튼이 바로 들어갑니다.'
+    }, postToEditorMarkup(existingPost));
     const attachInput = el('input', { type: 'text', className: 'planner-input', placeholder: '예: 안내문.pdf (없으면 비워두기)', value: existingPost?.article?.attachment || '' });
     const pinnedCheck = el('input', { type: 'checkbox', checked: Boolean(existingPost?.pinned) });
     const statusMsg = el('p', { className: 'sync-feedback', role: 'status' }, '');
+
+    const coverPreviewWrap = el('div', { className: 'editor-cover-preview' });
+    const fileInput = el('input', {
+      type: 'file',
+      accept: 'image/*',
+      style: { display: 'none' },
+      onChange: async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        statusMsg.classList.remove('is-error');
+        statusMsg.textContent = '이미지 최적화 중...';
+        try {
+          currentThumbUrl = await compressCoverImage(file);
+          statusMsg.textContent = '커버 사진을 첨부했습니다.';
+          renderCoverPreview();
+        } catch (err) {
+          statusMsg.classList.add('is-error');
+          statusMsg.textContent = err.message || '이미지 처리에 실패했습니다.';
+        }
+        fileInput.value = '';
+      }
+    });
+
+    function renderCoverPreview() {
+      if (!currentThumbUrl) {
+        coverPreviewWrap.replaceChildren();
+        return;
+      }
+      coverPreviewWrap.replaceChildren(
+        el('img', { src: currentThumbUrl, alt: '커버 미리보기', className: 'editor-cover-thumb' }),
+        el('button', {
+          type: 'button',
+          className: 'planner-mini-btn',
+          onClick: () => {
+            currentThumbUrl = '';
+            renderCoverPreview();
+          }
+        }, '사진 삭제')
+      );
+    }
+    renderCoverPreview();
+
+    function buildDraftPost() {
+      const parsedTags = tagsInput.value
+        .split(/[\s,]+/)
+        .map((t) => t.trim())
+        .filter(Boolean)
+        .map((t) => (t.startsWith('#') ? t : `#${t}`));
+      const bodyText = bodyArea.value.trim();
+      const { blocks, sections } = markupToArticleContent(bodyText);
+      return {
+        ...(existingPost || {}),
+        id: isEdit ? existingPost.id : `post-${Date.now().toString(36)}`,
+        title: titleInput.value.trim() || '(제목 없음)',
+        date: dateInput.value || today,
+        dept: deptInput.value.trim() || '학생자치회',
+        tags: parsedTags.length ? parsedTags : ['#공지'],
+        excerpt: excerptInput.value.trim() || bodyText.split('\n')[0].replace(/^[>#\s]+/, '').slice(0, 70),
+        pinned: Boolean(pinnedCheck.checked),
+        thumbUrl: currentThumbUrl,
+        thumbTheme: themeSelect.value || 'forest',
+        thumbIcon: existingPost?.thumbIcon || '공지',
+        article: {
+          ...(existingPost?.article || {}),
+          blocks,
+          sections,
+          quote: '',
+          facts: [],
+          bodyHtml: '',
+          html: '',
+          attachment: attachInput.value.trim()
+        }
+      };
+    }
+
+    const toolbar = el('div', { className: 'editor-toolbar' },
+      el('button', {
+        type: 'button',
+        className: 'editor-tool-btn',
+        onClick: () => insertSnippetAtCursor(bodyArea, '## 소제목\n여기에 본문을 입력하세요.')
+      }, '+ 소제목'),
+      el('button', {
+        type: 'button',
+        className: 'editor-tool-btn',
+        onClick: () => insertSnippetAtCursor(bodyArea, '> 한 줄로 강조할 핵심 문장을 입력하세요.')
+      }, '+ 인용구'),
+      el('button', {
+        type: 'button',
+        className: 'editor-tool-btn',
+        onClick: () => insertSnippetAtCursor(bodyArea, '일시 | 2026-12-00\n장소 | 강당\n대상 | 전교생')
+      }, '+ 정보 표'),
+      el('button', {
+        type: 'button',
+        className: 'editor-tool-btn',
+        onClick: () => insertSnippetAtCursor(bodyArea, '[자세히 보기](https://jjunsseo0219.github.io/teum-portal/)')
+      }, '+ 링크 버튼')
+    );
+
+    const editSection = el('div', { className: 'editor-form' },
+      el('label', { className: 'planner-field-label' }, '제목 *', titleInput),
+      el('div', { className: 'editor-row-2' },
+        el('label', { className: 'planner-field-label' }, '날짜', dateInput),
+        el('label', { className: 'planner-field-label' }, '담당 부서', deptInput)
+      ),
+      el('div', { className: 'editor-row-2' },
+        el('label', { className: 'planner-field-label' }, '태그', tagsInput),
+        el('label', { className: 'planner-field-label' }, '첨부 안내 (선택)', attachInput)
+      ),
+      el('div', { className: 'editor-cover-row' },
+        el('label', { className: 'planner-field-label', style: { flex: '1' } }, '배경 테마', themeSelect),
+        el('div', { className: 'editor-cover-btns' },
+          fileInput,
+          el('button', {
+            type: 'button',
+            className: 'planner-mini-btn',
+            onClick: () => fileInput.click()
+          }, '커버 사진 첨부'),
+          coverPreviewWrap
+        )
+      ),
+      el('label', { className: 'planner-field-label' }, '한 줄 요약', excerptInput),
+      el('div', { className: 'planner-field-label' },
+        '본문 · 꾸미기 블록',
+        toolbar,
+        bodyArea
+      ),
+      el('label', { className: 'editor-check-row' }, pinnedCheck, '홈 화면 중요 공지 캐러셀에 고정')
+    );
+
+    const previewBox = el('div', { className: 'editor-preview-box', style: { display: 'none' } });
+    const editTabBtn = el('button', { type: 'button', className: 'seg-btn is-active' }, '편집');
+    const previewTabBtn = el('button', { type: 'button', className: 'seg-btn' }, '미리보기');
+
+    function setEditorMode(mode) {
+      activeMode = mode;
+      editTabBtn.classList.toggle('is-active', mode === 'edit');
+      previewTabBtn.classList.toggle('is-active', mode === 'preview');
+      if (mode === 'preview') {
+        editSection.style.display = 'none';
+        previewBox.style.display = 'block';
+        const draft = buildDraftPost();
+        previewBox.replaceChildren(
+          el('h3', { className: 'editor-preview-title' }, draft.title),
+          buildArticleContent(draft, {
+            isLiked,
+            isBookmarked,
+            isScheduled: isPostScheduled,
+            onToggleLike: null,
+            onToggleBookmark: null,
+            onToggleSchedule: null,
+            onEditPost: null
+          })
+        );
+      } else {
+        previewBox.style.display = 'none';
+        editSection.style.display = 'flex';
+      }
+    }
+    editTabBtn.addEventListener('click', () => setEditorMode('edit'));
+    previewTabBtn.addEventListener('click', () => setEditorMode('preview'));
 
     const saveBtn = el('button', { type: 'submit', className: 'cta-btn', style: { flex: '1', backgroundColor: 'var(--accent)' } }, '저장 후 바로 반영');
     const delBtn = isEdit ? el('button', {
@@ -835,37 +1106,13 @@
         e.preventDefault();
         const title = titleInput.value.trim();
         if (!title) {
+          if (activeMode !== 'edit') setEditorMode('edit');
           titleInput.focus();
           statusMsg.textContent = '제목을 입력해 주세요.';
           statusMsg.classList.add('is-error');
           return;
         }
-        const parsedTags = tagsInput.value
-          .split(/[\s,]+/)
-          .map((t) => t.trim())
-          .filter(Boolean)
-          .map((t) => (t.startsWith('#') ? t : `#${t}`));
-        const bodyText = bodyArea.value.trim();
-        const postObj = {
-          ...(existingPost || {}),
-          id: isEdit ? existingPost.id : `post-${Date.now().toString(36)}`,
-          title,
-          date: dateInput.value || today,
-          dept: deptInput.value.trim() || '학생자치회',
-          tags: parsedTags.length ? parsedTags : ['#공지'],
-          excerpt: excerptInput.value.trim() || bodyText.split('\n')[0].slice(0, 70),
-          pinned: Boolean(pinnedCheck.checked),
-          thumbUrl: existingPost?.thumbUrl || '',
-          thumbTheme: existingPost?.thumbTheme || 'forest',
-          thumbIcon: existingPost?.thumbIcon || '공지',
-          article: {
-            ...(existingPost?.article || {}),
-            sections: plainTextToSections(bodyText),
-            bodyHtml: '',
-            html: '',
-            attachment: attachInput.value.trim()
-          }
-        };
+        const postObj = buildDraftPost();
         saveBtn.disabled = true;
         if (delBtn) delBtn.disabled = true;
         statusMsg.classList.remove('is-error');
@@ -881,18 +1128,12 @@
         closeFullDetail();
       }
     },
-      el('label', { className: 'planner-field-label' }, '제목 *', titleInput),
-      el('div', { className: 'editor-row-2' },
-        el('label', { className: 'planner-field-label' }, '날짜', dateInput),
-        el('label', { className: 'planner-field-label' }, '담당 부서', deptInput)
+      el('div', { className: 'segmented editor-mode-bar', role: 'group', 'aria-label': '편집 모드' },
+        editTabBtn,
+        previewTabBtn
       ),
-      el('div', { className: 'editor-row-2' },
-        el('label', { className: 'planner-field-label' }, '태그', tagsInput),
-        el('label', { className: 'planner-field-label' }, '첨부 안내 (선택)', attachInput)
-      ),
-      el('label', { className: 'planner-field-label' }, '한 줄 요약', excerptInput),
-      el('label', { className: 'planner-field-label' }, '본문', bodyArea),
-      el('label', { className: 'editor-check-row' }, pinnedCheck, '홈 화면 중요 공지 캐러셀에 고정'),
+      editSection,
+      previewBox,
       statusMsg,
       el('div', { className: 'editor-actions-row' }, saveBtn, delBtn)
     );
